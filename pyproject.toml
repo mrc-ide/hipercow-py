@@ -32,7 +32,7 @@ Issues = "https://github.com/unknown/hipercow/issues"
 Source = "https://github.com/unknown/hipercow"
 
 [tool.hatch.version]
-path = "hipercow/__about__.py"
+path = "src/hipercow/__about__.py"
 
 [tool.hatch.envs.default]
 dependencies = [
@@ -40,18 +40,46 @@ dependencies = [
   "pytest-cov",
 ]
 [tool.hatch.envs.default.scripts]
+test = "pytest {args:tests}"
+test-cov = "coverage run -m pytest {args:tests}"
 cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=hipercow --cov=tests {args}"
 no-cov = "cov --no-cov {args}"
 
 [[tool.hatch.envs.test.matrix]]
 python = ["37", "38", "39", "310", "311"]
 
+[tool.hatch.envs.lint]
+extra-dependencies = [
+  "black>=23.1.0",
+  "mypy>=1.0.0",
+  "ruff>=0.0.243",
+]
+[tool.hatch.envs.lint.scripts]
+typing = "mypy --install-types --non-interactive {args:src tests}"
+style = [
+  "ruff {args:.}",
+  "black --check --diff {args:.}",
+]
+fmt = [
+  "black {args:.}",
+  "ruff --fix {args:.}",
+  "style",
+]
+all = [
+  "style",
+  "typing",
+]
+
 [tool.coverage.run]
 branch = true
 parallel = true
 omit = [
-  "hipercow/__about__.py",
+  "hipercow/src/__about__.py",
 ]
+
+[tool.coverage.paths]
+hipercow = ["src/hipercow", "*/hipercow/src/hipercow"]
+tests = ["tests", "*/hipercow/tests"]
 
 [tool.coverage.report]
 exclude_lines = [
@@ -59,3 +87,68 @@ exclude_lines = [
   "if __name__ == .__main__.:",
   "if TYPE_CHECKING:",
 ]
+
+[tool.black]
+target-version = ["py37"]
+line-length = 80
+skip-string-normalization = true
+
+[tool.ruff]
+target-version = "py37"
+line-length = 80
+select = [
+  "A",
+  "ARG",
+  "B",
+  "C",
+  "D",
+  "DTZ",
+  "E",
+  "EM",
+  "F",
+  "FBT",
+  "I",
+  "ICN",
+  "ISC",
+  "N",
+  "PLC",
+  "PLE",
+  "PLR",
+  "PLW",
+  "Q",
+  "RUF",
+  "S",
+  "T",
+  "TID",
+  "UP",
+  "W",
+  "YTT",
+]
+ignore = [
+  # Allow non-abstract empty methods in abstract base classes
+  "B027",
+  # Allow boolean positional values in function calls, like `dict.get(... True)`
+  "FBT003",
+  # Ignore checks for possible passwords
+  "S105", "S106", "S107",
+  # Ignore complexity
+  "C901", "PLR0911", "PLR0912", "PLR0913", "PLR0915",
+  # Don't require docstrings everywhere for now
+  "D100", "D101", "D102", "D103", "D104", "D105",
+  # Ignore shadowing
+  "A001", "A002", "A003",
+  # Allow print until we find the alternative to R's cli
+  "T201"
+]
+
+unfixable = [
+  # Don't touch unused imports
+  "F401",
+]
+
+[tool.ruff.per-file-ignores]
+# Tests can use magic values, assertions, and relative imports
+"tests/**/*" = ["PLR2004", "S101", "TID252"]
+
+[tool.ruff.pydocstyle]
+convention = "numpy"
