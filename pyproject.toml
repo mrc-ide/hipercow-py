@@ -82,7 +82,7 @@ all = [
 branch = true
 parallel = true
 omit = [
-  "hipercow/src/__about__.py",
+  "src/hipercow/__about__.py",
 ]
 
 [tool.coverage.paths]
