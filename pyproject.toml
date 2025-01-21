@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "hipercow"
 description = ''
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.10"
 license = "MIT"
 keywords = []
 authors = [
@@ -53,8 +53,8 @@ cov-ci = [
   "cov-report-xml",
 ]
 
-[[tool.hatch.envs.test.matrix]]
-python = ["37", "38", "39", "310", "311"]
+[[tool.hatch.envs.all.matrix]]
+python = ["3.9", "3.10", "3.11", "3.12", "3.13"]
 
 [tool.hatch.envs.lint]
 extra-dependencies = [
@@ -65,12 +65,12 @@ extra-dependencies = [
 [tool.hatch.envs.lint.scripts]
 typing = "mypy --install-types --non-interactive {args:src tests}"
 style = [
-  "ruff {args:.}",
-  "black --check --diff {args:.}",
+  "ruff check {args:.}",
+   "black --check --diff {args:.}",
 ]
 fmt = [
   "black {args:.}",
-  "ruff --fix {args:.}",
+  "ruff check --fix {args:.}",
   "style",
 ]
 all = [
@@ -97,13 +97,13 @@ exclude_lines = [
 ]
 
 [tool.black]
-target-version = ["py37"]
 line-length = 80
 skip-string-normalization = true
 
 [tool.ruff]
-target-version = "py37"
 line-length = 80
+
+[tool.ruff.lint]
 select = [
   "A",
   "ARG",
@@ -145,6 +145,8 @@ ignore = [
   "D100", "D101", "D102", "D103", "D104", "D105",
   # Ignore shadowing
   "A001", "A002", "A003",
+  # Allow pickle
+  "S301",
   # Allow print until we find the alternative to R's cli
   "T201"
 ]
@@ -154,9 +156,9 @@ unfixable = [
   "F401",
 ]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 # Tests can use magic values, assertions, and relative imports
 "tests/**/*" = ["PLR2004", "S101", "TID252"]
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "numpy"
