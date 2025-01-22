@@ -1,7 +1,7 @@
 from hipercow import root
-from hipercow.task import TaskStatus, task_status, set_task_status
-from hipercow.util import transient_working_directory
 from hipercow import task_create as tc
+from hipercow.task import TaskStatus, set_task_status, task_status
+from hipercow.util import transient_working_directory
 
 
 def test_can_check_if_tasks_are_runnable():

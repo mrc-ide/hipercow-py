@@ -1,7 +1,6 @@
 import pytest
 
-from hipercow import root
-from hipercow import util
+from hipercow import root, util
 
 
 def test_create_root(tmp_path):

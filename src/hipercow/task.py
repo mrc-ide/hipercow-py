@@ -25,7 +25,7 @@ class TaskStatus(Flag):
 
 
 STATUS_FILE_MAP = {
-    TaskStatus.SUCCESS:  "status-success",
+    TaskStatus.SUCCESS: "status-success",
     TaskStatus.FAILURE: "status-failure",
     TaskStatus.CANCELLED: "status-cancelled",
     TaskStatus.RUNNING: "status-running",
