@@ -23,6 +23,9 @@ class TaskStatus(Flag):
     def is_terminal(self) -> bool:
         return bool(self & TaskStatus.TERMINAL)
 
+    def __str__(self) -> str:
+        return str(self.name).lower()
+
 
 STATUS_FILE_MAP = {
     TaskStatus.SUCCESS: "status-success",

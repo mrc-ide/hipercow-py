@@ -31,3 +31,7 @@ def test_that_missing_tasks_have_missing_status(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     assert task_status(r, "a" * 32) == TaskStatus.MISSING
+
+
+def test_can_convert_to_nice_string():
+    assert str(TaskStatus.CREATED) == "created"
