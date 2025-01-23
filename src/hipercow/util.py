@@ -30,3 +30,7 @@ def transient_working_directory(path):
     finally:
         if path is not None:
             os.chdir(origin)
+
+
+def file_create(path: str | Path) -> None:
+    Path(path).open("a").close()

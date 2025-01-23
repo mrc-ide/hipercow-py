@@ -1,6 +1,6 @@
 import pytest
 
-from hipercow import root
+from hipercow import root, util
 
 
 def test_create_root(tmp_path):
@@ -23,8 +23,7 @@ def test_notify_if_root_exists(tmp_path, capsys):
 
 
 def test_error_if_root_invalid(tmp_path):
-    with open(tmp_path / "hipercow", "w") as _:
-        pass
+    util.file_create(tmp_path / "hipercow")
     with pytest.raises(Exception, match="Unexpected file 'hipercow'"):
         root.init(tmp_path)
 
