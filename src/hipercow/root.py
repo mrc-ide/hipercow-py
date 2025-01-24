@@ -28,6 +28,18 @@ class Root:
             raise Exception(msg)
         self.path = path
 
+    def path_task(self, task_id: str) -> Path:
+        return self.path / "tasks" / task_id[:2] / task_id[2:]
+
+    def path_task_times(self, task_id: str) -> Path:
+        return self.path_task(task_id) / "times"
+
+    def path_task_data(self, task_id: str) -> Path:
+        return self.path_task(task_id) / "data"
+
+    def path_task_result(self, task_id: str) -> Path:
+        return self.path_task(task_id) / "result"
+
 
 def open_root(path: None | str | Path = None) -> Root:
     root = find_file_descend("hipercow", path or Path.cwd())

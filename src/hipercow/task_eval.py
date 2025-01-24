@@ -32,7 +32,7 @@ def task_eval_data(root: Root, data: TaskData) -> None:
         msg = f"Can't run '{task_id}', which has status '{status}'"
         raise Exception(msg)
 
-    t_created = (root.path / "tasks" / task_id / "data").stat().st_ctime
+    t_created = root.path_task_data(task_id).stat().st_ctime
     t_start = time.time()
 
     set_task_status(root, task_id, TaskStatus.RUNNING)
@@ -43,7 +43,7 @@ def task_eval_data(root: Root, data: TaskData) -> None:
     t_end = time.time()
 
     status = TaskStatus.SUCCESS if res.success else TaskStatus.FAILURE
-    with open(root.path / "tasks" / task_id / "result", "wb") as f:
+    with root.path_task_result(task_id).open("wb") as f:
         pickle.dump(res.data, f)
 
     times = TaskTimes(t_created, t_start, t_end)

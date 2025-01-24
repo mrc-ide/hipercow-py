@@ -44,13 +44,13 @@ class TaskTimes:
     finished: float
 
     def write(self, root: Root, task_id: str):
-        with open(root.path / "tasks" / task_id / "times", "wb") as f:
+        with root.path_task_times(task_id).open("wb") as f:
             pickle.dump(self, f)
 
 
 def task_status(root: Root, task_id: str) -> TaskStatus:
     # check_task_id(task_id)
-    path = root.path / "tasks" / task_id
+    path = root.path_task(task_id)
     if not path.exists():
         return TaskStatus.MISSING
     for v, p in STATUS_FILE_MAP.items():
@@ -60,7 +60,7 @@ def task_status(root: Root, task_id: str) -> TaskStatus:
 
 
 def set_task_status(root: Root, task_id: str, status: TaskStatus):
-    file_create(root.path / "tasks" / task_id / STATUS_FILE_MAP[status])
+    file_create(root.path_task(task_id) / STATUS_FILE_MAP[status])
 
 
 @dataclass
@@ -80,12 +80,13 @@ class TaskData:
 
 
 def task_data_write(root: Root, data: TaskData) -> None:
-    path_task_dir = root.path / "tasks" / data.task_id
+    task_id = data.task_id
+    path_task_dir = root.path_task(task_id)
     path_task_dir.mkdir(parents=True, exist_ok=True)
-    with open(path_task_dir / "data", "wb") as f:
+    with root.path_task_data(task_id).open("wb") as f:
         pickle.dump(data, f)
 
 
 def task_data_read(root: Root, task_id: str) -> TaskData:
-    with open(root.path / "tasks" / task_id / "data", "rb") as f:
+    with root.path_task_data(task_id).open("rb") as f:
         return pickle.load(f)
