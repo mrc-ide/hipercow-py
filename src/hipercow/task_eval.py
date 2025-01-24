@@ -12,7 +12,6 @@ from hipercow.task import (
     set_task_status,
     task_status,
 )
-from hipercow.util import transient_working_directory
 
 
 @dataclass
