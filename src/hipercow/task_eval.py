@@ -57,7 +57,6 @@ def task_eval_shell(root: Root, data: TaskData) -> TaskResult:
     cmd = data.data["cmd"]
     env = dict(os.environ, **data.envvars)
     path = root.path / data.path
-    with transient_working_directory(path):
-        res = subprocess.run(cmd, check=False, env=env)
+    res = subprocess.run(cmd, check=False, env=env, cwd=path)
     success = res.returncode == 0
     return TaskResult(data.task_id, success, None)
