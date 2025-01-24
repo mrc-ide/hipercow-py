@@ -146,6 +146,8 @@ ignore = [
   "A001", "A002", "A003",
   # Allow pickle
   "S301",
+  # Allow subprocess (https://github.com/astral-sh/ruff/issues/4045)
+  "S603",
   # Allow print until we find the alternative to R's cli
   "T201"
 ]

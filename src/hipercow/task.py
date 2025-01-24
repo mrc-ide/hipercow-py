@@ -36,6 +36,18 @@ STATUS_FILE_MAP = {
 }
 
 
+## TODO: we'll probably move these to use json soon via pydantic.
+@dataclass
+class TaskTimes:
+    created: float
+    started: float
+    finished: float
+
+    def write(self, root: Root, task_id: str):
+        with open(root.path / "tasks" / task_id / "times", "wb") as f:
+            pickle.dump(self, f)
+
+
 def task_status(root: Root, task_id: str) -> TaskStatus:
     # check_task_id(task_id)
     path = root.path / "tasks" / task_id
