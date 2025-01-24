@@ -11,7 +11,7 @@ def test_create_simple_task(tmp_path):
     with transient_working_directory(tmp_path):
         tid = tc.task_create_shell(["echo", "hello world"])
     assert re.match("^[0-9a-f]{32}$", tid)
-    assert (tmp_path / "tasks" / tid / "data").exists()
+    assert (tmp_path / "tasks" / tid[:2] / tid[2:] / "data").exists()
     d = TaskData.read(root.open_root(tmp_path), tid)
     assert isinstance(d, TaskData)
     assert d.task_id == tid
