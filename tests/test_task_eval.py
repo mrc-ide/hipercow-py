@@ -26,3 +26,15 @@ def test_cant_run_complete_task(tmp_path):
     msg = f"Can't run '{tid}', which has status 'success'"
     with pytest.raises(Exception, match=msg):
         task_eval(r, tid)
+
+
+def test_can_capture_output_to_auto_file(tmp_path):
+    root.init(tmp_path)
+    r = root.open_root(tmp_path)
+    with transient_working_directory(tmp_path):
+        tid = tc.task_create_shell(["echo", "hello world"])
+    task_eval(r, tid, capture=True)
+
+    path = r.path_task_log(tid)
+    with path.open("r") as f:
+        assert f.read().strip() == "hello world"

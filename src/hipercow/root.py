@@ -52,6 +52,9 @@ class Root:
     def path_task_result(self, task_id: str) -> Path:
         return self.path_task(task_id) / "result"
 
+    def path_task_log(self, task_id: str) -> Path:
+        return self.path_task(task_id) / "log"
+
 
 def open_root(path: None | str | Path = None) -> Root:
     root = find_file_descend("hipercow", path or Path.cwd())

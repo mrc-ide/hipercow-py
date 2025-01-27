@@ -1,6 +1,5 @@
 import os
 import pickle
-import subprocess
 import time
 from dataclasses import dataclass
 
@@ -12,6 +11,7 @@ from hipercow.task import (
     set_task_status,
     task_status,
 )
+from hipercow.util import subprocess_run
 
 
 @dataclass
@@ -21,11 +21,12 @@ class TaskResult:
     data: object
 
 
-def task_eval(root: Root, task_id: str) -> None:
-    task_eval_data(root, TaskData.read(root, task_id))
+def task_eval(root: Root, task_id: str, *, capture: bool = False) -> None:
+    data = TaskData.read(root, task_id)
+    task_eval_data(root, data, capture=capture)
 
 
-def task_eval_data(root: Root, data: TaskData) -> None:
+def task_eval_data(root: Root, data: TaskData, *, capture: bool) -> None:
     task_id = data.task_id
     status = task_status(root, task_id)
     if not status.is_runnable():
@@ -38,7 +39,7 @@ def task_eval_data(root: Root, data: TaskData) -> None:
     set_task_status(root, task_id, TaskStatus.RUNNING)
 
     assert data.method == "shell"  # noqa: S101
-    res = task_eval_shell(root, data)
+    res = task_eval_shell(root, data, capture=capture)
 
     t_end = time.time()
 
@@ -52,10 +53,11 @@ def task_eval_data(root: Root, data: TaskData) -> None:
     set_task_status(root, task_id, status)
 
 
-def task_eval_shell(root: Root, data: TaskData) -> TaskResult:
+def task_eval_shell(root: Root, data: TaskData, *, capture=False) -> TaskResult:
     cmd = data.data["cmd"]
     env = dict(os.environ, **data.envvars)
     path = root.path / data.path
-    res = subprocess.run(cmd, check=False, env=env, cwd=path)
+    filename = root.path_task_log(data.task_id) if capture else None
+    res = subprocess_run(cmd, check=False, env=env, cwd=path, filename=filename)
     success = res.returncode == 0
     return TaskResult(data.task_id, success, None)

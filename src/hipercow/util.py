@@ -1,4 +1,5 @@
 import os
+import subprocess
 from contextlib import contextmanager
 from pathlib import Path
 
@@ -34,3 +35,13 @@ def transient_working_directory(path):
 
 def file_create(path: str | Path) -> None:
     Path(path).open("a").close()
+
+
+def subprocess_run(cmd, *, filename: Path | None = None, check=False, **kwargs):
+    if filename is None:
+        return subprocess.run(cmd, **kwargs, check=check)
+    else:
+        with filename.open("wb") as f:
+            return subprocess.run(
+                cmd, check=check, stderr=subprocess.STDOUT, stdout=f, **kwargs
+            )
