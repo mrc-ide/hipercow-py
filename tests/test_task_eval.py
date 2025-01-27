@@ -2,7 +2,7 @@ import pytest
 
 from hipercow import root
 from hipercow import task_create as tc
-from hipercow.task import TaskStatus, task_status
+from hipercow.task import TaskStatus, task_log, task_status
 from hipercow.task_eval import task_eval
 from hipercow.util import transient_working_directory
 
@@ -38,3 +38,5 @@ def test_can_capture_output_to_auto_file(tmp_path):
     path = r.path_task_log(tid)
     with path.open("r") as f:
         assert f.read().strip() == "hello world"
+
+    assert task_log(r, tid) == ["hello world\n"]
