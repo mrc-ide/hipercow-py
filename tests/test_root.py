@@ -8,6 +8,7 @@ def test_create_root(tmp_path):
     root.init(path)
     assert path.exists()
     assert path.is_dir()
+    assert (path / "hipercow" / "py").exists()
     r = root.open_root(path)
     assert isinstance(r, root.Root)
     assert r.path == path
@@ -30,6 +31,14 @@ def test_error_if_root_invalid(tmp_path):
 
 def test_error_if_root_does_not_exist(tmp_path):
     with pytest.raises(Exception, match="Failed to open 'hipercow' root"):
+        root.Root(tmp_path)
+
+
+def test_error_if_non_python_hipercow_root_found(tmp_path):
+    root.init(tmp_path)
+    (tmp_path / "hipercow" / "py").unlink()
+    pat = "Failed to open non-python 'hipercow' root at"
+    with pytest.raises(Exception, match=pat):
         root.Root(tmp_path)
 
 
