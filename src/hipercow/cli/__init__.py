@@ -9,6 +9,7 @@ from hipercow.task_create import task_create
 def cli():
     pass
 
+
 @cli.command()
 @click.argument("path")
 def init(path: str):
