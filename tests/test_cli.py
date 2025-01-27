@@ -2,23 +2,7 @@ from pathlib import Path
 
 from click.testing import CliRunner
 
-from hipercow import cli
-from hipercow import root
-from hipercow import task
-
-# copied from https://github.com/mrc-ide/pyorderly/pull/53
-# def invoke(*args, expected_exit_code=0):
-#     def cast(x):
-#         if isinstance(x, OutpackRoot):
-#             return str(x.path)
-#         else:
-#             return str(x)
-
-#     runner = CliRunner(mix_stderr=False)
-#     result = runner.invoke(cli, [cast(x) for x in args])
-#     assert result.exit_code == expected_exit_code
-
-#     return result
+from hipercow import cli, root, task
 
 
 def test_can_init_repository(tmp_path):
@@ -33,7 +17,7 @@ def test_can_init_repository(tmp_path):
 
 def test_can_create_task(tmp_path):
     runner = CliRunner()
-    with runner.isolated_filesystem(temp_dir=tmp_path) as td:
+    with runner.isolated_filesystem(temp_dir=tmp_path):
         root.init(".")
         r = root.open_root()
         res = runner.invoke(cli.create, ["echo", "hello", "world"])
@@ -42,9 +26,9 @@ def test_can_create_task(tmp_path):
         assert task.task_status(r, task_id) == task.TaskStatus.CREATED
 
 
-def test_can_run_task(tmp_path, capsys):
+def test_can_run_task(tmp_path):
     runner = CliRunner()
-    with runner.isolated_filesystem(temp_dir=tmp_path) as td:
+    with runner.isolated_filesystem(temp_dir=tmp_path):
         root.init(".")
         r = root.open_root()
         res = runner.invoke(cli.create, ["echo", "hello", "world"])
