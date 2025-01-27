@@ -1,37 +1,45 @@
 import click
 
-from hipercow.root import open_root
+from hipercow import root
 from hipercow.task import task_status
 from hipercow.task_create import task_create
+from hipercow.task_eval import task_eval
 
 
 @click.group()
 def cli():
-    pass
+    pass  # pragma: no cover
 
 
 @cli.command()
 @click.argument("path")
 def init(path: str):
-    click.echo(f"Initialise hipercow at '{path}'")
+    root.init(path)
 
 
 @cli.group()
 def task():
-    pass
+    pass  # pragma: no cover
 
 
 @task.command()
-@click.argument("task_id", type=str)
+@click.argument("task_id")
 def status(task_id: str):
-    root = open_root()
-    click.echo(task_status(root, task_id))
+    r = root.open_root()
+    click.echo(task_status(r, task_id))
 
 
 @task.command()
 @click.argument("cmd", nargs=-1)
-def create(cmd: str):
-    root = open_root()
-    envvars = {}
-    task_id = task_create(root, "shell", list(cmd), envvars)
+def create(cmd: tuple[str]):
+    r = root.open_root()
+    data = {"cmd": list(cmd)}
+    task_id = task_create(r, "shell", data, {})
     click.echo(task_id)
+
+
+@task.command()
+@click.argument("task_id")
+def eval(task_id: str):
+    r = root.open_root()
+    task_eval(r, task_id)
