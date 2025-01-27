@@ -12,6 +12,10 @@ def init(path: str | Path) -> None:
         print(f"hipercow already initialised at {path}")
         return
 
+    root = find_file_descend("hipercow", path)
+    if root is not None:
+        print(f"hipercow already initialised at {root} (found from {path})")
+
     if dest_dir.exists() and not dest_dir.is_dir():
         msg = (
             "Unexpected file 'hipercow' (rather than directory)"

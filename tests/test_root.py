@@ -23,6 +23,15 @@ def test_notify_if_root_exists(tmp_path, capsys):
     assert captured.out.startswith("hipercow already initialised at")
 
 
+def test_notify_if_root_exists_below_requested(tmp_path, capsys):
+    path = tmp_path / "a" / "b"
+    root.init(tmp_path)
+    capsys.readouterr()
+    root.init(path)
+    captured = capsys.readouterr()
+    assert captured.out.startswith("hipercow already initialised at")
+
+
 def test_error_if_root_invalid(tmp_path):
     util.file_create(tmp_path / "hipercow")
     with pytest.raises(Exception, match="Unexpected file 'hipercow'"):
