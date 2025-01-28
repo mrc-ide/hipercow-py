@@ -40,12 +40,29 @@ STATUS_FILE_MAP = {
 @dataclass
 class TaskTimes:
     created: float
-    started: float
-    finished: float
+    started: float | None
+    finished: float | None
 
     def write(self, root: Root, task_id: str):
         with root.path_task_times(task_id).open("wb") as f:
             pickle.dump(self, f)
+
+    @staticmethod
+    def read(root: Root, task_id: str):
+        path_times = root.path_task_times(task_id)
+        if path_times.exists():
+            with path_times.open("rb") as f:
+                return pickle.load(f)
+        created = root.path_task_data(task_id).stat().st_ctime
+        path_task_running = (
+            root.path_task(task_id) / STATUS_FILE_MAP[TaskStatus.RUNNING]
+        )
+        running = (
+            path_task_running.stat().st_ctime
+            if path_task_running.exists()
+            else None
+        )
+        return TaskTimes(created, running, None)
 
 
 def task_status(root: Root, task_id: str) -> TaskStatus:
@@ -100,3 +117,20 @@ def task_data_write(root: Root, data: TaskData) -> None:
 def task_data_read(root: Root, task_id: str) -> TaskData:
     with root.path_task_data(task_id).open("rb") as f:
         return pickle.load(f)
+
+
+@dataclass
+class TaskInfo:
+    status: TaskStatus
+    data: TaskData
+    times: TaskTimes
+
+
+def task_info(root: Root, task_id: str) -> TaskInfo:
+    status = task_status(root, task_id)
+    if status == TaskStatus.MISSING:
+        msg = f"Task '{task_id}' does not exist"
+        raise Exception(msg)
+    data = TaskData.read(root, task_id)
+    times = TaskTimes.read(root, task_id)
+    return TaskInfo(status, data, times)
