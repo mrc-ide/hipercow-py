@@ -47,3 +47,23 @@ def test_can_run_task(tmp_path):
         # something.  I've checked with the capsys fixture and that
         # does not seem to have it either.
         assert task.task_status(r, task_id) == task.TaskStatus.SUCCESS
+
+
+def test_can_save_and_read_log(tmp_path):
+    runner = CliRunner()
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        root.init(".")
+        r = root.open_root()
+        res = runner.invoke(cli.create, ["echo", "hello", "world"])
+        task_id = res.stdout.strip()
+
+        res = runner.invoke(cli.eval, [task_id, "--capture"])
+        assert res.exit_code == 0
+
+        res = runner.invoke(cli.log, task_id)
+        assert res.exit_code == 0
+        assert res.output == "hello world\n\n"
+
+        res = runner.invoke(cli.log, [task_id, "--filename"])
+        assert res.exit_code == 0
+        assert res.output.strip() == str(r.path_task_log(task_id))

@@ -1,6 +1,8 @@
+import pytest
+
 from hipercow import root
 from hipercow import task_create as tc
-from hipercow.task import TaskStatus, set_task_status, task_status
+from hipercow.task import TaskStatus, set_task_status, task_log, task_status
 from hipercow.util import transient_working_directory
 
 
@@ -31,6 +33,14 @@ def test_that_missing_tasks_have_missing_status(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     assert task_status(r, "a" * 32) == TaskStatus.MISSING
+
+
+def test_that_missing_tasks_error_on_log_read(tmp_path):
+    root.init(tmp_path)
+    r = root.open_root(tmp_path)
+    task_id = "a" * 32
+    with pytest.raises(Exception, match="Task log for '.+' does not exist"):
+        task_log(r, task_id)
 
 
 def test_can_convert_to_nice_string():

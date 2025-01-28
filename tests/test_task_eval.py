@@ -39,4 +39,4 @@ def test_can_capture_output_to_auto_file(tmp_path):
     with path.open("r") as f:
         assert f.read().strip() == "hello world"
 
-    assert task_log(r, tid) == ["hello world\n"]
+    assert task_log(r, tid) == "hello world\n"
