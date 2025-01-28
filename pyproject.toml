@@ -22,13 +22,18 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = []
+dependencies = [
+  "click"
+]
 dynamic = ["version"]
 
 [project.urls]
 Documentation = "https://github.com/unknown/hipercow#readme"
 Issues = "https://github.com/unknown/hipercow/issues"
 Source = "https://github.com/unknown/hipercow"
+
+[project.scripts]
+hipercow = "hipercow.cli:cli"
 
 [tool.hatch.version]
 path = "src/hipercow/__about__.py"
