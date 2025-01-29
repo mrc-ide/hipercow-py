@@ -41,7 +41,7 @@ class Root:
         self.path = path
 
     def path_task(self, task_id: str) -> Path:
-        return self.path / "tasks" / task_id[:2] / task_id[2:]
+        return self.path / "hipercow" / "tasks" / task_id[:2] / task_id[2:]
 
     def path_task_times(self, task_id: str) -> Path:
         return self.path_task(task_id) / "times"
@@ -51,6 +51,9 @@ class Root:
 
     def path_task_result(self, task_id: str) -> Path:
         return self.path_task(task_id) / "result"
+
+    def path_task_log(self, task_id: str) -> Path:
+        return self.path_task(task_id) / "log"
 
 
 def open_root(path: None | str | Path = None) -> Root:

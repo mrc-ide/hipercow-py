@@ -1,7 +1,7 @@
 import click
 
 from hipercow import root
-from hipercow.task import task_status
+from hipercow.task import task_log, task_status
 from hipercow.task_create import task_create
 from hipercow.task_eval import task_eval
 
@@ -30,6 +30,17 @@ def status(task_id: str):
 
 
 @task.command()
+@click.option("--filename", is_flag=True)
+@click.argument("task_id")
+def log(task_id: str, *, filename=False):
+    r = root.open_root()
+    if filename:
+        click.echo(r.path_task_log(task_id))
+    else:
+        click.echo(task_log(r, task_id))
+
+
+@task.command()
 @click.argument("cmd", nargs=-1)
 def create(cmd: tuple[str]):
     r = root.open_root()
@@ -40,6 +51,7 @@ def create(cmd: tuple[str]):
 
 @task.command()
 @click.argument("task_id")
-def eval(task_id: str):
+@click.option("--capture/--no-capture", default=False)
+def eval(task_id: str, *, capture: bool):
     r = root.open_root()
-    task_eval(r, task_id)
+    task_eval(r, task_id, capture=capture)

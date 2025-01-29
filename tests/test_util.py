@@ -1,6 +1,10 @@
 from pathlib import Path
 
-from hipercow.util import find_file_descend, transient_working_directory
+from hipercow.util import (
+    find_file_descend,
+    subprocess_run,
+    transient_working_directory,
+)
 
 
 def test_find_descend(tmp_path):
@@ -19,3 +23,12 @@ def test_transient_working_directory(tmp_path):
         assert Path.cwd() == here
     with transient_working_directory(tmp_path):
         assert Path.cwd() == tmp_path
+
+
+def test_run_process_and_capture_output(tmp_path):
+    path = tmp_path / "output"
+    res = subprocess_run(["echo", "hello"], filename=path)
+    assert res.returncode == 0
+    assert path.exists()
+    with open(path) as f:
+        assert f.read().strip() == "hello"

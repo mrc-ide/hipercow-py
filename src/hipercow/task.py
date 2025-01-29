@@ -59,6 +59,16 @@ def task_status(root: Root, task_id: str) -> TaskStatus:
     return TaskStatus.CREATED
 
 
+def task_log(root: Root, task_id: str) -> str:
+    path = root.path_task_log(task_id)
+    if not path.exists():
+        status = task_status(root, task_id)
+        msg = f"Task log for '{task_id}' does not exist (status: {status})"
+        raise Exception(msg)
+    with path.open() as f:
+        return f.read()
+
+
 def set_task_status(root: Root, task_id: str, status: TaskStatus):
     file_create(root.path_task(task_id) / STATUS_FILE_MAP[status])
 
