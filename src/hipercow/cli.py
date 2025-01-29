@@ -1,7 +1,10 @@
+from functools import reduce
+from operator import ior
+
 import click
 
 from hipercow import root
-from hipercow.task import task_list, task_log, task_status
+from hipercow.task import TaskStatus, task_list, task_log, task_status
 from hipercow.task_create import task_create
 from hipercow.task_eval import task_eval
 
@@ -41,9 +44,11 @@ def cli_task_log(task_id: str, *, filename=False):
 
 
 @task.command("list")
-def cli_task_list():
+@click.option("--with-status", type=str, multiple=True)
+def cli_task_list(with_status=None):
     r = root.open_root()
-    for task_id in task_list(r):
+    with_status = _process_with_status(with_status)
+    for task_id in task_list(r, with_status=with_status):
         click.echo(task_id)
 
 
@@ -62,3 +67,9 @@ def cli_task_create(cmd: tuple[str]):
 def cli_task_eval(task_id: str, *, capture: bool):
     r = root.open_root()
     task_eval(r, task_id, capture=capture)
+
+
+def _process_with_status(with_status: list[str]):
+    if not with_status:
+        return None
+    return reduce(ior, [TaskStatus[i.upper()] for i in with_status])
