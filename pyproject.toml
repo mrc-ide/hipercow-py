@@ -23,7 +23,9 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dependencies = [
-  "click"
+  "click",
+  "defusedxml",
+  "requests"
 ]
 dynamic = ["version"]
 
@@ -65,6 +67,7 @@ extra-dependencies = [
   "black>=23.1.0",
   "mypy>=1.0.0",
   "ruff>=0.0.243",
+  "types-defusedxml"
 ]
 [tool.hatch.envs.lint.scripts]
 typing = "mypy --install-types --non-interactive {args:src tests}"
