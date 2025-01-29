@@ -134,3 +134,8 @@ def task_info(root: Root, task_id: str) -> TaskInfo:
     data = TaskData.read(root, task_id)
     times = TaskTimes.read(root, task_id)
     return TaskInfo(status, data, times)
+
+
+def task_list(root: Root) -> list[str]:
+    contents = (root.path / "tasks").rglob("data")
+    return ["".join(el.parts[-3:-1]) for el in contents if el.is_file()]

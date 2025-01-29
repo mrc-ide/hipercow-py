@@ -8,6 +8,7 @@ from hipercow.task import (
     TaskTimes,
     set_task_status,
     task_info,
+    task_list,
     task_log,
     task_status,
 )
@@ -91,3 +92,15 @@ def test_that_can_read_info_for_completed_task(tmp_path):
     assert isinstance(info.times.created, float)
     assert isinstance(info.times.started, float)
     assert isinstance(info.times.finished, float)
+
+
+def test_can_list_tasks(tmp_path):
+    root.init(tmp_path)
+    r = root.open_root(tmp_path)
+    assert task_list(r) == []
+    with transient_working_directory(tmp_path):
+        t1 = tc.task_create_shell(["echo", "hello world"])
+    assert task_list(r) == [t1]
+    with transient_working_directory(tmp_path):
+        t2 = tc.task_create_shell(["echo", "hello world"])
+    assert set(task_list(r)) == {t1, t2}
