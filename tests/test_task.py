@@ -104,3 +104,25 @@ def test_can_list_tasks(tmp_path):
     with transient_working_directory(tmp_path):
         t2 = tc.task_create_shell(["echo", "hello world"])
     assert set(task_list(r)) == {t1, t2}
+
+
+def test_can_list_tasks_by_status(tmp_path):
+    root.init(tmp_path)
+    r = root.open_root(tmp_path)
+    with transient_working_directory(tmp_path):
+        ids = [tc.task_create_shell(["true"]) for _ in range(5)]
+    # 0 is CREATED
+    set_task_status(r, ids[1], TaskStatus.RUNNING)
+    set_task_status(r, ids[2], TaskStatus.SUCCESS)
+    set_task_status(r, ids[3], TaskStatus.SUCCESS)
+    set_task_status(r, ids[4], TaskStatus.FAILURE)
+    assert set(task_list(r)) == set(ids)
+    assert set(task_list(r, with_status=TaskStatus.SUCCESS)) == {ids[2], ids[3]}
+    assert set(task_list(r, with_status=TaskStatus.TERMINAL)) == {
+        ids[2],
+        ids[3],
+        ids[4],
+    }
+    assert set(
+        task_list(r, with_status=TaskStatus.SUCCESS | TaskStatus.RUNNING)
+    ) == {ids[1], ids[2], ids[3]}
