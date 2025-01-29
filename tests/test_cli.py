@@ -61,11 +61,11 @@ def test_can_save_and_read_log(tmp_path):
         res = runner.invoke(cli.cli_task_eval, [task_id, "--capture"])
         assert res.exit_code == 0
 
-        res = runner.invoke(cli.cli_log, task_id)
+        res = runner.invoke(cli.cli_task_log, task_id)
         assert res.exit_code == 0
         assert res.output == "hello world\n\n"
 
-        res = runner.invoke(cli.cli_log, [task_id, "--filename"])
+        res = runner.invoke(cli.cli_task_log, [task_id, "--filename"])
         assert res.exit_code == 0
         assert res.output.strip() == str(r.path_task_log(task_id))
 
