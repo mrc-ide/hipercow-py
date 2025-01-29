@@ -53,7 +53,6 @@ def test_can_save_and_read_log(tmp_path):
     runner = CliRunner()
     with runner.isolated_filesystem(temp_dir=tmp_path):
         root.init(".")
-        r = root.open_root()
         res = runner.invoke(cli.cli_task_create, ["echo", "hello", "world"])
         task_id = res.stdout.strip()
 
