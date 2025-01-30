@@ -44,6 +44,7 @@ path = "src/hipercow/__about__.py"
 dependencies = [
   "pytest",
   "pytest-cov",
+  "responses",
 ]
 [tool.hatch.envs.default.scripts]
 test = "pytest {args:tests}"
@@ -68,7 +69,6 @@ extra-dependencies = [
   "mypy>=1.0.0",
   "ruff>=0.0.243",
   "types-defusedxml",
-  "responses"
 ]
 [tool.hatch.envs.lint.scripts]
 typing = "mypy --install-types --non-interactive {args:src tests}"
