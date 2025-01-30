@@ -12,7 +12,7 @@ from hipercow.task import TaskStatus
 
 
 def encode64(x: str) -> str:
-    return str(base64.b64encode(x.encode("utf-8")))
+    return base64.b64encode(x.encode("utf-8")).decode("utf-8")
 
 
 def decode64(x: str) -> str:
@@ -63,6 +63,7 @@ class DideHTTPClient(requests.Session):
         response = super().request(
             method, url, *args, headers=headers, **kwargs
         )
+        # To debug requests, you can do:
         # from requests_toolbelt.utils import dump
         # print(dump.dump_all(response).decode("utf-8"))
         if not response.ok:
@@ -229,13 +230,7 @@ def _client_parse_cancel(txt: str):
 
 
 def _client_parse_log(txt: str) -> str:
-    # We get an error here with module "defusedxml.ElementTree" not
-    # explicitly exporting ElementTree, which I can't fix - there may
-    # be a way but I suspect it's an issue in the 3rd party type
-    # stubs?
-    dat = ElementTree.ElementTree(ElementTree.fromstring(txt))  # type: ignore
-
-    res = dat.find('.//input[@id="res"]')
+    res = ElementTree.fromstring(txt).find('.//input[@id="res"]')
     if res is None:
         msg = "Failed to parse log response"
         raise Exception(msg)
