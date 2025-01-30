@@ -41,6 +41,7 @@ class DideTaskStatus:
     def from_string(entry):
         els = entry.strip().split("\t")
         els[2] = _parse_dide_status(els[2])
+        els[4] = els[4].replace("DIDE\\", "")
         for i in range(5, 8):
             els[i] = _parse_dide_timestamp(els[i])
         return DideTaskStatus(*els)
@@ -214,7 +215,8 @@ def _client_query_status_job(dide_id: str, cluster: str) -> dict:
 
 
 def _client_parse_headnodes(txt: str) -> list[str]:
-    return txt.strip().split("\n")
+    txt = txt.strip()
+    return txt.split("\n") if txt else []
 
 
 def _client_parse_submit(txt: str) -> str:
