@@ -67,8 +67,7 @@ class DideHTTPClient(requests.Session):
         # To debug requests, you can do:
         # from requests_toolbelt.utils import dump
         # print(dump.dump_all(response).decode("utf-8"))
-        if not response.ok:
-            response.raise_for_status()
+        response.raise_for_status()
         return response
 
     def login(self) -> None:
@@ -77,8 +76,11 @@ class DideHTTPClient(requests.Session):
             "pw": encode64(self._credentials.password),
             "hpcfunc": encode64("login"),
         }
-        self.request("POST", "index.php", data=data, public=True)
-        ## TODO: check for "You don't seem to have any HPC access" in resp
+        res = self.request("POST", "index.php", data=data, public=True)
+        no_access = "You don't seem to have any HPC access"
+        if no_access in res.text:
+            msg = "You do not have HPC access - please contact Wes"
+            raise Exception(msg)
         self._has_logged_in = True
 
     def logout(self) -> None:
@@ -154,7 +156,7 @@ def _client_check_access(cluster: str, valid: list[str]) -> None:
     if len(valid) == 0:
         msg = "You do not have access to any cluster"
     elif len(valid) == 1:
-        msg = f"You do not have access to '{cluster}'; try '{valid}'"
+        msg = f"You do not have access to '{cluster}'; try '{valid[0]}'"
     else:
         valid_str = ", ".join(valid)
         msg = f"You do not have access to '{cluster}'; try one of {valid_str}"
@@ -233,12 +235,7 @@ def _client_parse_cancel(txt: str):
 
 def _client_parse_log(txt: str) -> str:
     res = ElementTree.fromstring(txt).find('.//input[@id="res"]')
-    if res is None:
-        msg = "Failed to parse log response"
-        raise Exception(msg)
-
-    # The R version does some additional parsing here, but I think
-    # that's because we tweak the output streams when we run the task?
+    assert res is not None  # noqa: S101
     output = decode64(res.attrib["value"])
     return re.sub("^Output\\s*:\\s*?\n+", "", output)
 

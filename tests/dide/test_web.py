@@ -1,6 +1,7 @@
 import datetime
 import json
 
+import pytest
 import responses
 
 from hipercow.dide import web
@@ -169,3 +170,106 @@ def test_can_cancel_task():
     res = cl.cancel("497979")
     assert res == {"497979": "WRONG_USER."}
     assert cancel.call_count == 1
+
+
+def test_can_check_access():
+    with pytest.raises(Exception, match="You do not have access to any"):
+        web._client_check_access("wpia-hn", [])
+    with pytest.raises(Exception, match="You do not have access to 'wpia-hn'"):
+        web._client_check_access("wpia-hn", ["other"])
+    with pytest.raises(Exception, match="try one of a, b"):
+        web._client_check_access("wpia-hn", ["a", "b"])
+    assert web._client_check_access("a", ["a"]) is None
+    assert web._client_check_access("a", ["a", "b"]) is None
+
+
+def test_throw_if_parse_on_submit_fails():
+    with pytest.raises(Exception, match="Job submission has failed"):
+        web._client_parse_submit("")
+
+
+def test_wrap_ids_as_list_for_cancel():
+    base = {"cluster": web.encode64("cl"), "hpcfunc": web.encode64("cancel")}
+    assert web._client_body_cancel("1", "cl") == {"c1": "1", **base}
+    assert web._client_body_cancel(["1"], "cl") == {"c1": "1", **base}
+    assert web._client_body_cancel(["1", "2"], "cl") == {
+        "c1": "1",
+        "c2": "2",
+        **base,
+    }
+
+
+def test_can_check_if_we_are_logged_in_from_web_client():
+    cl = create_client()
+    assert cl.logged_in()
+    cl = create_client(logged_in=False)
+    assert not cl.logged_in()
+
+
+@responses.activate
+def test_can_check_if_we_have_access():
+    responses.add(
+        responses.POST,
+        "https://mrcdata.dide.ic.ac.uk/hpc/_listheadnodes.php",
+        body="wpia-hn\n",
+        status=200,
+    )
+    cl = create_client()
+    assert cl.check_access() is None
+
+
+@responses.activate
+def test_can_log_in_and_out():
+    login = responses.add(
+        responses.POST,
+        "https://mrcdata.dide.ic.ac.uk/hpc/index.php",
+        body="",
+        status=200,
+    )
+    logout = responses.add(
+        responses.GET,
+        "https://mrcdata.dide.ic.ac.uk/hpc/logout.php",
+        status=200,
+    )
+    cl = create_client(logged_in=False)
+    cl.login()
+    assert login.call_count == 1
+    assert cl.logged_in()
+    cl.logout()
+    assert login.call_count == 1
+    assert logout.call_count == 1
+    assert not cl.logged_in()
+
+
+@responses.activate
+def test_throw_if_user_has_no_access():
+    body = "<html>You don't seem to have any HPC access</html>"
+    responses.add(
+        responses.POST,
+        "https://mrcdata.dide.ic.ac.uk/hpc/index.php",
+        body=body,
+        status=200,
+    )
+    cl = create_client(logged_in=False)
+    with pytest.raises(Exception, match="You do not have HPC access"):
+        cl.login()
+
+
+@responses.activate
+def test_login_if_using_authenticated_endpoints():
+    login = responses.add(
+        responses.POST,
+        "https://mrcdata.dide.ic.ac.uk/hpc/index.php",
+        body="",
+        status=200,
+    )
+    responses.add(
+        responses.POST,
+        "https://mrcdata.dide.ic.ac.uk/hpc/_listheadnodes.php",
+        body="foo\nbar\n",
+        status=200,
+    )
+    cl = create_client(logged_in=False)
+    assert cl.headnodes() == ["foo", "bar"]
+    assert login.call_count == 1
+    assert cl.logged_in()
