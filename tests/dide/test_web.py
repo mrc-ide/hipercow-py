@@ -1,4 +1,5 @@
 import datetime
+import json
 
 import responses
 
@@ -89,3 +90,82 @@ def test_can_get_status_for_user():
         req.body
         == "user=&scheduler=d3BpYS1obg%3D%3D&state=Kg%3D%3D&jobs=LTE%3D"
     )
+
+
+@responses.activate
+def test_can_get_job_status():
+    status = responses.add(
+        responses.GET,
+        "https://mrcdata.dide.ic.ac.uk/hpc/api/v1/get_job_status/",
+        body="Failed",
+        status=200,
+    )
+    cl = create_client()
+    res = cl.status_job("1234")
+    assert res == TaskStatus.FAILURE
+    assert status.call_count == 1
+
+
+@responses.activate
+def test_can_get_software_list():
+    payload = {
+        "software": [
+            {"name": "R", "version": "4.2.3", "call": "setr64_4_2_3.bat"},
+            {"name": "R", "version": "4.3.1", "call": "setr64_4_3_1.bat"},
+            {"name": "python", "version": "3.11", "call": "python311.bat"},
+        ],
+        "linuxsoftware": [
+            {"name": "R", "version": "4.2.1", "module": "r/4.2.1"},
+            {"name": "python", "version": "3.12", "module": "python/3.12"},
+        ],
+    }
+    software = responses.add(
+        responses.GET,
+        "https://mrcdata.dide.ic.ac.uk/hpc/api/v1/cluster_software",
+        body=json.dumps(payload),
+        status=200,
+    )
+    cl = create_client(logged_in=False)
+    res = cl.software()
+    assert res == {
+        "linux": {
+            "r": {"4.2.1": {"module": "r/4.2.1"}},
+            "python": {"3.12": {"module": "python/3.12"}},
+        },
+        "windows": {
+            "r": {
+                "4.2.3": {"call": "setr64_4_2_3.bat"},
+                "4.3.1": {"call": "setr64_4_3_1.bat"},
+            },
+            "python": {"3.11": {"call": "python311.bat"}},
+        },
+    }
+    assert software.call_count == 1
+
+
+@responses.activate
+def test_can_submit_task():
+    submit = responses.add(
+        responses.POST,
+        "https://mrcdata.dide.ic.ac.uk/hpc/submit_1.php",
+        body="Job has been submitted. ID: 497979.\n",
+        status=200,
+    )
+    cl = create_client()
+    res = cl.submit("1234", "myname")
+    assert res == "497979"
+    assert submit.call_count == 1
+
+
+@responses.activate
+def test_can_cancel_task():
+    cancel = responses.add(
+        responses.POST,
+        "https://mrcdata.dide.ic.ac.uk/hpc/cancel.php",
+        body="497979\tWRONG_USER.\n",
+        status=200,
+    )
+    cl = create_client()
+    res = cl.cancel("497979")
+    assert res == {"497979": "WRONG_USER."}
+    assert cancel.call_count == 1

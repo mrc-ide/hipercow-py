@@ -252,12 +252,9 @@ def _client_parse_status_job(txt: str) -> TaskStatus:
 
 
 def _client_parse_software(json: dict) -> dict:
-    if "linuxsoftware" in json:
-        linux = json["linuxsoftware"]
-        windows = json["software"]
-    else:
-        linux = json["linux"]
-        windows = json["windows"]
+    # Likely to change soon when the portal updates
+    linux = json["linuxsoftware"]
+    windows = json["software"]
 
     def process(x):
         ret = {}
