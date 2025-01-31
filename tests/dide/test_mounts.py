@@ -108,8 +108,7 @@ def test_throw_if_error_in_unix_mount_entry():
 
 def test_can_parse_windows_mount_point():
     res = mounts._parse_windows_mount_entry(
-        "E:",
-        "//projects.dide.ic.ac.uk/other"
+        "E:", "//projects.dide.ic.ac.uk/other"
     )
     assert res == mounts.Mount("projects", "other", "E:")
 
