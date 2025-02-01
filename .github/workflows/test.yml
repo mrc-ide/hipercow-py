@@ -37,6 +37,8 @@ jobs:
       - name: Lint
         run: |
           hatch run lint:all
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
       - name: Test
         env:
           VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
@@ -49,5 +51,3 @@ jobs:
           # This can be useful, but the false positive rate is
           # annoyingly high.
           fail_ci_if_error: false
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
