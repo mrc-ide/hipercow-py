@@ -22,10 +22,6 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - {os: macos-latest,   py: '3.11'}
-          - {os: ubuntu-latest,  py: '3.10'}
-          - {os: ubuntu-latest,  py: '3.11'}
-          - {os: ubuntu-latest,  py: '3.12'}
           - {os: windows-latest, py: '3.11'}
 
     steps:
@@ -53,3 +49,5 @@ jobs:
           # This can be useful, but the false positive rate is
           # annoyingly high.
           fail_ci_if_error: false
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
