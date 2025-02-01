@@ -77,11 +77,11 @@ def test_throw_if_two_plausible_mounts():
 
 
 def test_preserve_drive_letter_if_given():
-    m = [mounts.Mount("host", Path("/hostmount"), Path("P:"))]
+    m = [mounts.Mount("host", Path("/hostmount"), Path("P:/"))]
     path = Path("P:/local/path")
     res = mounts.remap_path(path, m)
     assert res == mounts.PathMap(
-        path, m[0], Path("P:"), relative=Path("local/path")
+        path, m[0], Path("P:/"), relative=Path("local/path")
     )
 
 
