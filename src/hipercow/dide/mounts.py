@@ -35,7 +35,7 @@ def remap_path(path: Path, mounts: list[Mount]) -> PathMap:
         raise Exception(msg)
     mount = pos[0]
     relative = path.relative_to(mount.local)
-    if re.match("^[A-Za-z]:/?$", str(mount.local)):
+    if re.match("^[A-Za-z]:/?$", str(mount.local).replace("\\", "/")):
         remote = mount.local
     elif mount.host == "qdrive":
         remote = Path("Q:")
