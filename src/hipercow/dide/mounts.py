@@ -54,7 +54,7 @@ def detect_mounts() -> list[Mount]:
 def _detect_mounts_unix() -> list[Mount]:
     try:
         sysname = platform.system()
-    except Exception as ex:
+    except Exception:
         sysname = "Windows"
     fstype = _unix_smb_mount_type(sysname)
     res = subprocess.run(
