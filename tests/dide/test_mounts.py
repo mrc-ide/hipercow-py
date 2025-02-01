@@ -77,7 +77,6 @@ def test_throw_if_two_plausible_mounts():
 
 
 def test_preserve_drive_letter_if_given():
-	drive = "P:"
     m = [mounts.Mount("host", Path("/hostmount"), Path("P:"))]
     path = Path("P:/local/path")
     res = mounts.remap_path(path, m)
