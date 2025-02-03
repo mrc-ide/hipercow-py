@@ -10,6 +10,7 @@ from hipercow.task_eval import task_eval
 
 
 @click.group()
+@click.version_option()
 def cli():
     pass  # pragma: no cover
 
