@@ -41,7 +41,9 @@ def remap_path(path: Path, mounts: list[Mount]) -> PathMap:
         remote = Path("Q:")
     else:
         remote = Path("V:")
-    return PathMap(path, mount, remote, relative)
+    return PathMap(
+        path, mount, remote, Path(_drop_leading_slash(str(relative)))
+    )
 
 
 def detect_mounts() -> list[Mount]:
@@ -116,3 +118,7 @@ def _clean_dide_hostname(host: str) -> str:
 
 def _forward_slash(x: str) -> str:
     return x.replace("\\", "/")
+
+
+def _drop_leading_slash(x: str) -> str:
+    return re.sub("^[/\\\\]", "", x)
