@@ -20,7 +20,7 @@ def test_can_parse_mounts_on_unix(mocker):
     response = mock.MagicMock(spec=CompletedProcess)
     response.stdout = data
     mocker.patch("subprocess.run", return_value=response)
-    res = mounts._detect_mounts_unix()
+    res = mounts._detect_mounts_unix("Linux")
     assert len(res) == 2
     assert res[0] == mounts.Mount("projects", "other", "/path/local")
     assert res[1] == mounts.Mount("projects", "other2", "/path/local2")

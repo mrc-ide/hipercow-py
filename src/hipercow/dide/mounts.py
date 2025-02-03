@@ -47,14 +47,15 @@ def remap_path(path: Path, mounts: list[Mount]) -> PathMap:
 
 
 def detect_mounts() -> list[Mount]:
-    if platform.system() == "Windows":
+    system = platform.system()
+    if system == "Windows":
         return _detect_mounts_windows()
     else:
-        return _detect_mounts_unix()
+        return _detect_mounts_unix(system)
 
 
-def _detect_mounts_unix() -> list[Mount]:
-    fstype = _unix_smb_mount_type(platform.system())
+def _detect_mounts_unix(system: str) -> list[Mount]:
+    fstype = _unix_smb_mount_type(system)
     res = subprocess.run(
         ["mount", "-t", fstype], capture_output=True, check=True
     )
