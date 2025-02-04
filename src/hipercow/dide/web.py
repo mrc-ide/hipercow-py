@@ -10,6 +10,8 @@ from defusedxml import ElementTree
 
 from hipercow.task import TaskStatus
 
+from hipercow.dide.dide import Credentials
+
 
 def encode64(x: str) -> str:
     return base64.b64encode(x.encode("utf-8")).decode("utf-8")
@@ -17,12 +19,6 @@ def encode64(x: str) -> str:
 
 def decode64(x: str) -> str:
     return base64.b64decode(x).decode("utf-8")
-
-
-@dataclass
-class Credentials:
-    username: str
-    password: str
 
 
 @dataclass
