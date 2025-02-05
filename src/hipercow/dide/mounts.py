@@ -134,7 +134,7 @@ def _parse_windows_mount_entry(local: str, remote: str) -> Mount:
         msg = "Failed to parse windows entry"
         raise Exception(msg)
     host, remote = m.groups()
-    return Mount(_clean_dide_hostname(host), remote, Path(local))
+    return Mount(_clean_dide_hostname(host), remote, Path(local + "/"))
 
 
 def _clean_dide_hostname(host: str) -> str:

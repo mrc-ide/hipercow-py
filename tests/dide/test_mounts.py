@@ -43,8 +43,8 @@ def test_can_parse_mounts_on_windows(mocker):
     mocker.patch("subprocess.run", return_value=response)
     res = mounts._detect_mounts_windows()
     assert len(res) == 2
-    assert res[0] == mounts.Mount("wpia-hn", "hipercow", Path("I:"))
-    assert res[1] == mounts.Mount("wpia-hn2.hpc", "Climate", Path("Y:"))
+    assert res[0] == mounts.Mount("wpia-hn", "hipercow", Path("I:/"))
+    assert res[1] == mounts.Mount("wpia-hn2.hpc", "Climate", Path("Y:/"))
 
 
 def test_can_get_correct_smb_type():
@@ -75,7 +75,7 @@ def test_throw_if_two_plausible_mounts():
 
 
 def test_preserve_drive_letter_if_given():
-    m = [mounts.Mount("host", "/hostmount", Path("P:"))]
+    m = [mounts.Mount("host", "/hostmount", Path("P:/"))]
     path = Path("P:/local/path")
     res = mounts.remap_path(path, m)
     assert res == mounts.PathMap(path, m[0], "P:", relative="local/path")
@@ -104,7 +104,7 @@ def test_can_parse_windows_mount_point():
     res = mounts._parse_windows_mount_entry(
         "E:", "//projects.dide.ic.ac.uk/other"
     )
-    assert res == mounts.Mount("projects", "other", Path("E:"))
+    assert res == mounts.Mount("projects", "other", Path("E:/"))
 
 
 def test_throw_if_error_in_windows_mount_point():
