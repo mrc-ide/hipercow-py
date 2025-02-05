@@ -44,6 +44,7 @@ path = "src/hipercow/__about__.py"
 dependencies = [
   "pytest",
   "pytest-cov",
+  "pytest-mock",  
   "responses",
 ]
 [tool.hatch.envs.default.scripts]
@@ -157,6 +158,7 @@ ignore = [
   "S301",
   # Allow subprocess (https://github.com/astral-sh/ruff/issues/4045)
   "S603",
+  "S607", # don't use full path names for executables
   # Allow print until we find the alternative to R's cli
   "T201"
 ]
