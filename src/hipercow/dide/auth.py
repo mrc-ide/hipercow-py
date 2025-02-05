@@ -1,12 +1,13 @@
 import getpass
-import keyring
 import re
+
+import keyring
 
 from hipercow.dide.web import Credentials, DideWebClient
 
-
 ## Throughout this file we need to update to use a nice printing
 ## library, and to throw errors that the cli can nicely catch.
+
 
 def authenticate():
     intro = """# Please enter your DIDE credentials
@@ -41,20 +42,22 @@ Success! I'm saving these into your keyring now so that we can reuse these
 when we need to log into the cluster."""
     print(outro)
 
-    keyring.set_password("hipercow/dide/username", None, username)
+    keyring.set_password("hipercow/dide/username", "", username)
     keyring.set_password("hipercow/dide/password", username, password)
 
 
 def credentials() -> Credentials:
-    username = keyring.get_password("hipercow/dide/username", None)
+    username = keyring.get_password("hipercow/dide/username", "") or ""
     password = keyring.get_password("hipercow/dide/password", username)
     if not username or not password:
         # The error we throw here should depend on the context; if
         # we're within click then we should point people at at
         # 'hipercow dide authenticate' but if we are being used
         # programmatically that might not be best?
-        msg = ("Did not find your DIDE credentials, "
-               "please run 'hipercow dide authenticate'")
+        msg = (
+            "Did not find your DIDE credentials, "
+            "please run 'hipercow dide authenticate'"
+        )
         raise Exception(msg)
     return Credentials(username, password)
 
@@ -68,21 +71,24 @@ def check() -> None:
 
 
 def clear():
-    username = keyring.get_password("hipercow/dide/username", None)
+    username = keyring.get_password("hipercow/dide/username", "")
     if username:
-        _delete_password_silently("hipercow/dide/username", None)
+        _delete_password_silently("hipercow/dide/username", "")
         _delete_password_silently("hipercow/dide/password", username)
 
 
-def _delete_password_silently(key: str, username: str | None):
+def _delete_password_silently(key: str, username: str):
     try:
         keyring.delete_password(key, username)
-    except keyring.PasswordDeleteError:
+    except keyring.errors.PasswordDeleteError:
         pass
 
 
 def _default_username() -> str:
-    return keyring.get_password("hipercow/dide/username", None) or getpass.getuser()
+    return (
+        keyring.get_password("hipercow/dide/username", "")
+        or getpass.getuser()
+    )
 
 
 def _get_username(default: str) -> str:
@@ -106,8 +112,10 @@ def _check_username(value) -> str:
 
 
 def _get_password() -> str:
-    msg = ("Please enter your DIDE password. "
-           "You will not see characters while you type")
+    msg = (
+        "Please enter your DIDE password. "
+        "You will not see characters while you type"
+    )
     value = getpass.getpass()
     if not value:
         msg = "Invalid empty password"
