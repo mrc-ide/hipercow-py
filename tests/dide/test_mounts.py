@@ -11,7 +11,7 @@ def test_can_parse_cifs_output():
     m = mounts._parse_unix_mount_entry(
         "//projects/other on /path/local type cifs (rw,relatime)"
     )
-    assert m == mounts.Mount("projects", "other", "/path/local")
+    assert m == mounts.Mount("projects", "other", Path("/path/local"))
 
 
 def test_can_parse_mounts_on_unix(mocker):
@@ -22,8 +22,8 @@ def test_can_parse_mounts_on_unix(mocker):
     mocker.patch("subprocess.run", return_value=response)
     res = mounts._detect_mounts_unix("Linux")
     assert len(res) == 2
-    assert res[0] == mounts.Mount("projects", "other", "/path/local")
-    assert res[1] == mounts.Mount("projects", "other2", "/path/local2")
+    assert res[0] == mounts.Mount("projects", "other", Path("/path/local"))
+    assert res[1] == mounts.Mount("projects", "other2", Path("/path/local2"))
 
 
 def test_can_clean_dide_hostname():
@@ -43,8 +43,8 @@ def test_can_parse_mounts_on_windows(mocker):
     mocker.patch("subprocess.run", return_value=response)
     res = mounts._detect_mounts_windows()
     assert len(res) == 2
-    assert res[0] == mounts.Mount("wpia-hn", "hipercow", "I:")
-    assert res[1] == mounts.Mount("wpia-hn2.hpc", "Climate", "Y:")
+    assert res[0] == mounts.Mount("wpia-hn", "hipercow", Path("I:"))
+    assert res[1] == mounts.Mount("wpia-hn2.hpc", "Climate", Path("Y:"))
 
 
 def test_can_get_correct_smb_type():
@@ -58,18 +58,16 @@ def test_throw_on_remap_with_no_mounts():
 
 
 def test_can_remap_path():
-    m = [mounts.Mount("host", Path("/hostmount"), Path("/local"))]
+    m = [mounts.Mount("host", "/hostmount", Path("/local"))]
     path = Path("/local/path/to/dir")
     res = mounts.remap_path(path, m)
-    assert res == mounts.PathMap(
-        path, m[0], Path("V:"), relative=Path("path/to/dir")
-    )
+    assert res == mounts.PathMap(path, m[0], "V:", relative="path/to/dir")
 
 
 def test_throw_if_two_plausible_mounts():
     m = [
-        mounts.Mount("host1", Path("/path1"), Path("/local/path")),
-        mounts.Mount("host2", Path("/path2"), Path("/local")),
+        mounts.Mount("host1", "/path1", Path("/local/path")),
+        mounts.Mount("host2", "/path2", Path("/local")),
     ]
     path = Path("/local/path/to/dir")
     with pytest.raises(Exception, match="More than one plausible"):
@@ -77,28 +75,24 @@ def test_throw_if_two_plausible_mounts():
 
 
 def test_preserve_drive_letter_if_given():
-    m = [mounts.Mount("host", Path("/hostmount"), Path("P:"))]
+    m = [mounts.Mount("host", "/hostmount", Path("P:"))]
     path = Path("P:/local/path")
     res = mounts.remap_path(path, m)
-    assert res == mounts.PathMap(
-        path, m[0], Path("P:"), relative=Path("local/path")
-    )
+    assert res == mounts.PathMap(path, m[0], "P:", relative="local/path")
 
 
 def test_can_map_home_to_q_drive():
-    m = [mounts.Mount("qdrive", Path("user"), Path("/local"))]
+    m = [mounts.Mount("qdrive", "user", Path("/local"))]
     path = Path("/local/path/to/dir")
     res = mounts.remap_path(path, m)
-    assert res == mounts.PathMap(
-        path, m[0], Path("Q:"), relative=Path("path/to/dir")
-    )
+    assert res == mounts.PathMap(path, m[0], "Q:", relative="path/to/dir")
 
 
 def test_can_parse_unix_entry():
     res = mounts._parse_unix_mount_entry(
         "//projects.dide.ic.ac.uk/other on /path/local type cifs (rw,relatime)"
     )
-    assert res == mounts.Mount("projects", "other", "/path/local")
+    assert res == mounts.Mount("projects", "other", Path("/path/local"))
 
 
 def test_throw_if_error_in_unix_mount_entry():
@@ -110,7 +104,7 @@ def test_can_parse_windows_mount_point():
     res = mounts._parse_windows_mount_entry(
         "E:", "//projects.dide.ic.ac.uk/other"
     )
-    assert res == mounts.Mount("projects", "other", "E:")
+    assert res == mounts.Mount("projects", "other", Path("E:"))
 
 
 def test_throw_if_error_in_windows_mount_point():
