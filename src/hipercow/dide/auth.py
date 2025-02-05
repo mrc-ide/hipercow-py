@@ -8,6 +8,9 @@ from hipercow.dide.web import Credentials, DideWebClient
 ## Throughout this file we need to update to use a nice printing
 ## library, and to throw errors that the cli can nicely catch.
 
+## We follow hipercow in storing the username *as* a password, because
+## it's largely a computer-specific things.
+
 
 def authenticate():
     intro = """# Please enter your DIDE credentials
