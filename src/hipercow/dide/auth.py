@@ -89,8 +89,7 @@ def _delete_password_silently(key: str, username: str):
 
 def _default_username() -> str:
     return (
-        keyring.get_password("hipercow/dide/username", "")
-        or getpass.getuser()
+        keyring.get_password("hipercow/dide/username", "") or getpass.getuser()
     )
 
 
