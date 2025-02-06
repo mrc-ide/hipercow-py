@@ -85,7 +85,7 @@ def dide():
 @dide.command("authenticate")
 @click.option("--clear", is_flag=True)
 @click.option("--check", is_flag=True)
-def dide_authenticate(clear, check):
+def cli_dide_authenticate(clear, check):
     if check:
         dide_auth.check()
     elif clear:
