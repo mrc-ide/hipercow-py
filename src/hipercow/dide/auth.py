@@ -93,8 +93,13 @@ def _default_username() -> str:
     )
 
 
+# For mocking to work
+def _get_input(text):
+    return input(text)  # pragma: no cover
+
+
 def _get_username(default: str) -> str:
-    value = input(f"DIDE username (default: {default}) > ")
+    value = _get_input(f"DIDE username (default: {default}) > ")
     return _check_username(value or default)
 
 
