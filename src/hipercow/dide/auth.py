@@ -3,7 +3,7 @@ import re
 
 import keyring
 
-from hipercow.dide.web import Credentials, DideWebClient
+from hipercow.dide.web import Credentials, check_access
 
 ## Throughout this file we need to update to use a nice printing
 ## library, and to throw errors that the cli can nicely catch.
@@ -38,7 +38,7 @@ If this fails we can always try again"""
     print(check)
 
     credentials = Credentials(username, password)
-    _test_credentials(credentials)
+    check_access(credentials)
 
     outro = """
 Success! I'm saving these into your keyring now so that we can reuse these
@@ -49,7 +49,7 @@ when we need to log into the cluster."""
     keyring.set_password("hipercow/dide/password", username, password)
 
 
-def credentials() -> Credentials:
+def fetch_credentials() -> Credentials:
     username = keyring.get_password("hipercow/dide/username", "") or ""
     password = keyring.get_password("hipercow/dide/password", username)
     if not username or not password:
@@ -67,9 +67,9 @@ def credentials() -> Credentials:
 
 def check() -> None:
     print("Fetching credentials")
-    creds = credentials()
+    credentials = fetch_credentials()
     print("Testing credentials")
-    _test_credentials(creds)
+    check_access(credentials)
     print("Success!")
 
 
@@ -99,14 +99,14 @@ def _get_username(default: str) -> str:
 
 
 def _check_username(value) -> str:
-    value = re.sub("^DIDE\\\\", "", value.strip())
+    value = re.sub("^DIDE\\\\", "", value.strip(), flags=re.IGNORECASE)
     if not value:
         msg = "Invalid empty username"
         raise Exception(msg)
     if "\n" in value:
         msg = "Unexpected newline in username. Did you paste something?"
         raise Exception(msg)
-    for char in " #":
+    for char in "# ":
         if char in value:
             msg = f"Unexpected '{char}' in username"
             raise Exception(msg)
@@ -123,11 +123,3 @@ def _get_password() -> str:
         msg = "Invalid empty password"
         raise Exception(msg)
     return value
-
-
-def _test_credentials(credentials: Credentials):
-    try:
-        DideWebClient(credentials).check_access()
-    except Exception as e:
-        msg = "login failed"
-        raise Exception(msg) from e

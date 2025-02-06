@@ -150,6 +150,14 @@ class DideWebClient:
         return _client_parse_software(response.json())
 
 
+def check_access(credentials: Credentials) -> None:
+    try:
+        DideWebClient(credentials).check_access()
+    except Exception as e:
+        msg = "login failed"
+        raise Exception(msg) from e
+
+
 def _client_check_access(cluster: str, valid: list[str]) -> None:
     if cluster in valid:
         return

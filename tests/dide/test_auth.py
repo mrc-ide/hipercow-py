@@ -1,5 +1,4 @@
 import pytest
-from unittest import mock
 
 from hipercow.dide import auth
 
