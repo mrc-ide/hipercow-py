@@ -98,3 +98,32 @@ def test_can_list_tasks(tmp_path):
         res = runner.invoke(cli.cli_task_list, ["--with-status", "running"])
         assert res.exit_code == 0
         assert res.output.strip() == ""
+
+
+def test_can_call_cli_dide_authenticate(mocker):
+    mocker.patch("hipercow.cli.dide_auth.check")
+    mocker.patch("hipercow.cli.dide_auth.clear")
+    mocker.patch("hipercow.cli.dide_auth.authenticate")
+
+    runner = CliRunner()
+
+    res = runner.invoke(cli.cli_dide_authenticate, [])
+    assert res.exit_code == 0
+    assert res.output.strip() == ""
+    assert cli.dide_auth.check.call_count == 0
+    assert cli.dide_auth.clear.call_count == 0
+    assert cli.dide_auth.authenticate.call_count == 1
+
+    res = runner.invoke(cli.cli_dide_authenticate, ["--clear"])
+    assert res.exit_code == 0
+    assert res.output.strip() == ""
+    assert cli.dide_auth.check.call_count == 0
+    assert cli.dide_auth.clear.call_count == 1
+    assert cli.dide_auth.authenticate.call_count == 1
+
+    res = runner.invoke(cli.cli_dide_authenticate, ["--check"])
+    assert res.exit_code == 0
+    assert res.output.strip() == ""
+    assert cli.dide_auth.check.call_count == 1
+    assert cli.dide_auth.clear.call_count == 1
+    assert cli.dide_auth.authenticate.call_count == 1

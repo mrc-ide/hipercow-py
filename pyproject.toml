@@ -25,7 +25,8 @@ classifiers = [
 dependencies = [
   "click",
   "defusedxml",
-  "requests"
+  "keyring",
+  "requests",
 ]
 dynamic = ["version"]
 

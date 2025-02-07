@@ -273,3 +273,19 @@ def test_login_if_using_authenticated_endpoints():
     assert cl.headnodes() == ["foo", "bar"]
     assert login.call_count == 1
     assert cl.logged_in()
+
+
+def test_raise_if_no_access(mocker):
+    mocker.patch("hipercow.dide.web.DideWebClient.__init__", return_value=None)
+    mocker.patch(
+        "hipercow.dide.web.DideWebClient.check_access",
+        side_effect=Exception("some error"),
+    )
+    with pytest.raises(Exception, match="login failed"):
+        web.check_access(web.Credentials("a", "b"))
+
+
+def test_no_error_if_access_is_ok(mocker):
+    mocker.patch("hipercow.dide.web.DideWebClient.__init__", return_value=None)
+    mocker.patch("hipercow.dide.web.DideWebClient.check_access")
+    web.check_access(web.Credentials("a", "b"))

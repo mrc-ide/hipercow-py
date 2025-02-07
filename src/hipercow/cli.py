@@ -4,6 +4,7 @@ from operator import ior
 import click
 
 from hipercow import root
+from hipercow.dide import auth as dide_auth
 from hipercow.task import TaskStatus, task_list, task_log, task_status
 from hipercow.task_create import task_create
 from hipercow.task_eval import task_eval
@@ -74,3 +75,20 @@ def _process_with_status(with_status: list[str]):
     if not with_status:
         return None
     return reduce(ior, [TaskStatus[i.upper()] for i in with_status])
+
+
+@cli.group()
+def dide():
+    pass  # pragma: no cover
+
+
+@dide.command("authenticate")
+@click.option("--clear", is_flag=True)
+@click.option("--check", is_flag=True)
+def cli_dide_authenticate(clear, check):
+    if check:
+        dide_auth.check()
+    elif clear:
+        dide_auth.clear()
+    else:
+        dide_auth.authenticate()
