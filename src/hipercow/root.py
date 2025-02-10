@@ -1,4 +1,6 @@
+import pickle
 from pathlib import Path
+from typing import Any
 
 from hipercow.util import file_create, find_file_descend
 
@@ -55,6 +57,27 @@ class Root:
 
     def path_task_log(self, task_id: str) -> Path:
         return self.path_task(task_id) / "log"
+
+    def path_configuration(self, name: str) -> Path:
+        return self.path / "config" / name
+
+    def configuration(self, driver: str | None) -> Any:
+        if not driver:
+            return self._default_configuration()
+        path = self.path_configuration(driver)
+        if not path.exists():
+            msg = f"No such configuration '{driver}'"
+            raise Exception(msg)
+        with open(path, "rb") as f:
+            return pickle.load(f)
+
+    def _default_configuration(self):
+        candidates = list((self.path / "config").glob("*"))
+        n = len(candidates)
+        if n > 1:
+            msg = "More than one candidate driver"
+            raise Exception(msg)
+        return self.configuration(candidates[0]) if n == 1 else None
 
 
 def open_root(path: None | str | Path = None) -> Root:
