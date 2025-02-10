@@ -1,7 +1,5 @@
 import pickle
 from abc import ABC, abstractmethod
-from pathlib import Path
-from typing import Any
 
 from hipercow.root import Root
 from hipercow.util import transient_working_directory
@@ -11,20 +9,20 @@ class HipercowDriver(ABC):
     name: str
 
     @abstractmethod
-    def __init__(self, **kwargs):
+    def __init__(self, root: Root, **kwargs):
         pass
 
-    def submit(self, task_id: str, config: Any, path_root: Path) -> None:
+    def submit(self, task_id: str, root: Root) -> None:
         pass
 
 
 class ExampleDriver(HipercowDriver):
     name = "example"
 
-    def __init__(self, **kwargs):
+    def __init__(self, root: Root, **kwargs):
         pass
 
-    def submit(self, task_id: str, _1: None, _2: Path) -> None:
+    def submit(self, task_id, root: Root) -> None:
         print(f"submitting '{task_id}'")
 
 
