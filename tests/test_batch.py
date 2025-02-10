@@ -1,10 +1,10 @@
 from pathlib import Path
 
 from hipercow import root
-from hipercow.dide.mounts import Mount, PathMap
-from hipercow.dide import batch
-from hipercow.util import transient_working_directory
 from hipercow import task_create as tc
+from hipercow.dide import batch
+from hipercow.dide.mounts import Mount, PathMap
+from hipercow.util import transient_working_directory
 
 
 def test_can_create_batch_data():
@@ -16,7 +16,9 @@ def test_can_create_batch_data():
     assert res["task_id_2"] == "cde"
     assert res["hipercow_root_drive"] == "Q:"
     assert res["hipercow_root_path"] == "/my/project"
-    assert res["network_shares_create"] == r"net use \\wpia-hn\didehomes\bob Q: /y"
+    assert (
+        res["network_shares_create"] == r"net use \\wpia-hn\didehomes\bob Q: /y"
+    )
     assert res["network_shares_delete"] == "net use Q: /delete /y"
 
 

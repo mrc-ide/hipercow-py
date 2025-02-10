@@ -6,8 +6,8 @@ from hipercow.__about__ import __version__ as version
 from hipercow.dide.mounts import PathMap
 from hipercow.root import Root
 
-
-TASK_RUN = Template("""@echo off
+TASK_RUN = Template(
+    """@echo off
 REM automatically generated
 ECHO generated on host: ${hostname}
 ECHO generated on date: ${date}
@@ -60,7 +60,8 @@ if %TaskStatus% == 0 (
 ) else (
   ECHO Task did not complete successfully
   EXIT /b 1
-)""")
+)"""
+)
 
 
 # In a future version, we might prefer to use a configuration object,
@@ -75,7 +76,7 @@ if %TaskStatus% == 0 (
 def write_batch_task_run(task_id: str, path_map: PathMap, root: Root) -> str:
     data = _template_data_task_run(task_id, path_map)
     path = root.path_task(task_id, relative=True) / "task_run.bat"
-    unc = f"//{path_map.mount.host}/{path_map.mount.remote}/{path_map.relative}/{path}"
+    unc = f"//{path_map.mount.host}/{path_map.mount.remote}/{path_map.relative}/{path}"  # noqa: E501
     with (root.path / path).open("w") as f:
         f.write(TASK_RUN.substitute(data))
     return unc
@@ -92,7 +93,7 @@ def _template_data_task_run(task_id, path_map: PathMap) -> dict:
 
     return {
         "hostname": platform.node(),
-        "date": str(datetime.datetime.now()),
+        "date": str(datetime.datetime.now(tz=datetime.timezone.utc)),
         "hipercow_version": version,
         "task_id": task_id,
         "task_id_1": task_id[:2],
@@ -100,5 +101,5 @@ def _template_data_task_run(task_id, path_map: PathMap) -> dict:
         "hipercow_root_drive": root_drive,
         "hipercow_root_path": root_path,
         "network_shares_create": network_shares_create,
-        "network_shares_delete": network_shares_delete
+        "network_shares_delete": network_shares_delete,
     }

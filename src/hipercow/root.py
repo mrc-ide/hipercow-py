@@ -40,7 +40,7 @@ class Root:
 
         self.path = path
 
-    def path_task(self, task_id: str, *, relative: bool=False) -> Path:
+    def path_task(self, task_id: str, *, relative: bool = False) -> Path:
         base = Path() if relative else self.path
         return base / "hipercow" / "tasks" / task_id[:2] / task_id[2:]
 
