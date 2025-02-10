@@ -76,7 +76,7 @@ if %TaskStatus% == 0 (
 def write_batch_task_run(task_id: str, path_map: PathMap, root: Root) -> str:
     data = _template_data_task_run(task_id, path_map)
     path = str(root.path_task(task_id, relative=True) / "task_run.bat")
-    pat = path.replace("\\", "/")
+    path = path.replace("\\", "/")
     rel = path_map.relative
     unc = f"//{path_map.mount.host}/{path_map.mount.remote}/{rel}/{path}"
     with (root.path / path).open("w") as f:
