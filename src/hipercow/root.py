@@ -59,11 +59,11 @@ class Root:
         return self.path_task(task_id) / "log"
 
     def path_configuration(self, name: str) -> Path:
-        return self.path / "config" / name
+        return self.path / "hipercow" / "config" / name
 
-    def configuration(self, driver: str | None) -> Any:
+    def load_driver(self, driver: str | None, *, allow_none: bool=False) -> Any:
         if not driver:
-            return self._default_configuration()
+            return self._default_configuration(allow_none=allow_none)
         path = self.path_configuration(driver)
         if not path.exists():
             msg = f"No such configuration '{driver}'"
@@ -71,13 +71,22 @@ class Root:
         with open(path, "rb") as f:
             return pickle.load(f)
 
-    def _default_configuration(self):
-        candidates = list((self.path / "config").glob("*"))
+    def list_drivers(self) -> list[str]:
+        path = self.path / "hipercow" / "config"
+        return list(x.name for x in path.glob("*"))
+
+    def _default_configuration(self, *, allow_none: bool=False) -> Any:
+        candidates = self.list_drivers()
         n = len(candidates)
+        if n == 0:
+            if not allow_none:
+                msg = "No driver configured"
+                raise Exception(msg)
+            return None
         if n > 1:
             msg = "More than one candidate driver"
             raise Exception(msg)
-        return self.configuration(candidates[0]) if n == 1 else None
+        return self.load_driver(candidates[0])
 
 
 def open_root(path: None | str | Path = None) -> Root:
