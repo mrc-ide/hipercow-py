@@ -61,7 +61,9 @@ class Root:
     def path_configuration(self, name: str) -> Path:
         return self.path / "hipercow" / "config" / name
 
-    def load_driver(self, driver: str | None, *, allow_none: bool=False) -> Any:
+    def load_driver(
+        self, driver: str | None, *, allow_none: bool = False
+    ) -> Any:
         if not driver:
             return self._default_configuration(allow_none=allow_none)
         path = self.path_configuration(driver)
@@ -73,9 +75,9 @@ class Root:
 
     def list_drivers(self) -> list[str]:
         path = self.path / "hipercow" / "config"
-        return list(x.name for x in path.glob("*"))
+        return [x.name for x in path.glob("*")]
 
-    def _default_configuration(self, *, allow_none: bool=False) -> Any:
+    def _default_configuration(self, *, allow_none: bool = False) -> Any:
         candidates = self.list_drivers()
         n = len(candidates)
         if n == 0:

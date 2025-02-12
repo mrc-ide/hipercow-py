@@ -8,5 +8,5 @@ class ExampleDriver(HipercowDriver):
     def __init__(self, root: Root, **kwargs):
         pass
 
-    def submit(self, task_id, root: Root) -> None:
+    def submit(self, task_id, root: Root) -> None:  # noqa: ARG002
         print(f"submitting '{task_id}'")

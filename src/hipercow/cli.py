@@ -4,11 +4,11 @@ from operator import ior
 import click
 
 from hipercow import root
+from hipercow.configure import configure, unconfigure
 from hipercow.dide import auth as dide_auth
 from hipercow.task import TaskStatus, task_list, task_log, task_status
 from hipercow.task_create import task_create_shell
 from hipercow.task_eval import task_eval
-from hipercow.configure import configure, unconfigure
 
 
 @click.group()
@@ -97,7 +97,7 @@ def cli_task_list(with_status=None):
 @click.argument("cmd", nargs=-1)
 def cli_task_create(cmd: tuple[str]):
     r = root.open_root()
-    task_id = task_create_shell(r, cmd)
+    task_id = task_create_shell(r, list(cmd))
     click.echo(task_id)
 
 

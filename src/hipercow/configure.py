@@ -1,9 +1,9 @@
 import pickle
 
-from hipercow.root import Root
+from hipercow.dide.driver import DideDriver
 from hipercow.driver import HipercowDriver
 from hipercow.example import ExampleDriver
-from hipercow.dide.driver import DideDriver
+from hipercow.root import Root
 from hipercow.util import transient_working_directory
 
 
@@ -31,12 +31,13 @@ def unconfigure(root: Root, name: str) -> None:
 # ahead of some sort of global store of drivers:
 _DRIVERS = {d.name: d for d in [ExampleDriver, DideDriver]}
 
+
 def _get_driver(name: str):
     try:
         return _DRIVERS[name]
     except KeyError:
         msg = f"No such driver '{name}'"
-        raise Exception(msg)
+        raise Exception(msg) from None
 
 
 def _write_configuration(root: Root, driver: type[HipercowDriver], **kwargs):

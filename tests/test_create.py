@@ -1,5 +1,7 @@
 import re
 
+import pytest
+
 from hipercow import root
 from hipercow import task_create as tc
 from hipercow.task import TaskData
@@ -20,3 +22,10 @@ def test_create_simple_task(tmp_path):
     assert d.data == {"cmd": ["echo", "hello world"]}
     assert d.path == "."
     assert d.envvars == {}
+
+
+def test_tasks_cannot_be_empty(tmp_path):
+    root.init(tmp_path)
+    with pytest.raises(Exception, match="cannot be empty"):
+        with transient_working_directory(tmp_path):
+            tc.task_create_shell([])

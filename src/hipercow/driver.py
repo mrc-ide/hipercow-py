@@ -1,8 +1,6 @@
-import pickle
 from abc import ABC, abstractmethod
 
 from hipercow.root import Root
-from hipercow.util import transient_working_directory
 
 
 class HipercowDriver(ABC):

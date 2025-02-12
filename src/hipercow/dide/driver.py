@@ -22,7 +22,7 @@ class DideDriver(HipercowDriver):
     name = "dide"
     config: DideConfiguration
 
-    def __init__(self, root: Root, **kwargs):
+    def __init__(self, root: Root, **kwargs):  #  noqa: ARG002
         mounts = detect_mounts()
         path = remap_path(root.path, mounts)
         self.config = DideConfiguration(path)
