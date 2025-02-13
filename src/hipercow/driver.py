@@ -8,7 +8,7 @@ class HipercowDriver(ABC):
 
     @abstractmethod
     def __init__(self, root: Root, **kwargs):
-        pass
+        pass  # pragma: no cover
 
     def submit(self, task_id: str, root: Root) -> None:
-        pass
+        pass  # pragma: no cover
