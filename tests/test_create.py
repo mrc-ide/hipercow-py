@@ -4,6 +4,7 @@ import pytest
 
 from hipercow import root
 from hipercow import task_create as tc
+from hipercow.configure import configure
 from hipercow.task import TaskData
 from hipercow.util import transient_working_directory
 
@@ -31,3 +32,14 @@ def test_tasks_cannot_be_empty(tmp_path):
     with pytest.raises(Exception, match="cannot be empty"):
         with transient_working_directory(tmp_path):
             tc.task_create_shell(r, [])
+
+
+def test_submit_with_driver_if_configured(tmp_path, capsys):
+    root.init(tmp_path)
+    r = root.open_root(tmp_path)
+    configure(r, "example")
+    capsys.readouterr()
+    with transient_working_directory(tmp_path):
+        tid = tc.task_create_shell(r, ["echo", "hello world"])
+    str1 = capsys.readouterr().out
+    assert str1.startswith(f"submitting '{tid}'")

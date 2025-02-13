@@ -1,6 +1,6 @@
 import pytest
 
-from hipercow import root, util
+from hipercow import root
 from hipercow.configure import configure, unconfigure
 from hipercow.example import ExampleDriver
 
