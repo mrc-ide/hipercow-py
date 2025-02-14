@@ -144,3 +144,7 @@ def test_can_configure_driver(tmp_path):
         res = runner.invoke(cli.cli_driver_unconfigure, ["example"])
         assert res.exit_code == 0
         assert res.output.strip() == "Removed configuration for 'example'"
+
+        res = runner.invoke(cli.cli_driver_list, [])
+        assert res.exit_code == 0
+        assert res.output == "(none)\n"
