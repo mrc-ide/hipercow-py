@@ -1,7 +1,7 @@
 import pytest
 
 from hipercow import root
-from hipercow.configure import configure, unconfigure
+from hipercow.configure import _write_configuration, configure, unconfigure
 from hipercow.example import ExampleDriver
 
 
@@ -57,3 +57,17 @@ def test_can_reconfigure_driver(tmp_path, capsys):
     configure(r, "example")
     str2 = capsys.readouterr().out
     assert str2.startswith("Updated configuration for 'example'")
+
+
+def test_get_default_driver(tmp_path):
+    path = tmp_path / "ex"
+    root.init(path)
+    r = root.open_root(path)
+    a = ExampleDriver(r)
+    a.name = "a"
+    b = ExampleDriver(r)
+    b.name = "b"
+    _write_configuration(r, a)
+    _write_configuration(r, b)
+    with pytest.raises(Exception, match="More than one candidate driver"):
+        r.load_driver(None)

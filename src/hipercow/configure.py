@@ -14,7 +14,9 @@ from hipercow.util import transient_working_directory
 # * https://packaging.python.org/en/latest/specifications/entry-points/
 def configure(root: Root, name: str, **kwargs) -> None:
     driver = _get_driver(name)
-    _write_configuration(root, driver, **kwargs)
+    with transient_working_directory(root.path):
+        config = driver(root, **kwargs)
+    _write_configuration(root, config)
 
 
 def unconfigure(root: Root, name: str) -> None:
@@ -32,7 +34,7 @@ def unconfigure(root: Root, name: str) -> None:
 _DRIVERS = {d.name: d for d in [ExampleDriver, DideDriver]}
 
 
-def _get_driver(name: str):
+def _get_driver(name: str) -> type[HipercowDriver]:
     try:
         return _DRIVERS[name]
     except KeyError:
@@ -40,16 +42,14 @@ def _get_driver(name: str):
         raise Exception(msg) from None
 
 
-def _write_configuration(root: Root, driver: type[HipercowDriver], **kwargs):
-    with transient_working_directory(root.path):
-        config = driver(root, **kwargs)
-
-    path = root.path_configuration(driver.name)
+def _write_configuration(root: Root, driver: HipercowDriver) -> None:
+    name = driver.name
+    path = root.path_configuration(name)
     exists = path.exists()
     path.parent.mkdir(exist_ok=True, parents=True)
     with path.open("wb") as f:
-        pickle.dump(config, f)
+        pickle.dump(driver, f)
     if exists:
-        print(f"Updated configuration for '{driver.name}'")
+        print(f"Updated configuration for '{name}'")
     else:
-        print(f"Configured hipercow to use '{driver.name}'")
+        print(f"Configured hipercow to use '{name}'")
