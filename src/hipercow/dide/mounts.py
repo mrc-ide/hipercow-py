@@ -56,7 +56,7 @@ def remap_path(path: Path, mounts: list[Mount]) -> PathMap:
         msg = "More than one plausible mount for local directory"
         raise Exception(msg)
     elif len(pos) == 0:
-        msg = "Can't map local directory '{path}' to network path"
+        msg = f"Can't map local directory '{path}' to network path"
         raise Exception(msg)
     mount = pos[0]
     relative = path.relative_to(mount.local)
