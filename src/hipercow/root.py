@@ -90,6 +90,9 @@ class Root:
             raise Exception(msg)
         return self.load_driver(candidates[0])
 
+    def path_environment(self, name: str) -> Path:
+        return self.path / "environments" / name
+
 
 def open_root(path: None | str | Path = None) -> Root:
     root = find_file_descend("hipercow", path or Path.cwd())
