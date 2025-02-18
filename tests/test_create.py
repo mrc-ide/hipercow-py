@@ -5,7 +5,7 @@ import pytest
 from hipercow import root
 from hipercow import task_create as tc
 from hipercow.configure import configure
-from hipercow.task import TaskData
+from hipercow.task import TaskData, TaskStatus, task_status
 from hipercow.util import transient_working_directory
 
 
@@ -43,3 +43,4 @@ def test_submit_with_driver_if_configured(tmp_path, capsys):
         tid = tc.task_create_shell(r, ["echo", "hello world"])
     str1 = capsys.readouterr().out
     assert str1.startswith(f"submitting '{tid}'")
+    assert task_status(r, tid) == TaskStatus.SUBMITTED
