@@ -4,9 +4,10 @@ from operator import ior
 import click
 
 from hipercow import root
+from hipercow.configure import configure, unconfigure
 from hipercow.dide import auth as dide_auth
 from hipercow.task import TaskStatus, task_list, task_log, task_status
-from hipercow.task_create import task_create
+from hipercow.task_create import task_create_shell
 from hipercow.task_eval import task_eval
 
 
@@ -20,6 +21,44 @@ def cli():
 @click.argument("path")
 def init(path: str):
     root.init(path)
+
+
+@cli.group()
+def driver():
+    pass  # pragma: no cover
+
+
+@driver.command("configure")
+@click.argument("name")
+def cli_driver_configure(name: str):
+    # For now, there are no arguments to drivers so this is easy.
+    # However, we will want to be able to pass in generic key/value
+    # pairs eventually, and ideally the driver will tell us what these
+    # are.
+    #
+    # Some options to support this might be:
+    # https://www.zonca.dev/posts/2022-10-26-click-commandline-class-arguments
+    # https://stackoverflow.com/q/36513706 (old)
+    #
+    # For now, let's just have it on/off.
+    r = root.open_root()
+    configure(r, name)
+
+
+@driver.command("unconfigure")
+@click.argument("name")
+def cli_driver_unconfigure(name: str):
+    r = root.open_root()
+    unconfigure(r, name)
+
+
+@driver.command("list")
+def cli_driver_list():
+    drivers = root.open_root().list_drivers()
+    if drivers:
+        click.echo("\n".join([str(d) for d in drivers]))
+    else:
+        click.echo("(none)")
 
 
 @cli.group()
@@ -58,8 +97,7 @@ def cli_task_list(with_status=None):
 @click.argument("cmd", nargs=-1)
 def cli_task_create(cmd: tuple[str]):
     r = root.open_root()
-    data = {"cmd": list(cmd)}
-    task_id = task_create(r, "shell", data, {})
+    task_id = task_create_shell(r, list(cmd))
     click.echo(task_id)
 
 

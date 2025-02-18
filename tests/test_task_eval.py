@@ -11,7 +11,7 @@ def test_can_set_task_status(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     with transient_working_directory(tmp_path):
-        tid = tc.task_create_shell(["echo", "hello world"])
+        tid = tc.task_create_shell(r, ["echo", "hello world"])
     assert task_status(r, tid) == TaskStatus.CREATED
     task_eval(r, tid)
     assert task_status(r, tid) == TaskStatus.SUCCESS
@@ -21,7 +21,7 @@ def test_cant_run_complete_task(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     with transient_working_directory(tmp_path):
-        tid = tc.task_create_shell(["echo", "hello world"])
+        tid = tc.task_create_shell(r, ["echo", "hello world"])
     task_eval(r, tid)
     msg = f"Can't run '{tid}', which has status 'success'"
     with pytest.raises(Exception, match=msg):
@@ -32,7 +32,7 @@ def test_can_capture_output_to_auto_file(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     with transient_working_directory(tmp_path):
-        tid = tc.task_create_shell(["echo", "hello world"])
+        tid = tc.task_create_shell(r, ["echo", "hello world"])
     task_eval(r, tid, capture=True)
 
     path = r.path_task_log(tid)

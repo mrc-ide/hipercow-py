@@ -45,7 +45,7 @@ path = "src/hipercow/__about__.py"
 dependencies = [
   "pytest",
   "pytest-cov",
-  "pytest-mock",  
+  "pytest-mock",
   "responses",
 ]
 [tool.hatch.envs.default.scripts]

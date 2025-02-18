@@ -31,7 +31,7 @@ def test_can_set_task_status(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     with transient_working_directory(tmp_path):
-        tid = tc.task_create_shell(["echo", "hello world"])
+        tid = tc.task_create_shell(r, ["echo", "hello world"])
     assert task_status(r, tid) == TaskStatus.CREATED
     set_task_status(r, tid, TaskStatus.RUNNING)
     assert task_status(r, tid) == TaskStatus.RUNNING
@@ -61,7 +61,7 @@ def test_read_task_info(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     with transient_working_directory(tmp_path):
-        tid = tc.task_create_shell(["echo", "hello world"])
+        tid = tc.task_create_shell(r, ["echo", "hello world"])
     info = task_info(r, tid)
     assert info.status == TaskStatus.CREATED
     assert info.data == TaskData.read(r, tid)
@@ -83,7 +83,7 @@ def test_that_can_read_info_for_completed_task(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     with transient_working_directory(tmp_path):
-        tid = tc.task_create_shell(["echo", "hello world"])
+        tid = tc.task_create_shell(r, ["echo", "hello world"])
         task_eval(r, tid)
         info = task_info(r, tid)
     assert info.status == TaskStatus.SUCCESS
@@ -99,10 +99,10 @@ def test_can_list_tasks(tmp_path):
     r = root.open_root(tmp_path)
     assert task_list(r) == []
     with transient_working_directory(tmp_path):
-        t1 = tc.task_create_shell(["echo", "hello world"])
+        t1 = tc.task_create_shell(r, ["echo", "hello world"])
     assert task_list(r) == [t1]
     with transient_working_directory(tmp_path):
-        t2 = tc.task_create_shell(["echo", "hello world"])
+        t2 = tc.task_create_shell(r, ["echo", "hello world"])
     assert set(task_list(r)) == {t1, t2}
 
 
@@ -110,7 +110,7 @@ def test_can_list_tasks_by_status(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     with transient_working_directory(tmp_path):
-        ids = [tc.task_create_shell(["true"]) for _ in range(5)]
+        ids = [tc.task_create_shell(r, ["true"]) for _ in range(5)]
     # 0 is CREATED
     set_task_status(r, ids[1], TaskStatus.RUNNING)
     set_task_status(r, ids[2], TaskStatus.SUCCESS)

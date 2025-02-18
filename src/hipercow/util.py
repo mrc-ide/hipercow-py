@@ -11,7 +11,7 @@ def find_file_descend(filename, path):
     while path != root:
         attempt = path / filename
         if attempt.exists():
-            return attempt.parent.resolve()
+            return attempt.parent
         path = path.parent
 
     return None

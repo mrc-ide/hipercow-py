@@ -17,7 +17,7 @@ def test_can_create_batch_data():
     assert res["hipercow_root_drive"] == "Q:"
     assert res["hipercow_root_path"] == "/my/project"
     assert (
-        res["network_shares_create"] == r"net use \\wpia-hn\didehomes\bob Q: /y"
+        res["network_shares_create"] == r"net use Q: \\wpia-hn\didehomes\bob /y"
     )
     assert res["network_shares_delete"] == "net use Q: /delete /y"
 
@@ -29,7 +29,7 @@ def test_can_write_batch(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     with transient_working_directory(tmp_path):
-        tid = tc.task_create_shell(["echo", "hello world"])
+        tid = tc.task_create_shell(r, ["echo", "hello world"])
 
     unc = batch.write_batch_task_run(tid, path_map, r)
     path_rel = f"hipercow/tasks/{tid[:2]}/{tid[2:]}/task_run.bat"

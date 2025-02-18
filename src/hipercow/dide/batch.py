@@ -14,7 +14,7 @@ ECHO generated on date: ${date}
 ECHO hipercow(py) version: ${hipercow_version}
 ECHO running on: %COMPUTERNAME%
 
-net use I: \\\\wpia-hn\\hipercow
+net use I: \\\\wpia-hn\\hipercow /y
 
 ${network_shares_create}
 
@@ -28,7 +28,7 @@ set REDIS_URL=10.0.2.254
 
 ECHO this is a single task
 
-I:\\py\\hipercow task eval --capture ${task_id}
+I:\\bootstrap-py\\python-311\\bin\\hipercow task eval --capture ${task_id}
 
 @ECHO off
 set ErrorCodeTask=%ERRORLEVEL%
@@ -90,7 +90,7 @@ def _template_data_task_run(task_id, path_map: PathMap) -> dict:
     root_drive = path_map.remote
     root_path = "/" + path_map.relative
 
-    network_shares_create = f"net use {unc_path} {root_drive} /y"
+    network_shares_create = f"net use {root_drive} {unc_path} /y"
     network_shares_delete = f"net use {root_drive} /delete /y"
 
     return {
