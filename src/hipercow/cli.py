@@ -9,6 +9,7 @@ from hipercow.dide import auth as dide_auth
 from hipercow.task import TaskStatus, task_list, task_log, task_status
 from hipercow.task_create import task_create_shell
 from hipercow.task_eval import task_eval
+from hipercow.environments.pip import PipSource, PipVenv
 
 
 @click.group()
@@ -130,3 +131,47 @@ def cli_dide_authenticate(clear, check):
         dide_auth.clear()
     else:
         dide_auth.authenticate()
+
+
+@cli.group()
+def environment():
+    pass  # pragma: no cover
+
+
+@environment.command("list")
+def cli_environment_list():
+    envs = root.open_root().environment_list()
+    click.echo("\n".join(envs) if envs else "(none)")
+
+
+# Modified from https://stackoverflow.com/a/65744803, but this is
+# still quite gross, and I am not really sure that this is the best
+# way as we have to access the final order via the context and ignore
+# the actually provided list.
+class OrderedParamsCommand(click.Command):
+    def parse_args(self, ctx, args):
+        self.ordered_args = []
+        parser = self.make_parser(ctx)
+        opts, _, param_order = parser.parse_args(args=list(args))
+        for param in param_order:
+            if param.multiple:
+                self.ordered_args.append((param, opts[param.name].pop(0)))
+
+        return super().parse_args(ctx, args)
+
+
+@environment.command("create-pip", cls=OrderedParamsCommand)
+@click.option("--requirements", multiple=True)
+@click.option("--path", multiple=True)
+@click.pass_context
+def cli_environment_create_pip(ctx, requirements, path):
+    sources = []
+    for mode, value in ctx.command.ordered_args:
+        if mode.name == "requirements":
+            sources.append(PipSource.requirements(value))
+        else:
+            sources.append(PipSource.path(value))
+
+    if not sources:
+        msg = "At least one '--requirements' or '--path' argument is required"
+        raise Exception(msg)

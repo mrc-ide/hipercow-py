@@ -91,7 +91,7 @@ class Root:
         return self.load_driver(candidates[0])
 
     def path_environment(self, name: str) -> Path:
-        return self.path / "environments" / name
+        return self.path / "hipercow" / "environments" / name
 
 
 def open_root(path: None | str | Path = None) -> Root:
