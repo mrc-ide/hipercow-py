@@ -5,7 +5,23 @@ from typing import Self
 
 from hipercow.environments.base import Environment
 
-
+# There are really two bits here - one to create a virtualenv, and the
+# other to add things to it.  We mix them together here for now but
+# we'll likely change this later.  We also need to consider things
+# like which python versions are being invoked and that's not totally
+# straightforward.
+#
+# We'll likely end up with something pretty similar for conda I
+# imagine?  We might need to distinguish between (mini)?(conda|mamba)
+# but it's not clear how much these differences matter to most
+#
+# Finally, we might have software made available globally - these are
+# the modules in the linux version and outr batch files in windows.
+# Probably these will represent only a small subset of software
+# though, mostly concerned with bootstrapping. We should check with
+# bioinformatics users about preferences for installing tools via
+# conda vs having them available (e.g., via easybuild).  My guess is
+# the former though.
 @dataclass
 class PipSource:
     mode: str
@@ -15,12 +31,12 @@ class PipSource:
     @staticmethod
     def requirements(path: str="requirements.txt") -> Self:
         data = {"path": path}
-        return PipSource("requirements", data, ["-r", path])
+        return PipSource("requirements", data, ["pip", "install", "-r", path])
 
     @staticmethod
     def path(path: str=".") -> Self:
         data = {"path": path}
-        return PipSource("path", data, [path])
+        return PipSource("path", data, ["pip", "install", path])
 
     def __str__(self) -> str:
         data_str = ", ".join(f"{k}={v}" for k, v in self.data.items())
@@ -37,18 +53,18 @@ class PipVenv(Environment):
     # --upgrade-strategy, and -e which are going to be hard to sort
     # out.  Let's do a single one for now and then we'll allow for
     # arbitrary subsequent installation _into_ an environment.
-    def __init__(self, sources: PipSource | list[PipSource]):
-        if isinstance(sources, PipSource):
-            sources = [sources]
-        elif len(sources) == 0:
-            msg = "At least one source required"
-            raise Exception(msg)
-        self._sources = sources
+    #
+    # We'll need to broaden this to accept additional pip cli args,
+    # most likely, and we could eventually support a series of
+    # commands. I did try that way first but it's hard to get through
+    # the cli interface, and so probably needs thinking about more
+    # carefully, really.
+    def __init__(self, *, requirements: str | None=None, path: str | None=None):
+        self._source = _pip_source(requirements=requirements, path=path)
 
     def describe(self):
-        print("Pip installation:")
-        for el in self._sources:
-            print(str(el))
+        print(f"Pip installation:")
+        print(self._source)
 
     def path(self, name: str) -> Path:
         return (
@@ -78,5 +94,22 @@ class PipVenv(Environment):
         else:
             return [".", str(p / "bin" / "activate")]
 
-    def install(self) -> list[list[str]]:
-        return [["pip", "install"] + el.args for el in self._sources]
+    def install(self) -> list[str]:
+        return self._source.args
+
+
+# This will probably need considerable tweaking over time, but it
+# should do for now.
+def _pip_source(**kwargs):
+    given = {k: v for k, v in kwargs.items() if v is not None}
+    if len(given) == 0:
+        msg = "Missing option to install from pip"
+        raise Exception(msg)
+    if len(given) > 1:
+        msg = "More than one option provided to install from pip"
+        raise Exception(msg)
+    mode, value = given.popitem()
+    if mode == "requirements":
+        return PipSource.requirements(value)
+    else:
+        return PipSource.path(value)
