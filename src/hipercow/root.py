@@ -61,6 +61,12 @@ class Root:
     def path_configuration(self, name: str) -> Path:
         return self.path / "hipercow" / "config" / name
 
+    def path_environment(self, name: str) -> Path:
+        return self.path / "hipercow" / "environments" / name
+
+    def path_environment_config(self, name: str) -> Path:
+        return self.path / "hipercow" / "environments" / name / "config"
+
     def load_driver(
         self, driver: str | None, *, allow_none: bool = False
     ) -> Any:

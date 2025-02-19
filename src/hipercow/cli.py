@@ -6,6 +6,11 @@ import click
 from hipercow import root
 from hipercow.configure import configure, unconfigure
 from hipercow.dide import auth as dide_auth
+from hipercow.environment import (
+    environment_create,
+    environment_list,
+    environment_provision,
+)
 from hipercow.task import TaskStatus, task_list, task_log, task_status
 from hipercow.task_create import task_create_shell
 from hipercow.task_eval import task_eval
@@ -130,3 +135,29 @@ def cli_dide_authenticate(clear, check):
         dide_auth.clear()
     else:
         dide_auth.authenticate()
+
+
+@cli.group()
+def environment():
+    pass  # pragma: no cover
+
+
+@environment.command("list")
+def cli_environment_list():
+    envs = environment_list(root.open_root())
+    click.echo("\n".join(envs))
+
+
+@environment.command("create")
+@click.argument("name")
+def cli_environment_create(name: str):
+    # Soon, allow args mode, force, clean here
+    r = root.open_root()
+    environment_create(r, name, "pip")
+
+
+@environment.command("create")
+@click.argument("name")
+def cli_environment_provision(name: str):
+    r = root.open_root()
+    environment_provision(r, name)

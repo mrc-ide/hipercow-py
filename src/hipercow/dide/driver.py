@@ -33,3 +33,6 @@ class DideDriver(HipercowDriver):
         cl.login()
         unc = write_batch_task_run(task_id, self.config.path_map, root)
         cl.submit(unc, task_id)
+
+    def proivision(self, root: Root, name: str) -> None:
+        raise NotImplementedError()

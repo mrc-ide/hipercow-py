@@ -12,3 +12,6 @@ class HipercowDriver(ABC):
 
     def submit(self, task_id: str, root: Root) -> None:
         pass  # pragma: no cover
+
+    def provision(self, root: Root, name: str, cmd: list[str] | None) -> None:
+        pass  # pragma: no cover
