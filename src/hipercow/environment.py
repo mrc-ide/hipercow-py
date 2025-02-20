@@ -102,9 +102,9 @@ class Pip(EnvironmentProvider):
     # hipercow provision [--name default] -- pip install .
     def _auto(self) -> list[str]:
         if Path("requirements.txt").exists():
-            return ["pip", "install", "-r", "requirements.txt"]
+            return ["pip", "install", "--verbose", "-r", "requirements.txt"]
         if Path("pyproject.toml").exists():
-            return ["pip", "install", "."]
+            return ["pip", "install", "--verbose", "."]
         msg = "Can't run determine install command"
         raise Exception(msg)
 
@@ -130,7 +130,9 @@ class EnvironmentConfiguration:
     # the instance itself and only the configuration. Ignore this for
     # now, even though this will create versioning headaches for us.
     def write(self, root: Root, name: str):
-        with root.path_environment_config(name).open("wb") as f:
+        path = root.path_environment_config(name)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("wb") as f:
             pickle.dump(self, f)
 
     @staticmethod

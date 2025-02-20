@@ -162,6 +162,5 @@ def cli_environment_create(name: str):
 @click.option("--name")
 @click.argument("cmd", nargs=-1, type=click.UNPROCESSED)
 def cli_environment_provision(name: str | None, cmd: tuple[str]):
-    breakpoint()
     r = root.open_root()
     environment_provision(r, name, list(cmd))

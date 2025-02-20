@@ -31,7 +31,9 @@ def load_driver(
         return pickle.load(f)
 
 
-def _default_driver(root: Root, *, allow_none: bool = False) -> HipercowDriver | None:
+def _default_driver(
+    root: Root, *, allow_none: bool = False
+) -> HipercowDriver | None:
     candidates = root.list_drivers()
     n = len(candidates)
     if n == 0:
