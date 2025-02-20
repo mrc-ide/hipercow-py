@@ -2,6 +2,7 @@ import pytest
 
 from hipercow import root
 from hipercow.configure import _write_configuration, configure, unconfigure
+from hipercow.driver import load_driver
 from hipercow.example import ExampleDriver
 
 
@@ -10,11 +11,11 @@ def test_no_drivers_are_available_by_default(tmp_path):
     root.init(path)
     r = root.open_root(path)
     assert r.list_drivers() == []
-    assert r.load_driver(None, allow_none=True) is None
+    assert load_driver(r, None, allow_none=True) is None
     with pytest.raises(Exception, match="No driver configured"):
-        r.load_driver(None)
-    with pytest.raises(Exception, match="No such configuration 'example'"):
-        r.load_driver("example")
+        load_driver(r, None)
+    with pytest.raises(Exception, match="No such driver 'example'"):
+        load_driver(r, "example")
 
 
 def test_can_configure_driver(tmp_path):
@@ -23,7 +24,7 @@ def test_can_configure_driver(tmp_path):
     r = root.open_root(path)
     configure(r, "example")
     assert r.list_drivers() == ["example"]
-    assert isinstance(r.load_driver(None), ExampleDriver)
+    assert isinstance(load_driver(r, None), ExampleDriver)
 
 
 def test_can_unconfigure_driver(tmp_path):
@@ -70,4 +71,4 @@ def test_get_default_driver(tmp_path):
     _write_configuration(r, a)
     _write_configuration(r, b)
     with pytest.raises(Exception, match="More than one candidate driver"):
-        r.load_driver(None)
+        load_driver(r, None)

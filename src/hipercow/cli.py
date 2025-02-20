@@ -156,8 +156,12 @@ def cli_environment_create(name: str):
     environment_create(r, name, "pip")
 
 
-@environment.command("create")
-@click.argument("name")
-def cli_environment_provision(name: str):
+@environment.command(
+    "provision", context_settings={"ignore_unknown_options": True}
+)
+@click.option("--name")
+@click.argument("cmd", nargs=-1, type=click.UNPROCESSED)
+def cli_environment_provision(name: str | None, cmd: tuple[str]):
+    breakpoint()
     r = root.open_root()
-    environment_provision(r, name)
+    environment_provision(r, name, list(cmd))

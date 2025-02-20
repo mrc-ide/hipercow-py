@@ -1,5 +1,6 @@
 import secrets
 
+from hipercow.driver import load_driver
 from hipercow.root import Root
 from hipercow.task import TaskData, TaskStatus, set_task_status
 from hipercow.util import relative_workdir
@@ -40,6 +41,6 @@ def _new_task_id() -> str:
 
 
 def _submit_maybe(task_id: str, driver: str | None, root: Root) -> None:
-    if dr := root.load_driver(driver, allow_none=True):
+    if dr := load_driver(root, driver, allow_none=True):
         dr.submit(task_id, root)
         set_task_status(root, task_id, TaskStatus.SUBMITTED)

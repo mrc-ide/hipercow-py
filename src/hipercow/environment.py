@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
 
+from hipercow.driver import load_driver
 from hipercow.root import Root
 
 # Soon, we'll have some concept of configuration for our environments
@@ -27,18 +28,6 @@ class Platform:
     @staticmethod
     def local() -> "Platform":
         return Platform(platform.system().lower(), platform.python_version())
-
-
-# class Command:
-#     cmd: list[str]
-#     env: dict[str, str]
-
-#     def __init__(self, cmd: list[str], env: dict[str, str] | None = None):
-#         self.cmd = cmd
-#         self.env = env
-
-#     def run(self):
-#         subprocess.run(self.cmd, env=self.env, check=False)
 
 
 class EnvironmentProvider(ABC):
@@ -178,14 +167,25 @@ def environment_list(root: Root) -> list[str]:
     return [x.name for x in (root.path / "hipercow" / "environments").glob("*")]
 
 
-def environment_provision(root: Root, name: str, *, driver: str | None = None):
+def environment_provision(
+    root: Root,
+    name: str | None,
+    cmd: list[str] | None,
+    *,
+    driver: str | None = None,
+):
+    if name is None:
+        name = "default"
     path_config = root.path_environment_config(name)
     if not path_config.exists():
         msg = f"Environment '{name}' does not exist"
         raise Exception(msg)
 
-    dr = root.load_driver(driver, allow_none=False)
-    dr.provision(root, name)
+    dr = load_driver(root, driver, allow_none=True)
+    if dr is None:
+        msg = "Can't provision, no driver configured"
+        raise Exception(msg)
+    dr.provision(root, name, cmd)
 
 
 def _venv_bin_dir(system: str) -> str:
