@@ -35,4 +35,4 @@ class DideDriver(HipercowDriver):
         cl.submit(unc, task_id)
 
     def proivision(self, root: Root, name: str) -> None:
-        raise NotImplementedError()
+        raise NotImplementedError()  # pragma: no cover

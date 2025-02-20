@@ -14,12 +14,16 @@ from hipercow.environment import (
 from hipercow.util import file_create, transient_working_directory
 
 
-def test_create_pip_environment(tmp_path):
+def test_create_pip_environment(tmp_path, capsys):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     assert environment_list(r) == []
+    capsys.readouterr()
     environment_create(r, "default", "pip")
+    assert capsys.readouterr().out == "Creating environment 'default'\n"
     assert environment_list(r) == ["default"]
+    environment_create(r, "default", "pip")
+    assert capsys.readouterr().out == "Environment 'default' already exists\n"
 
 
 def test_require_pip_environment_provider(tmp_path):
@@ -67,6 +71,28 @@ def test_provision_with_example_driver(tmp_path, mocker):
     assert mock_run.mock_calls[1] == mock.call(
         ["pip", "install", "--verbose", "-r", "requirements.txt"],
         env=env,
+        check=True,
+    )
+
+
+def test_dont_create_on_second_provision(tmp_path, mocker):
+    root.init(tmp_path)
+    r = root.open_root(tmp_path)
+    file_create(r.path / "pyproject.toml")
+    configure(r, "example")
+    mock_run = mock.MagicMock()
+    mocker.patch("subprocess.run", mock_run)
+
+    environment_create(r, "default", "pip")
+    pr = Pip(r, Platform.local(), "default")
+    pr.path().mkdir(parents=True)
+
+    environment_provision(r, "default", [])
+    assert mock_run.call_count == 1
+
+    assert mock_run.mock_calls[0] == mock.call(
+        ["pip", "install", "--verbose", "."],
+        env=pr._envvars(),
         check=True,
     )
 

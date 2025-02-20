@@ -158,8 +158,8 @@ def environment_create(root: Root, name: str, provider: str) -> None:
         print(f"Creating environment '{name}'")
         EnvironmentConfiguration(provider).write(root, name)
     else:
-        # TODO: validate that config is the same by reading and comparing
-        # prev = EnvironmentConfiguration.read(name)
+        # Once we support multiple providers, or other configuration
+        # options, validate here that it has not changed.
         print(f"Environment '{name}' already exists")
 
 
@@ -171,13 +171,11 @@ def environment_list(root: Root) -> list[str]:
 
 def environment_provision(
     root: Root,
-    name: str | None,
+    name: str,
     cmd: list[str] | None,
     *,
     driver: str | None = None,
 ):
-    if name is None:
-        name = "default"
     path_config = root.path_environment_config(name)
     if not path_config.exists():
         msg = f"Environment '{name}' does not exist"
