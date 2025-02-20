@@ -26,10 +26,10 @@ def test_create_pip_environment(tmp_path, capsys):
     assert capsys.readouterr().out == "Environment 'default' already exists\n"
 
 
-def test_require_pip_environment_provider(tmp_path):
+def test_require_pip_environment_engine(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
-    with pytest.raises(Exception, match="Only the 'pip' provider is supported"):
+    with pytest.raises(Exception, match="Only the 'pip' engine is supported"):
         environment_create(r, "default", "conda")
 
 

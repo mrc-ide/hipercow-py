@@ -1,5 +1,5 @@
 from hipercow.driver import HipercowDriver
-from hipercow.environment import Platform, provider
+from hipercow.environment import Platform, engine
 from hipercow.root import Root
 from hipercow.util import transient_working_directory
 
@@ -15,7 +15,7 @@ class ExampleDriver(HipercowDriver):
 
     def provision(self, root: Root, name: str, cmd: list[str] | None) -> None:
         platform = Platform.local()
-        pr = provider(root, platform, name)
+        pr = engine(root, platform, name)
         if not pr.exists():
             pr.create()
         with transient_working_directory(root.path):
