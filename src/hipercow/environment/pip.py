@@ -19,7 +19,7 @@ class Pip(Environment):
     def _envvars(self) -> dict[str, str]:
         base = self.path()
         path_env = base / _venv_bin_dir(self.platform.system)
-        path = f"{path_env}{os.pathsep}{os.environ["PATH"]}"
+        path = f"{path_env}{os.pathsep}{os.environ['PATH']}"
         return {"VIRTUAL_ENV": str(base), "PATH": path}
 
     def create(self) -> None:
