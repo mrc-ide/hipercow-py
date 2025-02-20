@@ -2,7 +2,7 @@ import pytest
 
 from hipercow import root
 from hipercow.configure import _write_configuration, configure, unconfigure
-from hipercow.driver import load_driver
+from hipercow.driver import load_driver, load_driver_optional
 from hipercow.example import ExampleDriver
 
 
@@ -11,7 +11,7 @@ def test_no_drivers_are_available_by_default(tmp_path):
     root.init(path)
     r = root.open_root(path)
     assert r.list_drivers() == []
-    assert load_driver(r, None, allow_none=True) is None
+    assert load_driver_optional(r, None) is None
     with pytest.raises(Exception, match="No driver configured"):
         load_driver(r, None)
     with pytest.raises(Exception, match="No such driver 'example'"):

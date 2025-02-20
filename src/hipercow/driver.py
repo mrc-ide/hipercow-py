@@ -18,11 +18,23 @@ class HipercowDriver(ABC):
         pass  # pragma: no cover
 
 
-def load_driver(
-    root: Root, driver: str | None, *, allow_none: bool = False
+def load_driver(root: Root, driver: str | None) -> HipercowDriver:
+    dr = _load_driver(root, driver)
+    if not dr:
+        msg = "No driver configured"
+        raise Exception(msg)
+    return dr
+
+
+def load_driver_optional(
+    root: Root, driver: str | None
 ) -> HipercowDriver | None:
+    return _load_driver(root, driver)
+
+
+def _load_driver(root: Root, driver: str | None) -> HipercowDriver | None:
     if not driver:
-        return _default_driver(root, allow_none=allow_none)
+        return _default_driver(root)
     path = root.path_configuration(driver)
     if not path.exists():
         msg = f"No such driver '{driver}'"
@@ -31,15 +43,10 @@ def load_driver(
         return pickle.load(f)
 
 
-def _default_driver(
-    root: Root, *, allow_none: bool = False
-) -> HipercowDriver | None:
+def _default_driver(root: Root) -> HipercowDriver | None:
     candidates = root.list_drivers()
     n = len(candidates)
     if n == 0:
-        if not allow_none:
-            msg = "No driver configured"
-            raise Exception(msg)
         return None
     if n > 1:
         msg = "More than one candidate driver"

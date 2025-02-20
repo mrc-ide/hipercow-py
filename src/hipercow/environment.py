@@ -41,15 +41,15 @@ class EnvironmentProvider(ABC):
 
     @abstractmethod
     def path(self) -> Path:
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     def create(self) -> None:
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     def provision(self, cmd: list[str] | None) -> None:
-        pass
+        pass  # pragma: no cover
 
 
 class Pip(EnvironmentProvider):
@@ -101,11 +101,11 @@ class Pip(EnvironmentProvider):
     # hipercow provision [--name default] [--auto]
     # hipercow provision [--name default] -- pip install .
     def _auto(self) -> list[str]:
-        if Path("requirements.txt").exists():
-            return ["pip", "install", "--verbose", "-r", "requirements.txt"]
         if Path("pyproject.toml").exists():
             return ["pip", "install", "--verbose", "."]
-        msg = "Can't run determine install command"
+        if Path("requirements.txt").exists():
+            return ["pip", "install", "--verbose", "-r", "requirements.txt"]
+        msg = "Can't determine install command"
         raise Exception(msg)
 
     def _check_args(self, cmd: list[str] | None) -> list[str]:
@@ -144,7 +144,7 @@ class EnvironmentConfiguration:
 def provider(root: Root, platform: Platform, name: str) -> EnvironmentProvider:
     cfg = EnvironmentConfiguration.read(root, name)
     if cfg.provider != "pip":
-        raise NotImplementedError()
+        raise NotImplementedError()  # pragma: no cover
     return Pip(root, platform, name)
 
 
@@ -183,10 +183,7 @@ def environment_provision(
         msg = f"Environment '{name}' does not exist"
         raise Exception(msg)
 
-    dr = load_driver(root, driver, allow_none=True)
-    if dr is None:
-        msg = "Can't provision, no driver configured"
-        raise Exception(msg)
+    dr = load_driver(root, driver)
     dr.provision(root, name, cmd)
 
 

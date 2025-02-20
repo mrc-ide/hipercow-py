@@ -11,6 +11,7 @@ from hipercow.environment import (
     environment_list,
     environment_provision,
 )
+from hipercow.util import file_create, transient_working_directory
 
 
 def test_create_pip_environment(tmp_path):
@@ -21,11 +22,26 @@ def test_create_pip_environment(tmp_path):
     assert environment_list(r) == ["default"]
 
 
+def test_require_pip_environment_provider(tmp_path):
+    root.init(tmp_path)
+    r = root.open_root(tmp_path)
+    with pytest.raises(Exception, match="Only the 'pip' provider is supported"):
+        environment_create(r, "default", "conda")
+
+
 def test_throw_on_provision_if_no_driver(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     environment_create(r, "default", "pip")
-    with pytest.raises(Exception, match="Can't provision, no driver"):
+    with pytest.raises(Exception, match="No driver configured"):
+        environment_provision(r, "default", [])
+
+
+def test_throw_on_provision_if_no_environment(tmp_path):
+    root.init(tmp_path)
+    r = root.open_root(tmp_path)
+    configure(r, "example")
+    with pytest.raises(Exception, match="Environment 'default' does not exist"):
         environment_provision(r, "default", [])
 
 
@@ -53,3 +69,30 @@ def test_provision_with_example_driver(tmp_path, mocker):
         env=env,
         check=True,
     )
+
+
+def test_pip_can_detect_reasonable_install(tmp_path):
+    root.init(tmp_path)
+    r = root.open_root(tmp_path)
+    pr = Pip(r, Platform.local(), "default")
+    with transient_working_directory(tmp_path):
+        with pytest.raises(Exception, match="Can't determine install command"):
+            pr._check_args(None)
+        file_create(r.path / "requirements.txt")
+        assert pr._check_args(None) == [
+            "pip",
+            "install",
+            "--verbose",
+            "-r",
+            "requirements.txt",
+        ]
+        file_create(r.path / "pyproject.toml")
+        assert pr._check_args(None) == ["pip", "install", "--verbose", "."]
+        assert pr._check_args([]) == ["pip", "install", "--verbose", "."]
+        assert pr._check_args(["pip", "install", "."]) == [
+            "pip",
+            "install",
+            ".",
+        ]
+        with pytest.raises(Exception, match="Expected first element"):
+            assert pr._check_args(["install", "."])
