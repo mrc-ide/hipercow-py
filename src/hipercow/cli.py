@@ -149,9 +149,8 @@ def cli_environment_list():
 
 
 @environment.command("create")
-@click.argument("name")
+@click.option("--name", default="default")
 def cli_environment_create(name: str):
-    # Soon, allow args mode, force, clean here
     r = root.open_root()
     environment_create(r, name, "pip")
 
@@ -159,8 +158,8 @@ def cli_environment_create(name: str):
 @environment.command(
     "provision", context_settings={"ignore_unknown_options": True}
 )
-@click.option("--name")
+@click.option("--name", default="default")
 @click.argument("cmd", nargs=-1, type=click.UNPROCESSED)
-def cli_environment_provision(name: str | None, cmd: tuple[str]):
+def cli_environment_provision(name: str, cmd: tuple[str]):
     r = root.open_root()
     environment_provision(r, name, list(cmd))

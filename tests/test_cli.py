@@ -1,4 +1,5 @@
 from pathlib import Path
+from unittest import mock
 
 from click.testing import CliRunner
 
@@ -148,3 +149,42 @@ def test_can_configure_driver(tmp_path):
         res = runner.invoke(cli.cli_driver_list, [])
         assert res.exit_code == 0
         assert res.output == "(none)\n"
+
+
+def test_can_list_environments(tmp_path):
+    runner = CliRunner()
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        runner.invoke(cli.init, ".")
+        runner.invoke(cli.cli_driver_configure, ["example"])
+        res = runner.invoke(cli.cli_environment_create, [])
+        assert res.exit_code == 0
+        assert res.output == "Creating environment 'default'\n"
+        res = runner.invoke(cli.cli_environment_list, [])
+        assert res.exit_code == 0
+        assert res.output == "default\n"
+
+
+def test_can_provision_environment(tmp_path, mocker):
+    runner = CliRunner()
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        runner.invoke(cli.init, ".")
+        runner.invoke(cli.cli_environment_create, [])
+
+        mock_provision = mock.MagicMock()
+        mocker.patch("hipercow.cli.environment_provision", mock_provision)
+
+        res = runner.invoke(cli.cli_environment_provision, [])
+        assert res.exit_code == 0
+        assert mock_provision.call_count == 1
+        assert mock_provision.mock_calls[0] == mock.call(
+            mock.ANY, "default", []
+        )
+
+        res = runner.invoke(
+            cli.cli_environment_provision, ["--name=foo", "pip", "install", "."]
+        )
+        assert res.exit_code == 0
+        assert mock_provision.call_count == 2
+        assert mock_provision.mock_calls[1] == mock.call(
+            mock.ANY, "foo", ["pip", "install", "."]
+        )
