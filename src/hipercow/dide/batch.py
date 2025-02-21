@@ -63,6 +63,59 @@ if %TaskStatus% == 0 (
 )"""
 )
 
+PROVISION = Template(
+    """@echo off
+REM automatically generated
+ECHO generated on host: ${hostname}
+ECHO generated on date: ${date}
+ECHO hipercow(py) version: ${hipercow_version}
+ECHO running on: %COMPUTERNAME%
+
+net use I: \\\\wpia-hn\\hipercow /y
+
+${network_shares_create}
+
+${hipercow_root_drive}
+cd ${hipercow_root_path}
+ECHO working directory: %CD%
+
+ECHO this is a provisioning task
+
+[[call whatever we need here to do the installation]]
+
+@ECHO off
+set ErrorCodeTask=%ERRORLEVEL%
+
+@REM We could use hipercow here, I think
+if exist hipercow\\tasks\\${task_id_1}\\${task_id_2}\\status-success (
+  set TaskStatus=0
+) else (
+  set TaskStatus=1
+)
+
+ECHO ERRORLEVEL was %ErrorCodeTask%
+
+ECHO Cleaning up
+%SystemDrive%
+
+${network_shares_delete}
+
+net use I: /delete /y
+
+if %ErrorCodeTask% neq 0 (
+  ECHO Task failed catastrophically
+  EXIT /b %ErrorCodeTask%
+)
+
+if %TaskStatus% == 0 (
+  ECHO Task completed successfully!
+  ECHO Quitting
+) else (
+  ECHO Task did not complete successfully
+  EXIT /b 1
+)"""
+)
+
 
 # In a future version, we might prefer to use a configuration object,
 # perhaps extracted from the root, rather than the actual argument for
