@@ -58,7 +58,7 @@ def task_eval_shell(root: Root, data: TaskData, *, capture=False) -> TaskResult:
     env = os.environ | data.envvars
     path = root.path / data.path
     filename = root.path_task_log(data.task_id) if capture else None
-    res = engine(root, None, data.environment).run(
+    res = engine(root, data.environment).run(
         cmd, check=False, env=env, cwd=path, filename=filename
     )
     success = res.returncode == 0

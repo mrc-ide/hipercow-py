@@ -1,11 +1,14 @@
 import pickle
-from dataclasses import dataclass
+import secrets
+import time
+from dataclasses import dataclass, field
 
 from hipercow.driver import load_driver
 from hipercow.environment.base import Environment, Platform
 from hipercow.environment.empty import Empty
 from hipercow.environment.pip import Pip
 from hipercow.root import Root
+from hipercow.util import transient_working_directory
 
 
 @dataclass
@@ -27,12 +30,11 @@ class EnvironmentConfiguration:
             return pickle.load(f)
 
 
-def engine(root: Root, platform: Platform | None, name: str) -> Environment:
+def engine(root: Root, name: str) -> Environment:
     use_empty_environment = name == "empty" or (
         name == "default" and not environment_exists(root, name)
     )
-    if platform is None:
-        platform = Platform.local()
+    platform = Platform.local()
     if use_empty_environment:
         return Empty(root, platform, name)
     cfg = EnvironmentConfiguration.read(root, name)
@@ -72,6 +74,29 @@ def environment_check(root: Root, name: str | None) -> str:
     raise Exception(msg)
 
 
+def _new_provisioning_id() -> str:
+    return secrets.token_hex(8)
+
+
+@dataclass
+class ProvisioningData:
+    name: str
+    cmd: list[str] | None
+    id: str = field(default_factory=_new_provisioning_id, init=False)
+    time: float = field(default_factory=time.time, init=False)
+
+    def write(self, root: Root):
+        path = root.path_environment_provision_data(self.name, self.id)
+        path.parent.mkdir(parents=True, exist_ok=False)
+        with path.open("wb") as f:
+            pickle.dump(self, f)
+
+    @staticmethod
+    def read(root: Root, name: str, id: str) -> "ProvisioningData":
+        with root.path_environment_provision_data(name, id).open("rb") as f:
+            return pickle.load(f)
+
+
 def environment_provision(
     root: Root,
     name: str,
@@ -84,8 +109,20 @@ def environment_provision(
         msg = f"Environment '{name}' does not exist"
         raise Exception(msg)
 
+    data = ProvisioningData(name, cmd)
+    data.write(root)
+
     dr = load_driver(root, driver)
-    dr.provision(root, name, cmd)
+    dr.provision(root, name, data.id)
+
+
+def environment_provision_run(root: Root, name: str, id: str) -> None:
+    data = ProvisioningData.read(root, name, id)
+    env = engine(root, name)
+    with transient_working_directory(root.path):
+        if not env.exists():
+            env.create()
+        env.provision(data.cmd)
 
 
 def environment_exists(root: Root, name: str) -> bool:

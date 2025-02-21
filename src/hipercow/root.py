@@ -40,8 +40,11 @@ class Root:
 
         self.path = path
 
+    def path_base(self, *, relative: bool = False) -> Path:
+        return Path() if relative else self.path
+
     def path_task(self, task_id: str, *, relative: bool = False) -> Path:
-        base = Path() if relative else self.path
+        base = self.path_base(relative=relative)
         return base / "hipercow" / "tasks" / task_id[:2] / task_id[2:]
 
     def path_task_times(self, task_id: str) -> Path:
@@ -59,11 +62,25 @@ class Root:
     def path_configuration(self, name: str) -> Path:
         return self.path / "hipercow" / "config" / name
 
-    def path_environment(self, name: str) -> Path:
-        return self.path / "hipercow" / "environments" / name
+    def path_environment(self, name: str, *, relative: bool = False) -> Path:
+        base = self.path_base(relative=relative)
+        return base / "hipercow" / "environments" / name
 
     def path_environment_config(self, name: str) -> Path:
-        return self.path / "hipercow" / "environments" / name / "config"
+        return self.path_environment(name) / "config"
+
+    def path_environment_provision(
+        self, name: str, id: str, *, relative: bool = False
+    ) -> Path:
+        return self.path_environment(name, relative=relative) / "provision" / id
+
+    def path_environment_provision_data(
+        self, name: str, id: str, *, relative: bool = False
+    ) -> Path:
+        return (
+            self.path_environment_provision(name, id, relative=relative)
+            / "data"
+        )
 
     def list_drivers(self) -> list[str]:
         path = self.path / "hipercow" / "config"

@@ -16,7 +16,7 @@ class HipercowDriver(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
-    def provision(self, root: Root, name: str, cmd: list[str] | None) -> None:
+    def provision(self, root: Root, name: str, id: str) -> None:
         pass  # pragma: no cover
 
 
