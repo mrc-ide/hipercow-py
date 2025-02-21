@@ -66,7 +66,7 @@ def environment_list(root: Root) -> list[str]:
 def environment_check(root: Root, name: str | None) -> str:
     if name is None:
         return "default"
-    if name == "empty" or name == "default" or environment_exists(root, name):
+    if name in {"empty", "default"} or environment_exists(root, name):
         return name
     msg = f"No such environment '{name}'"
     raise Exception(msg)

@@ -124,6 +124,7 @@ def test_pip_can_detect_reasonable_install(tmp_path):
         with pytest.raises(Exception, match="Expected first element"):
             assert pr._check_args(["install", "."])
 
+
 def test_environment_selection(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
