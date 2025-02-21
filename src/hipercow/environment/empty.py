@@ -7,20 +7,24 @@ from hipercow.util import subprocess_run
 
 
 class Empty(Environment):
-    def __init__(self, root: Root, platform: Platform, name: str):
-        super().__init__(root, platform, name)
+    def __init__(self, root: Root, name: str, platform: Platform | None = None):
+        super().__init__(root, name, platform)
 
     def exists(self) -> bool:
         return True
 
     def path(self) -> Path:
-        return self.root.path_environment(self.name)
+        msg = "The empty environment has no path"
+        raise Exception(msg)
 
-    def create(self, **kwargs) -> None:
-        pass
+    def create(self, **kwargs) -> None:  # noqa: ARG002
+        msg = "Can't create the empty environment!"
+        raise Exception(msg)
 
-    def provision(self, cmd: list[str] | None, **kwargs) -> None:
-        msg = "Can't provision an empty environment!"
+    def provision(
+        self, cmd: list[str] | None, **kwargs  # noqa: ARG002
+    ) -> None:
+        msg = "Can't provision the empty environment!"
         raise Exception(msg)
 
     # These "unused argument" errors from ruff are probably a bug?

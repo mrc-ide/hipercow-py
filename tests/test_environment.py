@@ -1,3 +1,4 @@
+import time
 from unittest import mock
 
 import pytest
@@ -11,7 +12,12 @@ from hipercow.environment import (
     environment_create,
     environment_list,
 )
-from hipercow.environment.provision import environment_provision
+from hipercow.environment.provision import (
+    ProvisioningResult,
+    environment_provision,
+    environment_provision_history,
+    environment_provision_run,
+)
 from hipercow.util import file_create, transient_working_directory
 
 
@@ -61,20 +67,37 @@ def test_provision_with_example_driver(tmp_path, mocker):
     environment_create(r, "default", "pip")
     environment_provision(r, "default", [])
 
-    pr = Pip(r, Platform.local(), "default")
+    pr = Pip(r, "default")
     venv_path = str(pr.path())
     env = pr._envvars()
 
     assert mock_run.call_count == 2
     assert mock_run.mock_calls[0] == mock.call(
-        ["python", "-m", "venv", venv_path], check=True, stderr=mock.ANY, stdout=mock.ANY
+        ["python", "-m", "venv", venv_path],
+        check=True,
+        stderr=mock.ANY,
+        stdout=mock.ANY,
     )
     assert mock_run.mock_calls[1] == mock.call(
         ["pip", "install", "--verbose", "-r", "requirements.txt"],
         env=env,
         check=True,
-        stderr=mock.ANY, stdout=mock.ANY
+        stderr=mock.ANY,
+        stdout=mock.ANY,
     )
+
+    h = environment_provision_history(r, "default")
+    assert len(h) == 1
+    assert h[0].result.error is None
+
+    id = h[0].data.id
+    with pytest.raises(Exception, match="has already been run"):
+        environment_provision_run(r, "default", id)
+
+    r.path_environment_provision_result("default", id).unlink()
+    h2 = environment_provision_history(r, "default")
+    assert len(h) == 1
+    assert h2[0].result is None
 
 
 def test_dont_create_on_second_provision(tmp_path, mocker):
@@ -86,7 +109,7 @@ def test_dont_create_on_second_provision(tmp_path, mocker):
     mocker.patch("subprocess.run", mock_run)
 
     environment_create(r, "default", "pip")
-    pr = Pip(r, Platform.local(), "default")
+    pr = Pip(r, "default")
     pr.path().mkdir(parents=True)
 
     environment_provision(r, "default", [])
@@ -99,6 +122,35 @@ def test_dont_create_on_second_provision(tmp_path, mocker):
         stderr=mock.ANY,
         stdout=mock.ANY,
     )
+
+
+def test_record_provisioning_error(tmp_path, mocker):
+    root.init(tmp_path)
+    r = root.open_root(tmp_path)
+    file_create(r.path / "pyproject.toml")
+    configure(r, "example")
+    mock_run = mock.MagicMock(side_effect=Exception("some ghastly error"))
+    mocker.patch("subprocess.run", mock_run)
+
+    environment_create(r, "default", "pip")
+    pr = Pip(r, "default")
+    pr.path().mkdir(parents=True)
+
+    with pytest.raises(Exception, match="Provisioning failed"):
+        environment_provision(r, "default", [])
+    assert mock_run.call_count == 1
+
+    assert mock_run.mock_calls[0] == mock.call(
+        ["pip", "install", "--verbose", "."],
+        env=pr._envvars(),
+        check=True,
+        stderr=mock.ANY,
+        stdout=mock.ANY,
+    )
+
+    h = environment_provision_history(r, "default")
+    assert len(h) == 1
+    assert isinstance(h[0].result.error, Exception)
 
 
 def test_pip_can_detect_reasonable_install(tmp_path):

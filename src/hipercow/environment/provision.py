@@ -30,14 +30,12 @@ class ProvisioningData:
 
 @dataclass
 class ProvisioningResult:
-    data: ProvisioningData
     error: Exception | None
     start: float
     end: float = field(default_factory=time.time, init=False)
 
-    def write(self, root: Root) -> None:
-        data = self.data
-        path = root.path_environment_provision_result(data.name, data.id)
+    def write(self, root: Root, name: str, id: str) -> None:
+        path = root.path_environment_provision_result(name, id)
         with path.open("wb") as f:
             pickle.dump(self, f)
 
@@ -45,6 +43,21 @@ class ProvisioningResult:
     def read(root: Root, name: str, id: str) -> "ProvisioningResult":
         with root.path_environment_provision_result(name, id).open("rb") as f:
             return pickle.load(f)
+
+
+@dataclass
+class ProvisioningRecord:
+    data: ProvisioningData
+    result: ProvisioningResult | None
+
+    @staticmethod
+    def read(root: Root, name: str, id: str) -> "ProvisioningRecord":
+        data = ProvisioningData.read(root, name, id)
+        try:
+            result = ProvisioningResult.read(root, name, id)
+        except FileNotFoundError:
+            result = None
+        return ProvisioningRecord(data, result)
 
 
 def environment_provision(
@@ -78,18 +91,18 @@ def environment_provision_run(root: Root, name: str, id: str) -> None:
             env.create(filename=logfile)
         try:
             env.provision(data.cmd, filename=logfile)
-            ProvisioningResult(data, None, start).write(root)
+            ProvisioningResult(None, start).write(root, name, id)
         except Exception as e:
-            ProvisioningResult(data, e, start).write(root)
+            ProvisioningResult(e, start).write(root, name, id)
             msg = "Provisioning failed"
             raise Exception(msg) from e
 
 
 def environment_provision_history(
     root: Root, name: str
-) -> list[ProvisioningResult]:
+) -> list[ProvisioningRecord]:
     results = [
-        ProvisioningResult.read(root, name, x.name)
+        ProvisioningRecord.read(root, name, x.name)
         for x in (root.path_environment(name) / "provision").glob("*")
     ]
     results.sort(key=lambda x: x.data.time)

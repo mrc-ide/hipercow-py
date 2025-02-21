@@ -32,10 +32,10 @@ def engine(root: Root, name: str) -> Environment:
     )
     platform = Platform.local()
     if use_empty_environment:
-        return Empty(root, platform, name)
+        return Empty(root, name, platform)
     cfg = EnvironmentConfiguration.read(root, name)
     if cfg.engine == "pip":
-        return Pip(root, platform, name)
+        return Pip(root, name, platform)
 
     raise NotImplementedError()  # pragma: no cover
 

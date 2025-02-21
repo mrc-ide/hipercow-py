@@ -8,8 +8,8 @@ from hipercow.util import subprocess_run
 
 
 class Pip(Environment):
-    def __init__(self, root: Root, platform: Platform, name: str):
-        super().__init__(root, platform, name)
+    def __init__(self, root: Root, name: str, platform: Platform | None = None):
+        super().__init__(root, name, platform)
 
     def path(self) -> Path:
         return (
