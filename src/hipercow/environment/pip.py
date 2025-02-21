@@ -4,6 +4,7 @@ from pathlib import Path
 
 from hipercow.environment.base import Environment, Platform
 from hipercow.root import Root
+from hipercow.util import subprocess_run
 
 
 class Pip(Environment):
@@ -27,7 +28,7 @@ class Pip(Environment):
         # we assume that we have the correct version?  If we check
         # that the version here matches that in self.platform we're ok.
         cmd = ["python", "-m", "venv", str(self.path())]
-        subprocess.run(cmd, check=True)
+        subprocess_run(cmd, check=True)
 
     def _auto(self) -> list[str]:
         if Path("pyproject.toml").exists():
@@ -46,9 +47,18 @@ class Pip(Environment):
         return cmd
 
     def provision(self, cmd: list[str] | None) -> None:
-        env = self._envvars()
-        args = self._check_args(cmd)
-        subprocess.run(args, env=env, check=True)
+        self.run(self._check_args(cmd), check=True)
+
+    def run(
+        self,
+        cmd: list[str],
+        *,
+        filename: Path | None = None,
+        env: dict[str, str] | None = None,
+        **kwargs,
+    ) -> subprocess.CompletedProcess:
+        env = (env or {}) | self._envvars()
+        return subprocess_run(cmd, filename=filename, env=env, **kwargs)
 
 
 def _venv_bin_dir(system: str) -> str:

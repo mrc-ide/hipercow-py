@@ -1,4 +1,5 @@
 import platform
+import subprocess
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
@@ -37,4 +38,15 @@ class Environment(ABC):
 
     @abstractmethod
     def provision(self, cmd: list[str] | None) -> None:
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def run(
+        self,
+        cmd: list[str],
+        *,
+        filename: Path | None = None,
+        env: dict[str, str] | None = None,
+        **kwargs,
+    ) -> subprocess.CompletedProcess:
         pass  # pragma: no cover
