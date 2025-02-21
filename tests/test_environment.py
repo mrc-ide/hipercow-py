@@ -7,6 +7,7 @@ from hipercow.configure import configure
 from hipercow.environment import (
     Pip,
     Platform,
+    environment_check,
     environment_create,
     environment_list,
     environment_provision,
@@ -122,3 +123,27 @@ def test_pip_can_detect_reasonable_install(tmp_path):
         ]
         with pytest.raises(Exception, match="Expected first element"):
             assert pr._check_args(["install", "."])
+
+def test_environment_selection(tmp_path):
+    root.init(tmp_path)
+    r = root.open_root(tmp_path)
+    assert environment_check(r, "empty") == "empty"
+    assert environment_check(r, None) == "default"
+    assert environment_check(r, "default") == "default"
+    with pytest.raises(Exception, match="No such environment 'other'"):
+        environment_check(r, "other")
+
+    environment_create(r, "default", "pip")
+    assert environment_check(r, "empty") == "empty"
+    assert environment_check(r, None) == "default"
+    assert environment_check(r, "default") == "default"
+    with pytest.raises(Exception, match="No such environment 'other'"):
+        environment_check(r, "other")
+
+    environment_create(r, "other", "pip")
+    assert environment_check(r, "empty") == "empty"
+    assert environment_check(r, None) == "default"
+    assert environment_check(r, "default") == "default"
+    assert environment_check(r, "other") == "other"
+    with pytest.raises(Exception, match="No such environment 'other2'"):
+        environment_check(r, "other2")

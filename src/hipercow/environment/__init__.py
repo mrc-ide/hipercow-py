@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 from hipercow.driver import load_driver
 from hipercow.environment.base import Environment, Platform
+from hipercow.environment.empty import Empty
 from hipercow.environment.pip import Pip
 from hipercow.root import Root
 
@@ -26,11 +27,19 @@ class EnvironmentConfiguration:
             return pickle.load(f)
 
 
-def engine(root: Root, platform: Platform, name: str) -> Environment:
+def engine(root: Root, platform: Platform | None, name: str) -> Environment:
+    use_empty_environment = name == "empty" or (
+        name == "default" and not environment_exists(root, name)
+    )
+    if platform is None:
+        platform = Platform.local()
+    if use_empty_environment:
+        return Empty(root, platform, name)
     cfg = EnvironmentConfiguration.read(root, name)
-    if cfg.engine != "pip":
-        raise NotImplementedError()  # pragma: no cover
-    return Pip(root, platform, name)
+    if cfg.engine == "pip":
+        return Pip(root, platform, name)
+
+    raise NotImplementedError()  # pragma: no cover
 
 
 def environment_create(root: Root, name: str, engine: str) -> None:
@@ -54,6 +63,15 @@ def environment_list(root: Root) -> list[str]:
     return [x.name for x in (root.path / "hipercow" / "environments").glob("*")]
 
 
+def environment_check(root: Root, name: str | None) -> str:
+    if name is None:
+        return "default"
+    if name == "empty" or name == "default" or environment_exists(root, name):
+        return name
+    msg = f"No such environment '{name}'"
+    raise Exception(msg)
+
+
 def environment_provision(
     root: Root,
     name: str,
@@ -68,3 +86,7 @@ def environment_provision(
 
     dr = load_driver(root, driver)
     dr.provision(root, name, cmd)
+
+
+def environment_exists(root: Root, name: str) -> bool:
+    return root.path_environment(name).exists()
