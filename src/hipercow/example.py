@@ -1,5 +1,5 @@
 from hipercow.driver import HipercowDriver
-from hipercow.environment import environment_provision_run
+from hipercow.environment.provision import environment_provision_run
 from hipercow.root import Root
 
 

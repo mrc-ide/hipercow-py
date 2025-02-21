@@ -33,11 +33,11 @@ class Environment(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
-    def create(self) -> None:
+    def create(self, **kwargs) -> None:
         pass  # pragma: no cover
 
     @abstractmethod
-    def provision(self, cmd: list[str] | None) -> None:
+    def provision(self, cmd: list[str] | None, **kwargs) -> None:
         pass  # pragma: no cover
 
     @abstractmethod
@@ -45,7 +45,6 @@ class Environment(ABC):
         self,
         cmd: list[str],
         *,
-        filename: Path | None = None,
         env: dict[str, str] | None = None,
         **kwargs,
     ) -> subprocess.CompletedProcess:

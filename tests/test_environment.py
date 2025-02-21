@@ -10,8 +10,8 @@ from hipercow.environment import (
     environment_check,
     environment_create,
     environment_list,
-    environment_provision,
 )
+from hipercow.environment.provision import environment_provision
 from hipercow.util import file_create, transient_working_directory
 
 

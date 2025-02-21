@@ -43,7 +43,7 @@ def subprocess_run(
     if filename is None:
         return subprocess.run(cmd, **kwargs, check=check)
     else:
-        with filename.open("wb") as f:
+        with filename.open("ab") as f:
             return subprocess.run(
                 cmd, check=check, stderr=subprocess.STDOUT, stdout=f, **kwargs
             )

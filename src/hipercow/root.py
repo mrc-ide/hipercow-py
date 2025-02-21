@@ -64,7 +64,7 @@ class Root:
 
     def path_environment(self, name: str, *, relative: bool = False) -> Path:
         base = self.path_base(relative=relative)
-        return base / "hipercow" / "environments" / name
+        return base / "hipercow" / "env" / name
 
     def path_environment_config(self, name: str) -> Path:
         return self.path_environment(name) / "config"
@@ -74,12 +74,32 @@ class Root:
     ) -> Path:
         return self.path_environment(name, relative=relative) / "provision" / id
 
+    def path_environment_contents(
+        self, name: str, *, relative: bool = False
+    ) -> Path:
+        return self.path_environment(name, relative=relative) / "contents"
+
     def path_environment_provision_data(
         self, name: str, id: str, *, relative: bool = False
     ) -> Path:
         return (
             self.path_environment_provision(name, id, relative=relative)
             / "data"
+        )
+
+    def path_environment_provision_result(
+        self, name: str, id: str, *, relative: bool = False
+    ) -> Path:
+        return (
+            self.path_environment_provision(name, id, relative=relative)
+            / "result"
+        )
+
+    def path_environment_provision_log(
+        self, name: str, id: str, *, relative: bool = False
+    ) -> Path:
+        return (
+            self.path_environment_provision(name, id, relative=relative) / "log"
         )
 
     def list_drivers(self) -> list[str]:
