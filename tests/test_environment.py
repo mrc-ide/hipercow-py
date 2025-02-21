@@ -80,6 +80,12 @@ def test_provision_with_example_driver(tmp_path, mocker):
         stdout=mock.ANY,
     )
 
+    # A bit of a faff here as we set up some side effects:
+    h = environment_provision_history(root, "default")
+    id = h[0].id
+    ProvisioningResult(data, None, time.time()).write(root)
+    
+
 
 def test_dont_create_on_second_provision(tmp_path, mocker):
     root.init(tmp_path)

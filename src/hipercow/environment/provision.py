@@ -30,7 +30,6 @@ class ProvisioningData:
 
 @dataclass
 class ProvisioningResult:
-    data: ProvisioningData
     error: Exception | None
     start: float
     end: float = field(default_factory=time.time, init=False)
@@ -88,9 +87,16 @@ def environment_provision_run(root: Root, name: str, id: str) -> None:
 def environment_provision_history(
     root: Root, name: str
 ) -> list[ProvisioningResult]:
+    def read_result(id):
+        data = ProvisioningData.read(root, name, id)
+        try:
+            result = ProvisioningResult.read(root, name, id)
+        except:
+            result = None
+        return (data, result)
     results = [
-        ProvisioningResult.read(root, name, x.name)
+        read_result(x.name)
         for x in (root.path_environment(name) / "provision").glob("*")
     ]
-    results.sort(key=lambda x: x.data.time)
+    results.sort(key=lambda x: x[0].time)
     return results
