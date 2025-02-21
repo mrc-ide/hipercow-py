@@ -56,9 +56,7 @@ def environment_create(root: Root, name: str, engine: str) -> None:
 
 
 def environment_list(root: Root) -> list[str]:
-    # We'll possibly always have the 'none' environment, which will
-    # prevent any environment being selected?
-    return [x.name for x in (root.path / "hipercow" / "environments").glob("*")]
+    return [x.name for x in (root.path / "hipercow" / "env").glob("*")]
 
 
 def environment_check(root: Root, name: str | None) -> str:

@@ -66,6 +66,9 @@ def environment_provision(
 
 
 def environment_provision_run(root: Root, name: str, id: str) -> None:
+    if root.path_environment_provision_result(name, id).exists():
+        msg = "Provisioning task '{id}' for '{name}' has already been run"
+        raise Exception(msg)
     data = ProvisioningData.read(root, name, id)
     env = engine(root, name)
     logfile = root.path_environment_provision_log(name, id)

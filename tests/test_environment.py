@@ -67,12 +67,13 @@ def test_provision_with_example_driver(tmp_path, mocker):
 
     assert mock_run.call_count == 2
     assert mock_run.mock_calls[0] == mock.call(
-        ["python", "-m", "venv", venv_path], check=True
+        ["python", "-m", "venv", venv_path], check=True, stderr=mock.ANY, stdout=mock.ANY
     )
     assert mock_run.mock_calls[1] == mock.call(
         ["pip", "install", "--verbose", "-r", "requirements.txt"],
         env=env,
         check=True,
+        stderr=mock.ANY, stdout=mock.ANY
     )
 
 
@@ -95,6 +96,8 @@ def test_dont_create_on_second_provision(tmp_path, mocker):
         ["pip", "install", "--verbose", "."],
         env=pr._envvars(),
         check=True,
+        stderr=mock.ANY,
+        stdout=mock.ANY,
     )
 
 

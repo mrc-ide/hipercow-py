@@ -3,6 +3,7 @@ from pathlib import Path
 
 from hipercow.environment.base import Environment, Platform
 from hipercow.root import Root
+from hipercow.util import subprocess_run
 
 
 class Empty(Environment):
@@ -19,15 +20,15 @@ class Empty(Environment):
         pass
 
     def provision(self, cmd: list[str] | None, **kwargs) -> None:
-        pass
+        msg = "Can't provision an empty environment!"
+        raise Exception(msg)
 
     # These "unused argument" errors from ruff are probably a bug?
     def run(
         self,
-        cmd: list[str],  # noqa: ARG002
+        cmd: list[str],
         *,
-        env: dict[str, str] | None = None,  # noqa: ARG002
-        **kwargs,  # noqa: ARG002
+        env: dict[str, str] | None = None,
+        **kwargs,
     ) -> subprocess.CompletedProcess:
-        msg = "Can't provision an empty environment!"
-        raise Exception(msg)
+        return subprocess_run(cmd, env=env, **kwargs)
