@@ -3,6 +3,7 @@ import pickle
 import time
 from dataclasses import dataclass
 
+from hipercow.environment import engine
 from hipercow.root import Root
 from hipercow.task import (
     TaskData,
@@ -11,7 +12,6 @@ from hipercow.task import (
     set_task_status,
     task_status,
 )
-from hipercow.util import subprocess_run
 
 
 @dataclass
@@ -55,9 +55,11 @@ def task_eval_data(root: Root, data: TaskData, *, capture: bool) -> None:
 
 def task_eval_shell(root: Root, data: TaskData, *, capture=False) -> TaskResult:
     cmd = data.data["cmd"]
-    env = dict(os.environ, **data.envvars)
+    env = os.environ | data.envvars
     path = root.path / data.path
     filename = root.path_task_log(data.task_id) if capture else None
-    res = subprocess_run(cmd, check=False, env=env, cwd=path, filename=filename)
+    res = engine(root, None, data.environment).run(
+        cmd, check=False, env=env, cwd=path, filename=filename
+    )
     success = res.returncode == 0
     return TaskResult(data.task_id, success, None)
