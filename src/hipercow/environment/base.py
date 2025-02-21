@@ -20,10 +20,10 @@ class Platform:
 
 
 class Environment(ABC):
-    def __init__(self, root: Root, platform: Platform, name: str):
+    def __init__(self, root: Root, name: str, platform: Platform | None = None):
         self.root = root
-        self.platform = platform
         self.name = name
+        self.platform = platform or Platform.local()
 
     def exists(self) -> bool:
         return self.path().exists()

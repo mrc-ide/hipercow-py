@@ -61,19 +61,23 @@ def test_provision_with_example_driver(tmp_path, mocker):
     environment_create(r, "default", "pip")
     environment_provision(r, "default", [])
 
-    pr = Pip(r, Platform.local(), "default")
+    pr = Pip(r, "default")
     venv_path = str(pr.path())
     env = pr._envvars()
 
     assert mock_run.call_count == 2
     assert mock_run.mock_calls[0] == mock.call(
-        ["python", "-m", "venv", venv_path], check=True, stderr=mock.ANY, stdout=mock.ANY
+        ["python", "-m", "venv", venv_path],
+        check=True,
+        stderr=mock.ANY,
+        stdout=mock.ANY,
     )
     assert mock_run.mock_calls[1] == mock.call(
         ["pip", "install", "--verbose", "-r", "requirements.txt"],
         env=env,
         check=True,
-        stderr=mock.ANY, stdout=mock.ANY
+        stderr=mock.ANY,
+        stdout=mock.ANY,
     )
 
 
@@ -86,7 +90,7 @@ def test_dont_create_on_second_provision(tmp_path, mocker):
     mocker.patch("subprocess.run", mock_run)
 
     environment_create(r, "default", "pip")
-    pr = Pip(r, Platform.local(), "default")
+    pr = Pip(r, "default")
     pr.path().mkdir(parents=True)
 
     environment_provision(r, "default", [])
