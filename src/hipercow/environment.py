@@ -78,4 +78,4 @@ def environment_engine(root: Root, name: str) -> EnvironmentEngine:
         return Pip(root, name)
     elif cfg.engine == "empty":
         return Empty(root, name)
-    raise NotImplementedError()
+    raise NotImplementedError()  # pragma no cover

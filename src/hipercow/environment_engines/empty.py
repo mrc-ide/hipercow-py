@@ -17,6 +17,7 @@ class Empty(EnvironmentEngine):
         msg = "The empty environment has no path"
         raise Exception(msg)
 
+    # These "unused argument" errors from ruff are probably a bug?
     def create(self, **kwargs) -> None:  # noqa: ARG002
         msg = "Can't create the empty environment!"
         raise Exception(msg)
@@ -27,7 +28,6 @@ class Empty(EnvironmentEngine):
         msg = "Can't provision the empty environment!"
         raise Exception(msg)
 
-    # These "unused argument" errors from ruff are probably a bug?
     def run(
         self,
         cmd: list[str],
