@@ -1,4 +1,3 @@
-import time
 from unittest import mock
 
 import pytest
@@ -13,7 +12,6 @@ from hipercow.environment import (
     environment_list,
 )
 from hipercow.environment.provision import (
-    ProvisioningResult,
     environment_provision,
     environment_provision_history,
     environment_provision_run,

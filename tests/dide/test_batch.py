@@ -56,6 +56,6 @@ def test_can_write_provisioing_batch(tmp_path):
     id = "abcdef"
 
     unc = batch.write_batch_provision("example", id, path_map, r)
-    path_rel = f"hipercow/env/example/provision/abcdef/run.bat"
+    path_rel = "hipercow/env/example/provision/abcdef/run.bat"
     assert unc == f"//wpia-hn/didehomes/bob/my/project/{path_rel}"
     assert (r.path / path_rel).exists()
