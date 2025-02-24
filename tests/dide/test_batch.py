@@ -44,7 +44,7 @@ def test_can_create_provisioning_batch_data():
     core = batch._template_data_core(path_map)
     assert all(k in res.keys() for k in core.keys())
     extra = {k: v for k, v in res.items() if k not in core}
-    assert extra == {"name": "example", "provision_id": "abcde"}
+    assert extra == {"environment_name": "example", "provision_id": "abcde"}
 
 
 def test_can_write_provisioing_batch(tmp_path):

@@ -81,7 +81,7 @@ ECHO working directory: %CD%
 
 ECHO this is a provisioning task
 
-[[call whatever we need here to do the installation]]
+I:\\bootstrap-py\\python-311\\bin\\hipercow environment build --name ${environment_name} ${provision_id}
 
 @ECHO off
 %SystemDrive%
@@ -178,4 +178,4 @@ def _template_data_task_run(task_id, path_map: PathMap) -> dict[str, str]:
 def _template_data_provision(
     name: str, id: str, path_map: PathMap
 ) -> dict[str, str]:
-    return _template_data_core(path_map) | {"name": name, "provision_id": id}
+    return _template_data_core(path_map) | {"environment_name": name, "provision_id": id}
