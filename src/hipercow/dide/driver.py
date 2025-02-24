@@ -35,4 +35,13 @@ class DideDriver(HipercowDriver):
         cl.submit(unc, task_id)
 
     def provision(self, root: Root, name: str, id: str) -> None:
-        raise NotImplementedError()  # pragma: no cover
+        credentials = fetch_credentials()
+        cl = DideWebClient(credentials)
+        cl.login()
+        unc = write_batch_provision(name, id, self.config.path_map, root)
+        cl.submit(unc, f"{name}/{id}")
+        # Once we have support, we need to block here and stream logs,
+        # but that erquires getting the logwatch functionality ported
+        # over.
+        print("A provisioning task has been submitted")
+        print("Have a look at the web portal to keep track on progress")
