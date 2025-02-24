@@ -35,3 +35,27 @@ def test_can_write_batch(tmp_path):
     path_rel = f"hipercow/tasks/{tid[:2]}/{tid[2:]}/task_run.bat"
     assert unc == f"//wpia-hn/didehomes/bob/my/project/{path_rel}"
     assert (r.path / path_rel).exists()
+
+
+def test_can_create_provisioning_batch_data():
+    m = Mount("wpia-hn", "didehomes/bob", "/mnt/nethome")
+    path_map = PathMap(Path("some/path"), m, "Q:", "my/project")
+    res = batch._template_data_provision("example", "abcde", path_map)
+    core = batch._template_data_core(path_map)
+    assert all(k in res.keys() for k in core.keys())
+    extra = {k: v for k, v in res.items() if k not in core}
+    assert extra == {"name": "example", "provision_id": "abcde"}
+
+
+def test_can_write_provisioing_batch(tmp_path):
+    m = Mount("wpia-hn", "didehomes/bob", "/mnt/nethome")
+    path_map = PathMap(Path("some/path"), m, "Q:", "my/project")
+
+    root.init(tmp_path)
+    r = root.open_root(tmp_path)
+    id = "abcdef"
+
+    unc = batch.write_batch_provision("example", id, path_map, r)
+    path_rel = f"hipercow/env/example/provision/abcdef/run.bat"
+    assert unc == f"//wpia-hn/didehomes/bob/my/project/{path_rel}"
+    assert (r.path / path_rel).exists()

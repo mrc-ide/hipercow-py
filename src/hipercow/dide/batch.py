@@ -133,14 +133,16 @@ def write_batch_provision(
 ) -> str:
     data = _template_data_provision(name, provision_id, path_map)
     path = str(
-        root.path_environment(name, relative=True)
-        / "batch"
-        / f"{provision_id}.bat"
+        root.path_environment_provision(name, provision_id, relative=True)
+        / "run.bat"
     )
     path = path.replace("\\", "/")
     rel = path_map.relative
     unc = f"//{path_map.mount.host}/{path_map.mount.remote}/{rel}/{path}"
-    with (root.path / path).open("w") as f:
+
+    path_abs = root.path / path
+    path_abs.parent.mkdir(parents=True, exist_ok=True)
+    with (path_abs).open("w") as f:
         f.write(PROVISION.substitute(data))
     return unc
 
