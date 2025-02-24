@@ -3,8 +3,8 @@ from unittest import mock
 import pytest
 
 from hipercow import root
-from hipercow.environment_engines import Empty
 from hipercow.environment import environment_engine
+from hipercow.environment_engines import Empty
 
 
 def test_empty_environment_has_no_path_but_always_exists(tmp_path):
