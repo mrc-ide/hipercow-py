@@ -148,3 +148,16 @@ def test_can_configure_driver(tmp_path):
         res = runner.invoke(cli.cli_driver_list, [])
         assert res.exit_code == 0
         assert res.output == "(none)\n"
+
+
+def test_can_list_environments(tmp_path):
+    runner = CliRunner()
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        runner.invoke(cli.init, ".")
+        runner.invoke(cli.cli_driver_configure, ["example"])
+        res = runner.invoke(cli.cli_environment_new, [])
+        assert res.exit_code == 0
+        assert res.output == "Creating environment 'default' using 'pip'\n"
+        res = runner.invoke(cli.cli_environment_list, [])
+        assert res.exit_code == 0
+        assert res.output == "default\nempty\n"
