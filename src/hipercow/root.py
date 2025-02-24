@@ -1,6 +1,4 @@
-import pickle
 from pathlib import Path
-from typing import Any
 
 from hipercow.util import file_create, find_file_descend
 
@@ -60,35 +58,6 @@ class Root:
 
     def path_configuration(self, name: str) -> Path:
         return self.path / "hipercow" / "config" / name
-
-    def load_driver(
-        self, driver: str | None, *, allow_none: bool = False
-    ) -> Any:
-        if not driver:
-            return self._default_configuration(allow_none=allow_none)
-        path = self.path_configuration(driver)
-        if not path.exists():
-            msg = f"No such configuration '{driver}'"
-            raise Exception(msg)
-        with open(path, "rb") as f:
-            return pickle.load(f)
-
-    def list_drivers(self) -> list[str]:
-        path = self.path / "hipercow" / "config"
-        return [x.name for x in path.glob("*")]
-
-    def _default_configuration(self, *, allow_none: bool = False) -> Any:
-        candidates = self.list_drivers()
-        n = len(candidates)
-        if n == 0:
-            if not allow_none:
-                msg = "No driver configured"
-                raise Exception(msg)
-            return None
-        if n > 1:
-            msg = "More than one candidate driver"
-            raise Exception(msg)
-        return self.load_driver(candidates[0])
 
 
 def open_root(path: None | str | Path = None) -> Root:

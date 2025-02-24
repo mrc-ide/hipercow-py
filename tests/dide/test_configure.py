@@ -5,6 +5,7 @@ from hipercow.configure import configure
 from hipercow.dide.driver import DideConfiguration
 from hipercow.dide.mounts import Mount, remap_path
 from hipercow.dide.web import Credentials, DideWebClient
+from hipercow.driver import list_drivers, load_driver
 from hipercow.task_create import task_create_shell
 from hipercow.util import transient_working_directory
 
@@ -17,8 +18,8 @@ def test_can_configure_dide_mount(tmp_path, mocker):
     mocker.patch("hipercow.dide.driver.detect_mounts", return_value=mock_mounts)
     configure(r, "dide")
 
-    assert r.list_drivers() == ["dide"]
-    driver = r.load_driver("dide")
+    assert list_drivers(r) == ["dide"]
+    driver = load_driver(r, "dide")
     path_map = remap_path(path, mock_mounts)
     assert driver.config == DideConfiguration(path_map)
 

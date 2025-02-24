@@ -6,6 +6,7 @@ import click
 from hipercow import root
 from hipercow.configure import configure, unconfigure
 from hipercow.dide import auth as dide_auth
+from hipercow.driver import list_drivers
 from hipercow.task import TaskStatus, task_list, task_log, task_status
 from hipercow.task_create import task_create_shell
 from hipercow.task_eval import task_eval
@@ -54,7 +55,7 @@ def cli_driver_unconfigure(name: str):
 
 @driver.command("list")
 def cli_driver_list():
-    drivers = root.open_root().list_drivers()
+    drivers = list_drivers(root.open_root())
     if drivers:
         click.echo("\n".join([str(d) for d in drivers]))
     else:
