@@ -76,6 +76,26 @@ class Root:
     ) -> Path:
         return self.path_environment(name, relative=relative) / "contents"
 
+    def path_provision(
+        self, name: str, id: str, *, relative: bool = False
+    ) -> Path:
+        return self.path_environment(name, relative=relative) / "provision" / id
+
+    def path_provision_data(
+        self, name: str, id: str, *, relative: bool = False
+    ) -> Path:
+        return self.path_provision(name, id, relative=relative) / "data"
+
+    def path_provision_result(
+        self, name: str, id: str, *, relative: bool = False
+    ) -> Path:
+        return self.path_provision(name, id, relative=relative) / "result"
+
+    def path_provision_log(
+        self, name: str, id: str, *, relative: bool = False
+    ) -> Path:
+        return self.path_provision(name, id, relative=relative) / "log"
+
 
 def open_root(path: None | str | Path = None) -> Root:
     root = find_file_descend("hipercow", path or Path.cwd())
