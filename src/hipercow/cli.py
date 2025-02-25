@@ -8,6 +8,7 @@ from hipercow.configure import configure, unconfigure
 from hipercow.dide import auth as dide_auth
 from hipercow.driver import list_drivers
 from hipercow.environment import environment_list, environment_new
+from hipercow.provision import provision
 from hipercow.task import TaskStatus, task_list, task_log, task_status
 from hipercow.task_create import task_create_shell
 from hipercow.task_eval import task_eval
@@ -152,3 +153,13 @@ def cli_environment_list():
 def cli_environment_new(name: str, engine: str):
     r = root.open_root()
     environment_new(r, name, engine)
+
+
+@environment.command(
+    "provision", context_settings={"ignore_unknown_options": True}
+)
+@click.option("--name", default="default")
+@click.argument("cmd", nargs=-1, type=click.UNPROCESSED)
+def cli_environment_provision(name: str, cmd: tuple[str]):
+    r = root.open_root()
+    provision(r, name, list(cmd))

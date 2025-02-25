@@ -96,3 +96,12 @@ def provision_run(root: Root, name: str, id: str) -> None:
             ProvisioningResult(e, start).write(root, name, id)
             msg = "Provisioning failed"
             raise Exception(msg) from e
+
+
+def provision_history(root: Root, name: str) -> list[ProvisioningRecord]:
+    results = [
+        ProvisioningRecord.read(root, name, x.name)
+        for x in (root.path_environment(name) / "provision").glob("*")
+    ]
+    results.sort(key=lambda x: x.data.time)
+    return results
