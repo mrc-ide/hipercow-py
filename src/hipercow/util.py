@@ -37,11 +37,13 @@ def file_create(path: str | Path) -> None:
     Path(path).open("a").close()
 
 
-def subprocess_run(cmd, *, filename: Path | None = None, check=False, **kwargs):
+def subprocess_run(
+    cmd, *, filename: Path | None = None, check=False, **kwargs
+) -> subprocess.CompletedProcess:
     if filename is None:
         return subprocess.run(cmd, **kwargs, check=check)
     else:
-        with filename.open("wb") as f:
+        with filename.open("ab") as f:
             return subprocess.run(
                 cmd, check=check, stderr=subprocess.STDOUT, stdout=f, **kwargs
             )
