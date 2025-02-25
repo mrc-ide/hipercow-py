@@ -96,6 +96,7 @@ class TaskData:
     method: str  # shell etc
     data: dict
     path: str
+    environment: str
     envvars: dict[str, str]
 
     def write(self, root: Root):
