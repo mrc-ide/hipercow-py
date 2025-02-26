@@ -3,7 +3,7 @@ from pathlib import Path
 from click.testing import CliRunner
 
 from hipercow import cli, root, task
-from hipercow.task import TaskStatus
+from hipercow.task import TaskData, TaskStatus
 
 
 def test_can_init_repository(tmp_path):
@@ -161,3 +161,23 @@ def test_can_list_environments(tmp_path):
         res = runner.invoke(cli.cli_environment_list, [])
         assert res.exit_code == 0
         assert res.output == "default\nempty\n"
+
+
+def test_can_create_task_in_environment(tmp_path):
+    runner = CliRunner()
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        root.init(".")
+        r = root.open_root()
+
+        runner.invoke(cli.init, ".")
+        res = runner.invoke(cli.cli_environment_new, ["--name", "other"])
+        assert res.exit_code == 0
+
+        res = runner.invoke(
+            cli.cli_task_create,
+            ["echo", "hello", "world", "--environment", "other"],
+        )
+        assert res.exit_code == 0
+        task_id = res.stdout.strip()
+        data = TaskData.read(r, task_id)
+        assert data.environment == "other"

@@ -97,9 +97,10 @@ def cli_task_list(with_status=None):
 
 @task.command("create")
 @click.argument("cmd", nargs=-1)
-def cli_task_create(cmd: tuple[str]):
+@click.option("--environment", type=str)
+def cli_task_create(cmd: tuple[str], environment: str | None):
     r = root.open_root()
-    task_id = task_create_shell(r, list(cmd))
+    task_id = task_create_shell(r, list(cmd), environment=environment)
     click.echo(task_id)
 
 
