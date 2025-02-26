@@ -1,6 +1,11 @@
 import pickle
 from dataclasses import dataclass
 
+from hipercow.environment_engines import (
+    Empty,
+    EnvironmentEngine,
+    Pip,
+)
 from hipercow.root import Root
 
 
@@ -34,8 +39,8 @@ def environment_new(root: Root, name: str, engine: str) -> None:
         msg = f"Environment '{name}' already exists"
         raise Exception(msg)
 
-    if engine not in {"empty", "pip"}:
-        msg = "Only the 'empty' and 'pip' engines are supported"
+    if engine not in {"pip", "empty"}:
+        msg = "Only the 'pip' and 'empty' engines are supported"
         raise Exception(msg)
 
     print(f"Creating environment '{name}' using '{engine}'")
@@ -59,3 +64,18 @@ def environment_check(root: Root, name: str | None) -> str:
 
 def environment_exists(root: Root, name: str) -> bool:
     return root.path_environment(name).exists()
+
+
+def environment_engine(root: Root, name: str) -> EnvironmentEngine:
+    use_empty_environment = name == "empty" or (
+        name == "default" and not environment_exists(root, name)
+    )
+    if use_empty_environment:
+        cfg = EnvironmentConfiguration("empty")
+    else:
+        cfg = EnvironmentConfiguration.read(root, name)
+    if cfg.engine == "pip":
+        return Pip(root, name)
+    elif cfg.engine == "empty":
+        return Empty(root, name)
+    raise NotImplementedError()  # pragma no cover

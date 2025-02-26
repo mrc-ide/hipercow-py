@@ -69,6 +69,11 @@ class Root:
     def path_environment_config(self, name: str) -> Path:
         return self.path_environment(name) / "config"
 
+    def path_environment_contents(
+        self, name: str, *, relative: bool = False
+    ) -> Path:
+        return self.path_environment(name, relative=relative) / "contents"
+
 
 def open_root(path: None | str | Path = None) -> Root:
     root = find_file_descend("hipercow", path or Path.cwd())

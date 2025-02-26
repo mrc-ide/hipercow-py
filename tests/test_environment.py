@@ -49,5 +49,5 @@ def test_environment_selection(tmp_path):
 def test_require_pip_environment_engine(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
-    with pytest.raises(Exception, match="Only the 'empty' and 'pip'"):
+    with pytest.raises(Exception, match="Only the 'pip' and 'empty'"):
         environment_new(r, "default", "conda")
