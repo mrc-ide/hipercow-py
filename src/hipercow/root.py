@@ -1,3 +1,4 @@
+import platform
 from pathlib import Path
 
 from hipercow.util import file_create, find_file_descend
@@ -60,7 +61,8 @@ class Root:
         return self.path_task(task_id) / "log"
 
     def path_configuration(self, name: str) -> Path:
-        return self.path / "hipercow" / "config" / name
+        hostname = platform.node()
+        return self.path / "hipercow" / "config" / hostname / name
 
     def path_environment(self, name: str, *, relative: bool = False) -> Path:
         base = self.path_base(relative=relative)
