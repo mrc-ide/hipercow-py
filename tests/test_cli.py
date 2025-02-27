@@ -1,4 +1,5 @@
 from pathlib import Path
+from unittest import mock
 
 from click.testing import CliRunner
 
@@ -181,3 +182,29 @@ def test_can_create_task_in_environment(tmp_path):
         task_id = res.stdout.strip()
         data = TaskData.read(r, task_id)
         assert data.environment == "other"
+
+
+def test_can_provision_environment(tmp_path, mocker):
+    runner = CliRunner()
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        runner.invoke(cli.init, ".")
+        runner.invoke(cli.cli_environment_new, [])
+
+        mock_provision = mock.MagicMock()
+        mocker.patch("hipercow.cli.provision", mock_provision)
+
+        res = runner.invoke(cli.cli_environment_provision, [])
+        assert res.exit_code == 0
+        assert mock_provision.call_count == 1
+        assert mock_provision.mock_calls[0] == mock.call(
+            mock.ANY, "default", []
+        )
+
+        res = runner.invoke(
+            cli.cli_environment_provision, ["--name=foo", "pip", "install", "."]
+        )
+        assert res.exit_code == 0
+        assert mock_provision.call_count == 2
+        assert mock_provision.mock_calls[1] == mock.call(
+            mock.ANY, "foo", ["pip", "install", "."]
+        )

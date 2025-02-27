@@ -1,3 +1,4 @@
+import os
 from unittest import mock
 
 import pytest
@@ -49,5 +50,5 @@ def test_can_run_command_in_empty_env(tmp_path, mocker):
     env.run(["some", "command"])
     assert mock_run.call_count == 1
     assert mock_run.mock_calls[0] == mock.call(
-        ["some", "command"], env=None, check=False
+        ["some", "command"], env=os.environ, check=False
     )

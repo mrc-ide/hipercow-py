@@ -1,4 +1,3 @@
-import os
 import pickle
 import time
 from dataclasses import dataclass
@@ -55,7 +54,7 @@ def task_eval_data(root: Root, data: TaskData, *, capture: bool) -> None:
 
 def task_eval_shell(root: Root, data: TaskData, *, capture=False) -> TaskResult:
     cmd = data.data["cmd"]
-    env = os.environ | data.envvars
+    env = data.envvars
     path = root.path / data.path
     filename = root.path_task_log(data.task_id) if capture else None
     res = environment_engine(root, data.environment).run(
