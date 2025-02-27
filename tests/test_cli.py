@@ -208,3 +208,24 @@ def test_can_provision_environment(tmp_path, mocker):
         assert mock_provision.mock_calls[1] == mock.call(
             mock.ANY, "foo", ["pip", "install", "."]
         )
+
+
+def test_can_delete_environment(tmp_path):
+    runner = CliRunner()
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        runner.invoke(cli.init, ".")
+        runner.invoke(cli.cli_driver_configure, ["example"])
+        res = runner.invoke(cli.cli_environment_new, ["--name", "other"])
+        assert res.exit_code == 0
+        assert res.output == "Creating environment 'other' using 'pip'\n"
+
+        res = runner.invoke(cli.cli_environment_list, [])
+        assert res.exit_code == 0
+        assert res.output == "empty\nother\n"
+
+        res = runner.invoke(cli.cli_environment_delete, ["--name", "other"])
+        assert res.exit_code == 0
+
+        res = runner.invoke(cli.cli_environment_list, [])
+        assert res.exit_code == 0
+        assert res.output == "empty\n"
