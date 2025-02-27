@@ -34,6 +34,9 @@ class Pip(EnvironmentEngine):
         env: dict[str, str] | None = None,
         **kwargs,
     ) -> subprocess.CompletedProcess:
+        # If the user sets a PATH, this all goes wrong unfortunately.
+        # Later, we could inspect env for `PATH` and join these
+        # together nicely.
         env = (env or {}) | self._envvars()
         return subprocess_run(cmd, env=env, **kwargs)
 

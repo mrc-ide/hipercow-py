@@ -38,12 +38,23 @@ def file_create(path: str | Path) -> None:
 
 
 def subprocess_run(
-    cmd, *, filename: Path | None = None, check=False, **kwargs
+    cmd,
+    *,
+    filename: Path | None = None,
+    check=False,
+    env: dict | None = None,
+    **kwargs,
 ) -> subprocess.CompletedProcess:
+    env = os.environ | (env or {})
     if filename is None:
-        return subprocess.run(cmd, **kwargs, check=check)
+        return subprocess.run(cmd, **kwargs, check=check, env=env)
     else:
         with filename.open("ab") as f:
             return subprocess.run(
-                cmd, check=check, stderr=subprocess.STDOUT, stdout=f, **kwargs
+                cmd,
+                check=check,
+                env=env,
+                stderr=subprocess.STDOUT,
+                stdout=f,
+                **kwargs,
             )

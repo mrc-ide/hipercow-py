@@ -1,3 +1,4 @@
+import os
 from unittest import mock
 
 import pytest
@@ -28,13 +29,14 @@ def test_provision_with_example_driver(tmp_path, mocker):
     assert mock_run.call_count == 2
     assert mock_run.mock_calls[0] == mock.call(
         ["python", "-m", "venv", venv_path],
+        env=os.environ,
         check=True,
         stderr=mock.ANY,
         stdout=mock.ANY,
     )
     assert mock_run.mock_calls[1] == mock.call(
         ["pip", "install", "--verbose", "-r", "requirements.txt"],
-        env=env,
+        env=os.environ | env,
         check=True,
         stderr=mock.ANY,
         stdout=mock.ANY,
@@ -71,7 +73,7 @@ def test_dont_create_on_second_provision(tmp_path, mocker):
 
     assert mock_run.mock_calls[0] == mock.call(
         ["pip", "install", "--verbose", "."],
-        env=pr._envvars(),
+        env=os.environ | pr._envvars(),
         check=True,
         stderr=mock.ANY,
         stdout=mock.ANY,
@@ -96,7 +98,7 @@ def test_record_provisioning_error(tmp_path, mocker):
 
     assert mock_run.mock_calls[0] == mock.call(
         ["pip", "install", "--verbose", "."],
-        env=pr._envvars(),
+        env=os.environ | pr._envvars(),
         check=True,
         stderr=mock.ANY,
         stdout=mock.ANY,

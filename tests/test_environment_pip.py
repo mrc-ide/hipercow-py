@@ -1,3 +1,4 @@
+import os
 from unittest import mock
 
 import pytest
@@ -34,7 +35,7 @@ def test_pip_environment_can_be_created(tmp_path, mocker):
     env.create()
     assert mock_run.call_count == 1
     assert mock_run.mock_calls[0] == mock.call(
-        ["python", "-m", "venv", venv_path], check=True
+        ["python", "-m", "venv", venv_path], check=True, env=os.environ
     )
 
     with transient_working_directory(tmp_path):
@@ -42,7 +43,7 @@ def test_pip_environment_can_be_created(tmp_path, mocker):
         assert mock_run.call_count == 2
         assert mock_run.mock_calls[1] == mock.call(
             ["pip", "install", "--verbose", "-r", "requirements.txt"],
-            env=envvars,
+            env=os.environ | envvars,
             check=True,
         )
 
