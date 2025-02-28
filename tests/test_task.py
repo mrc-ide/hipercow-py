@@ -7,10 +7,12 @@ from hipercow.task import (
     TaskStatus,
     TaskTimes,
     set_task_status,
+    task_exists,
     task_info,
     task_list,
     task_log,
     task_status,
+    task_wait,
 )
 from hipercow.task_eval import task_eval
 from hipercow.util import transient_working_directory
@@ -32,6 +34,7 @@ def test_can_set_task_status(tmp_path):
     r = root.open_root(tmp_path)
     with transient_working_directory(tmp_path):
         tid = tc.task_create_shell(r, ["echo", "hello world"])
+    assert task_exists(r, tid)
     assert task_status(r, tid) == TaskStatus.CREATED
     set_task_status(r, tid, TaskStatus.RUNNING)
     assert task_status(r, tid) == TaskStatus.RUNNING
@@ -43,13 +46,14 @@ def test_that_missing_tasks_have_missing_status(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     assert task_status(r, "a" * 32) == TaskStatus.MISSING
+    assert not task_exists(r, "a" * 32)
 
 
 def test_that_missing_tasks_error_on_log_read(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     task_id = "a" * 32
-    with pytest.raises(Exception, match="Task log for '.+' does not exist"):
+    with pytest.raises(Exception, match="Task '.+' does not exist"):
         task_log(r, task_id)
 
 
@@ -126,3 +130,21 @@ def test_can_list_tasks_by_status(tmp_path):
     assert set(
         task_list(r, with_status=TaskStatus.SUCCESS | TaskStatus.RUNNING)
     ) == {ids[1], ids[2], ids[3]}
+
+
+def test_can_wait_on_completed_task(tmp_path):
+    root.init(tmp_path)
+    r = root.open_root(tmp_path)
+    with transient_working_directory(tmp_path):
+        tid = tc.task_create_shell(r, ["echo", "hello world"])
+        task_eval(r, tid)
+    assert task_wait(r, tid)
+
+
+def test_refuse_to_wait_for_created_task(tmp_path):
+    root.init(tmp_path)
+    r = root.open_root(tmp_path)
+    with transient_working_directory(tmp_path):
+        tid = tc.task_create_shell(r, ["echo", "hello world"])
+    with pytest.raises(Exception, match="Cannot wait .+ not been submitted"):
+        task_wait(r, tid)
