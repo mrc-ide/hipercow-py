@@ -12,7 +12,7 @@ from hipercow.task import (
     task_list,
     task_log,
     task_status,
-    task_wait
+    task_wait,
 )
 from hipercow.task_eval import task_eval
 from hipercow.util import transient_working_directory
