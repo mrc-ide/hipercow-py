@@ -12,6 +12,7 @@ from hipercow.task import (
     task_list,
     task_log,
     task_status,
+    task_wait
 )
 from hipercow.task_eval import task_eval
 from hipercow.util import transient_working_directory
@@ -129,3 +130,21 @@ def test_can_list_tasks_by_status(tmp_path):
     assert set(
         task_list(r, with_status=TaskStatus.SUCCESS | TaskStatus.RUNNING)
     ) == {ids[1], ids[2], ids[3]}
+
+
+def test_can_wait_on_completed_task(tmp_path):
+    root.init(tmp_path)
+    r = root.open_root(tmp_path)
+    with transient_working_directory(tmp_path):
+        tid = tc.task_create_shell(r, ["echo", "hello world"])
+        task_eval(r, tid)
+    assert task_wait(r, tid)
+
+
+def test_refuse_to_wait_for_created_task(tmp_path):
+    root.init(tmp_path)
+    r = root.open_root(tmp_path)
+    with transient_working_directory(tmp_path):
+        tid = tc.task_create_shell(r, ["echo", "hello world"])
+    with pytest.raises(Exception, match="Cannot wait .+ not been submitted"):
+        task_wait(r, tid)
