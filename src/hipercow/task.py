@@ -67,6 +67,10 @@ class TaskTimes:
         return TaskTimes(created, running, None)
 
 
+def task_exists(root: Root, task_id: str) -> bool:
+    return root.path_task(task_id).exists()
+
+
 def task_status(root: Root, task_id: str) -> TaskStatus:
     # check_task_id(task_id)
     path = root.path_task(task_id)
@@ -78,20 +82,12 @@ def task_status(root: Root, task_id: str) -> TaskStatus:
     return TaskStatus.CREATED
 
 
-def task_log(root: Root, task_id: str) -> str:
-    path = root.path_task_log(task_id)
-    if not path.exists():
-        status = task_status(root, task_id)
-        msg = f"Task log for '{task_id}' does not exist (status: {status})"
+def task_log(root: Root, task_id: str) -> str | None:
+    if not task_exists(root, task_id):
+        msg = f"Task '{task_id}' does not exist"
         raise Exception(msg)
-    with path.open() as f:
-        return f.read()
-
-
-def task_log_optional(root: Root, task_id: str) -> str | None:
     path = root.path_task_log(task_id)
     if not path.exists():
-        # check if task exists though...
         return None
     with path.open() as f:
         return f.read()
@@ -169,7 +165,7 @@ class WaitWrapper(taskwait.Task):
         return str(task_status(self.root, self.task_id))
 
     def log(self) -> list[str] | None:
-        value = task_log_optional(self.root, self.task_id)
+        value = task_log(self.root, self.task_id)
         return value.splitlines() if value else None
 
     def has_log(self):

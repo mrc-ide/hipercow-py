@@ -59,6 +59,10 @@ def test_can_save_and_read_log(tmp_path):
         res = runner.invoke(cli.cli_task_create, ["echo", "hello", "world"])
         task_id = res.stdout.strip()
 
+        res = runner.invoke(cli.cli_task_log, task_id)
+        assert res.exit_code == 0
+        assert res.output == ""
+
         res = runner.invoke(cli.cli_task_eval, [task_id, "--capture"])
         assert res.exit_code == 0
 

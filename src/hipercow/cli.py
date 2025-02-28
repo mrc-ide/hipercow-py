@@ -94,7 +94,9 @@ def cli_task_log(task_id: str, *, filename=False):
     if filename:
         click.echo(r.path_task_log(task_id))
     else:
-        click.echo(task_log(r, task_id))
+        value = task_log(r, task_id)
+        if value is not None:
+            click.echo(value)
 
 
 @task.command("list")
