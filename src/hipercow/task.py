@@ -2,6 +2,8 @@ import pickle
 from dataclasses import dataclass
 from enum import Flag, auto
 
+import taskwait
+
 from hipercow.root import Root
 from hipercow.util import file_create
 
@@ -86,6 +88,15 @@ def task_log(root: Root, task_id: str) -> str:
         return f.read()
 
 
+def task_log_optional(root: Root, task_id: str) -> str | None:
+    path = root.path_task_log(task_id)
+    if not path.exists():
+        # check if task exists though...
+        return None
+    with path.open() as f:
+        return f.read()
+
+
 def set_task_status(root: Root, task_id: str, status: TaskStatus):
     file_create(root.path_task(task_id) / STATUS_FILE_MAP[status])
 
@@ -145,3 +156,41 @@ def task_list(
     if with_status is not None:
         ids = [i for i in ids if task_status(root, i) & with_status]
     return ids
+
+
+class WaitWrapper(taskwait.Task):
+    def __init__(self, root: Root, task_id: str):
+        self.root = root
+        self.task_id = task_id
+        self.status_waiting = {"created", "submitted"}
+        self.status_running = {"running"}
+
+    def status(self) -> str:
+        return str(task_status(self.root, self.task_id))
+
+    def log(self) -> list[str] | None:
+        value = task_log_optional(self.root, self.task_id)
+        return value.splitlines() if value else None
+
+    def has_log(self):
+        return True
+
+
+def task_wait(
+    root: Root, task_id: str, *, allow_created: bool = False, **kwargs
+) -> bool:
+    task = WaitWrapper(root, task_id)
+
+    status = task_status(root, task_id)
+
+    if status == TaskStatus.CREATED and not allow_created:
+        msg = "Cannot wait on task '{task_id}' which has not been submitted"
+        raise Exception(msg)
+
+    if status.is_terminal():
+        return status == TaskStatus.SUCCESS
+
+    result = taskwait.taskwait(task, **kwargs)
+    status = TaskStatus[result.status.upper()]
+
+    return status == TaskStatus.SUCCESS
