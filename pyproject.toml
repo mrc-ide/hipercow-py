@@ -27,6 +27,7 @@ dependencies = [
   "defusedxml",
   "keyring",
   "requests",
+  "taskwait",
 ]
 dynamic = ["version"]
 
