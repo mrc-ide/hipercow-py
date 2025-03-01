@@ -1,4 +1,5 @@
 import pickle
+import shutil
 from dataclasses import dataclass
 
 from hipercow.environment_engines import (
@@ -51,6 +52,25 @@ def environment_list(root: Root) -> list[str]:
     special = ["empty"]
     found = [x.name for x in (root.path / "hipercow" / "env").glob("*")]
     return sorted(special + found)
+
+
+def environment_delete(root: Root, name: str) -> None:
+    if name == "empty":
+        msg = "Can't delete the empty environment"
+        raise Exception(msg)
+    if not environment_exists(root, name):
+        if name == "default":
+            reason = "it is empty"
+        else:
+            reason = "it does not exist"
+        msg = f"Can't delete environment '{name}', as {reason}"
+        raise Exception(msg)
+    print(
+        f"Attempting to delete environment '{name}'; this might fail if "
+        "files are in use on a network share, in which case you should ",
+        "try again later",
+    )
+    shutil.rmtree(str(root.path_environment(name)))
 
 
 def environment_check(root: Root, name: str | None) -> str:
