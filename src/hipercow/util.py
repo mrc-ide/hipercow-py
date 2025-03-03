@@ -46,15 +46,25 @@ def subprocess_run(
     **kwargs,
 ) -> subprocess.CompletedProcess:
     env = os.environ | (env or {})
-    if filename is None:
-        return subprocess.run(cmd, **kwargs, check=check, env=env)
-    else:
-        with filename.open("ab") as f:
-            return subprocess.run(
-                cmd,
-                check=check,
-                env=env,
-                stderr=subprocess.STDOUT,
-                stdout=f,
-                **kwargs,
-            )
+    try:
+        if filename is None:
+            return subprocess.run(cmd, **kwargs, check=check, env=env)
+        else:
+            with filename.open("ab") as f:
+                return subprocess.run(
+                    cmd,
+                    check=check,
+                    env=env,
+                    stderr=subprocess.STDOUT,
+                    stdout=f,
+                    **kwargs,
+                )
+    except FileNotFoundError as err:
+        if check:
+            raise err
+        elif filename is None:
+            print(err)
+        else:
+            with filename.open("a") as f:
+                print(err, file=f)
+        return subprocess.CompletedProcess(cmd, -1)
