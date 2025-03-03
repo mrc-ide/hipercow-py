@@ -154,7 +154,7 @@ def task_list(
     return ids
 
 
-class WaitWrapper(taskwait.Task):
+class TaskWaitWrapper(taskwait.Task):
     def __init__(self, root: Root, task_id: str):
         self.root = root
         self.task_id = task_id
@@ -175,7 +175,7 @@ class WaitWrapper(taskwait.Task):
 def task_wait(
     root: Root, task_id: str, *, allow_created: bool = False, **kwargs
 ) -> bool:
-    task = WaitWrapper(root, task_id)
+    task = TaskWaitWrapper(root, task_id)
 
     status = task_status(root, task_id)
 

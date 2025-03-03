@@ -1,3 +1,5 @@
+from unittest import mock
+
 import pytest
 
 from hipercow import root
@@ -6,6 +8,7 @@ from hipercow.task import (
     TaskData,
     TaskStatus,
     TaskTimes,
+    TaskWaitWrapper,
     set_task_status,
     task_exists,
     task_info,
@@ -148,3 +151,40 @@ def test_refuse_to_wait_for_created_task(tmp_path):
         tid = tc.task_create_shell(r, ["echo", "hello world"])
     with pytest.raises(Exception, match="Cannot wait .+ not been submitted"):
         task_wait(r, tid)
+
+
+def test_wait_wrapper_can_get_status(tmp_path):
+    root.init(tmp_path)
+    r = root.open_root(tmp_path)
+    with transient_working_directory(tmp_path):
+        tid = tc.task_create_shell(r, ["echo", "hello world"])
+        wrapper = TaskWaitWrapper(r, tid)
+        assert wrapper.status() == "created"
+        set_task_status(r, tid, TaskStatus.SUCCESS)
+        assert wrapper.status() == "success"
+
+
+def test_wait_wrapper_can_get_log(tmp_path):
+    root.init(tmp_path)
+    r = root.open_root(tmp_path)
+    with transient_working_directory(tmp_path):
+        tid = tc.task_create_shell(r, ["echo", "hello world"])
+        wrapper = TaskWaitWrapper(r, tid)
+        assert wrapper.log() is None
+        assert wrapper.has_log()
+        task_eval(r, tid, capture=True)
+        assert wrapper.status() == "success"
+        assert wrapper.log() == ["hello world"]
+        assert wrapper.has_log()
+
+
+def test_can_pass_to_task_wait(tmp_path, mocker):
+    mock_status = mock.MagicMock(
+        side_effect=[TaskStatus.SUBMITTED, TaskStatus.SUCCESS]
+    )
+    mocker.patch("hipercow.task.task_status", mock_status)
+    root.init(tmp_path)
+    r = root.open_root(tmp_path)
+    with transient_working_directory(tmp_path):
+        tid = tc.task_create_shell(r, ["echo", "hello world"])
+        assert task_wait(r, tid)
