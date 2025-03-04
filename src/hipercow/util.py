@@ -1,5 +1,6 @@
 import os
 import subprocess
+from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
 
@@ -34,11 +35,11 @@ def transient_working_directory(path):
 
 
 @contextmanager
-def transient_envvars(env):
+def transient_envvars(env: dict[str, str | None]) -> Iterator[None]:
     def _set_envvars(env):
         for k, v in env.items():
             if v is None:
-                del os.environ[k]
+                os.environ.pop(k, None)
             else:
                 os.environ[k] = v
 

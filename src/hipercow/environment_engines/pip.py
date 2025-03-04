@@ -57,7 +57,6 @@ class Pip(EnvironmentEngine):
             os.environ["PATH"] = path_old
         return res
 
-
     def _envvars(self) -> dict[str, str]:
         base = self.path()
         path_env = base / self._venv_bin_dir()

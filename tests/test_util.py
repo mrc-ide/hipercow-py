@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import pytest
@@ -5,6 +6,7 @@ import pytest
 from hipercow.util import (
     find_file_descend,
     subprocess_run,
+    transient_envvars,
     transient_working_directory,
 )
 
@@ -53,3 +55,24 @@ def test_can_cope_with_missing_path(tmp_path, capsys):
 
     with pytest.raises(FileNotFoundError):
         res = subprocess_run(cmd, check=True)
+
+
+def test_can_set_envvars():
+    with transient_envvars({"hc_a": "1"}):
+        assert os.environ.get("hc_a") == "1"
+    assert os.environ.get("hc_a") is None
+
+
+def test_can_unset_envvars_if_none():
+    with transient_envvars({"hc_a": "1", "hc_b": None, "hc_c": "3"}):
+        assert os.environ.get("hc_a") == "1"
+        assert "hc_b" not in os.environ
+        assert os.environ.get("hc_c") == "3"
+        with transient_envvars({"hc_b": "2", "hc_c": None}):
+            assert os.environ.get("hc_a") == "1"
+            assert os.environ.get("hc_b") == "2"
+            assert os.environ.get("hc_c") is None
+            assert "hc_c" not in os.environ
+        assert os.environ.get("hc_a") == "1"
+        assert "hc_b" not in os.environ
+        assert os.environ.get("hc_c") == "3"
