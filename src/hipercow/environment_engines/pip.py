@@ -37,8 +37,26 @@ class Pip(EnvironmentEngine):
         # If the user sets a PATH, this all goes wrong unfortunately.
         # Later, we could inspect env for `PATH` and join these
         # together nicely.
+        #
+        # https://docs.python.org/3/library/subprocess.html#popen-constructor
+        #
+        # See the Warning:
+        #
+        # > For Windows, ... env cannot override the PATH environment
+        # > variable. Using a full path avoids all of these
+        # > variations.
+        #
+        # The other way of doing this would be shutil.which and
+        # updating the command, but that feels worse?
+        path_old = os.environ["PATH"]
         env = (env or {}) | self._envvars()
-        return subprocess_run(cmd, env=env, **kwargs)
+        try:
+            os.environ["PATH"] = env["PATH"]
+            res = subprocess_run(cmd, env=env, **kwargs)
+        finally:
+            os.environ["PATH"] = path_old
+        return res
+
 
     def _envvars(self) -> dict[str, str]:
         base = self.path()
