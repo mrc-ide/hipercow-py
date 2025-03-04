@@ -81,7 +81,7 @@ ECHO working directory: %CD%
 
 ECHO this is a provisioning task
 
-I:\bootstrap-py-windows\python-311\bin\hipercow environment build --name ${environment_name} ${provision_id}
+I:\bootstrap-py-windows\python-311\bin\hipercow environment provision-run ${environment_name} ${provision_id}
 
 @ECHO off
 %SystemDrive%
