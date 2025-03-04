@@ -10,6 +10,13 @@ hatch build
 
 to build the package.  Copy the `.whl` file to the bootstrap inputs (`\\wpia-hn\hipercow\bootstrap-py-windows\in`)
 
+for example:
+
+```
+hatch build
+cp dist/hipercow-0.0.2-py3-none-any.whl ~/net/hipercow/bootstrap-py-windows/in
+```
+
 Edit or write the batch file, as `\\wpia-hn\hipercow\bootstrap-py-windows\in\bootstrap-311.bat`
 
 ```batch
