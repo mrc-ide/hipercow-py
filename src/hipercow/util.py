@@ -33,6 +33,23 @@ def transient_working_directory(path):
             os.chdir(origin)
 
 
+@contextmanager
+def transient_envvars(env):
+    def _set_envvars(env):
+        for k, v in env.items():
+            if v is None:
+                del os.environ[k]
+            else:
+                os.environ[k] = v
+
+    prev = {k: os.environ.get(k) for k in env.keys()}
+    try:
+        _set_envvars(env)
+        yield
+    finally:
+        _set_envvars(prev)
+
+
 def file_create(path: str | Path) -> None:
     Path(path).open("a").close()
 
