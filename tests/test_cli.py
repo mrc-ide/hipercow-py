@@ -59,6 +59,10 @@ def test_can_save_and_read_log(tmp_path):
         res = runner.invoke(cli.cli_task_create, ["echo", "hello", "world"])
         task_id = res.stdout.strip()
 
+        res = runner.invoke(cli.cli_task_log, task_id)
+        assert res.exit_code == 0
+        assert res.output == ""
+
         res = runner.invoke(cli.cli_task_eval, [task_id, "--capture"])
         assert res.exit_code == 0
 
@@ -229,3 +233,41 @@ def test_can_delete_environment(tmp_path):
         res = runner.invoke(cli.cli_environment_list, [])
         assert res.exit_code == 0
         assert res.output == "empty\n"
+
+
+def test_can_wait_on_task(tmp_path, mocker):
+    runner = CliRunner()
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        runner.invoke(cli.init, ".")
+        res = runner.invoke(cli.cli_task_create, ["echo", "hello", "world"])
+        assert res.exit_code == 0
+        task_id = res.stdout.strip()
+
+        mocker.patch("hipercow.cli.task_wait")
+
+        res = runner.invoke(cli.cli_task_wait, [task_id])
+        assert res.exit_code == 0
+        assert cli.task_wait.call_count == 1
+        assert cli.task_wait.mock_calls[0] == mock.call(
+            mock.ANY,
+            task_id,
+            poll=1,
+            timeout=None,
+            show_log=True,
+            progress=True,
+        )
+
+        res = runner.invoke(
+            cli.cli_task_wait,
+            [task_id, "--poll=0.1", "--no-show-log", "--timeout", "200"],
+        )
+        assert res.exit_code == 0
+        assert cli.task_wait.call_count == 2
+        assert cli.task_wait.mock_calls[1] == mock.call(
+            mock.ANY,
+            task_id,
+            poll=0.1,
+            timeout=200,
+            show_log=False,
+            progress=True,
+        )

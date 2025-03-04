@@ -13,7 +13,13 @@ from hipercow.environment import (
     environment_new,
 )
 from hipercow.provision import provision
-from hipercow.task import TaskStatus, task_list, task_log, task_status
+from hipercow.task import (
+    TaskStatus,
+    task_list,
+    task_log,
+    task_status,
+    task_wait,
+)
 from hipercow.task_create import task_create_shell
 from hipercow.task_eval import task_eval
 
@@ -88,7 +94,9 @@ def cli_task_log(task_id: str, *, filename=False):
     if filename:
         click.echo(r.path_task_log(task_id))
     else:
-        click.echo(task_log(r, task_id))
+        value = task_log(r, task_id)
+        if value is not None:
+            click.echo(value)
 
 
 @task.command("list")
@@ -115,6 +123,31 @@ def cli_task_create(cmd: tuple[str], environment: str | None):
 def cli_task_eval(task_id: str, *, capture: bool):
     r = root.open_root()
     task_eval(r, task_id, capture=capture)
+
+
+@task.command("wait")
+@click.argument("task_id")
+@click.option("--poll", default=1, type=float)
+@click.option("--timeout", type=float)
+@click.option("--show-log/--no-show-log", default=True)
+@click.option("--progress/--no-progress", default=True)
+def cli_task_wait(
+    task_id: str,
+    *,
+    poll: float,
+    timeout: float,
+    show_log: bool,
+    progress: bool,
+):
+    r = root.open_root()
+    task_wait(
+        r,
+        task_id,
+        poll=poll,
+        timeout=timeout,
+        show_log=show_log,
+        progress=progress,
+    )
 
 
 def _process_with_status(with_status: list[str]):
