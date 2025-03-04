@@ -4,7 +4,7 @@ from pathlib import Path
 
 from hipercow.environment_engines.base import EnvironmentEngine, Platform
 from hipercow.root import Root
-from hipercow.util import subprocess_run
+from hipercow.util import subprocess_run, transient_envvars
 
 
 class Pip(EnvironmentEngine):
@@ -34,28 +34,29 @@ class Pip(EnvironmentEngine):
         env: dict[str, str] | None = None,
         **kwargs,
     ) -> subprocess.CompletedProcess:
-        # If the user sets a PATH, this all goes wrong unfortunately.
-        # Later, we could inspect env for `PATH` and join these
-        # together nicely.
+        # If the user sets a PATH, within 'env' then we will clobber
+        # that when we add our envvars to the dictionary.  Later we
+        # can inspect 'env' for PATH and join them together, but it's
+        # not obvious what the priority should really be.
         #
+        # There's another subtlety about setting PATH; see the See the
+        # Warning in
         # https://docs.python.org/3/library/subprocess.html#popen-constructor
-        #
-        # See the Warning:
         #
         # > For Windows, ... env cannot override the PATH environment
         # > variable. Using a full path avoids all of these
         # > variations.
         #
         # The other way of doing this would be shutil.which and
-        # updating the command, but that feels worse?
+        # updating the command, but that feels worse because it
+        # requires that the first line of the cmd is definitely the
+        # program under executation (probably reasonable) and it will
+        # require logic around only doing that if a relative path is
+        # given, etc.
         path_old = os.environ["PATH"]
         env = (env or {}) | self._envvars()
-        try:
-            os.environ["PATH"] = env["PATH"]
-            res = subprocess_run(cmd, env=env, **kwargs)
-        finally:
-            os.environ["PATH"] = path_old
-        return res
+        with transient_envvars({"PATH": env["PATH"]}):
+            return subprocess_run(cmd, env=env, **kwargs)
 
     def _envvars(self) -> dict[str, str]:
         base = self.path()
