@@ -40,3 +40,15 @@ def test_can_capture_output_to_auto_file(tmp_path):
         assert f.read().strip() == "hello world"
 
     assert task_log(r, tid) == "hello world\n"
+
+
+def test_return_information_about_failure_to_find_path(tmp_path):
+    root.init(tmp_path)
+    r = root.open_root(tmp_path)
+    with transient_working_directory(tmp_path):
+        tid = tc.task_create_shell(r, ["adsfasdfasdfa", "arg"])
+    task_eval(r, tid, capture=True)
+
+    path = r.path_task_log(tid)
+    assert path.exists()
+    assert task_status(r, tid) == TaskStatus.FAILURE
