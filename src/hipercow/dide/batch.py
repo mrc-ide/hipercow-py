@@ -28,7 +28,7 @@ set REDIS_URL=10.0.2.254
 
 ECHO this is a single task
 
-I:\bootstrap-py\python-311\bin\hipercow task eval --capture ${task_id}
+I:\bootstrap-py-windows\python-311\bin\hipercow task eval --capture ${task_id}
 
 @ECHO off
 set ErrorCode=%ERRORLEVEL%
@@ -81,7 +81,7 @@ ECHO working directory: %CD%
 
 ECHO this is a provisioning task
 
-I:\bootstrap-py\python-311\bin\hipercow environment build --name ${environment_name} ${provision_id}
+I:\bootstrap-py-windows\python-311\bin\hipercow environment build --name ${environment_name} ${provision_id}
 
 @ECHO off
 %SystemDrive%
