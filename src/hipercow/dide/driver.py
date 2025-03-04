@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-import taskwait
+from taskwait import Task, taskwait
 
 from hipercow.dide.auth import fetch_credentials
 from hipercow.dide.batch import write_batch_provision, write_batch_task_run
@@ -30,27 +30,15 @@ class DideDriver(HipercowDriver):
         self.config = DideConfiguration(path)
 
     def submit(self, task_id: str, root: Root):
-        credentials = fetch_credentials()
-        cl = DideWebClient(credentials)
-        cl.login()
+        cl = _web_client()
         unc = write_batch_task_run(task_id, self.config.path_map, root)
         cl.submit(unc, task_id)
 
     def provision(self, root: Root, name: str, id: str) -> None:
-        credentials = fetch_credentials()
-        cl = DideWebClient(credentials)
-        cl.login()
-        unc = write_batch_provision(name, id, self.config.path_map, root)
-        dide_id = cl.submit(unc, f"{name}/{id}")
-        ProvisionWaitWrapper(root, name, id, cl, dide_id)
-        # Once we have support, we need to block here and stream logs,
-        # but that erquires getting the logwatch functionality ported
-        # over.
-        print("A provisioning task has been submitted")
-        print("Have a look at the web portal to keep track on progress")
+        _dide_provision(root, name, id, self.config.path_map)
 
 
-class ProvisionWaitWrapper(taskwait.Task):
+class ProvisionWaitWrapper(Task):
     def __init__(
         self,
         root: Root,
@@ -75,7 +63,22 @@ class ProvisionWaitWrapper(taskwait.Task):
         if not path.exists():
             return None
         with path.open() as f:
-            return f.readlines()
+            return f.read().splitlines()
 
     def has_log(self) -> bool:
         return True
+
+
+def _web_client() -> DideWebClient:
+    credentials = fetch_credentials()
+    cl = DideWebClient(credentials)
+    cl.login()
+    return cl
+
+
+def _dide_provision(root: Root, name: str, id: str, path_map: PathMap):
+    cl = _web_client()
+    unc = write_batch_provision(name, id, path_map, root)
+    dide_id = cl.submit(unc, f"{name}/{id}")
+    task = ProvisionWaitWrapper(root, name, id, cl, dide_id)
+    taskwait(task)
