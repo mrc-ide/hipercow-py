@@ -53,7 +53,6 @@ class Pip(EnvironmentEngine):
         # program under executation (probably reasonable) and it will
         # require logic around only doing that if a relative path is
         # given, etc.
-        path_old = os.environ["PATH"]
         env = (env or {}) | self._envvars()
         with transient_envvars({"PATH": env["PATH"]}):
             return subprocess_run(cmd, env=env, **kwargs)
