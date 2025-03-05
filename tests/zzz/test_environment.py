@@ -13,7 +13,6 @@ from hipercow.util import transient_working_directory
 @pytest.mark.slow
 def test_run_in_environment(tmp_path):
     with transient_working_directory(tmp_path):
-        assert tmp_path == "a"
         root.init(tmp_path)
         r = root.open_root(tmp_path)
 
