@@ -35,3 +35,30 @@ def test_can_write_batch(tmp_path):
     path_rel = f"hipercow/tasks/{tid[:2]}/{tid[2:]}/task_run.bat"
     assert unc == f"//wpia-hn/didehomes/bob/my/project/{path_rel}"
     assert (r.path / path_rel).exists()
+
+
+def test_can_create_provision_data():
+    m = Mount("wpia-hn", "didehomes/bob", "/mnt/nethome")
+    path_map = PathMap(Path("some/path"), m, "Q:", "my/project")
+    res = batch._template_data_provision("env", "abcde", path_map)
+    assert res["environment_name"] == "env"
+    assert res["provision_id"] == "abcde"
+    assert res["hipercow_root_drive"] == "Q:"
+    assert res["hipercow_root_path"] == "/my/project"
+    assert (
+        res["network_shares_create"] == r"net use Q: \\wpia-hn\didehomes\bob /y"
+    )
+    assert res["network_shares_delete"] == "net use Q: /delete /y"
+
+
+def test_can_write_provision_batch(tmp_path):
+    m = Mount("wpia-hn", "didehomes/bob", "/mnt/nethome")
+    path_map = PathMap(Path("some/path"), m, "Q:", "my/project")
+
+    root.init(tmp_path)
+    r = root.open_root(tmp_path)
+
+    unc = batch.write_batch_provision("myenv", "abcdef", path_map, r)
+    path_rel = "hipercow/env/myenv/provision/abcdef/run.bat"
+    assert unc == f"//wpia-hn/didehomes/bob/my/project/{path_rel}"
+    assert (r.path / path_rel).exists()

@@ -271,3 +271,21 @@ def test_can_wait_on_task(tmp_path, mocker):
             show_log=False,
             progress=True,
         )
+
+
+def test_can_build_environment(tmp_path, mocker):
+    runner = CliRunner()
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        runner.invoke(cli.init, ".")
+
+        mock_provision = mock.MagicMock()
+        mocker.patch("hipercow.cli.provision_run", mock_provision)
+
+        res = runner.invoke(
+            cli.cli_environment_provision_run, ["example", "abcdef"]
+        )
+        assert res.exit_code == 0
+        assert mock_provision.call_count == 1
+        assert mock_provision.mock_calls[0] == mock.call(
+            mock.ANY, "example", "abcdef"
+        )

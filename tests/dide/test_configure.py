@@ -6,6 +6,8 @@ from hipercow.dide.driver import DideConfiguration
 from hipercow.dide.mounts import Mount, remap_path
 from hipercow.dide.web import Credentials, DideWebClient
 from hipercow.driver import list_drivers, load_driver
+from hipercow.environment import environment_new
+from hipercow.provision import provision
 from hipercow.task_create import task_create_shell
 from hipercow.util import transient_working_directory
 
@@ -48,3 +50,21 @@ def test_creating_task_triggers_submission(tmp_path, mocker):
     # testing arguments here would be possibly useful, but we hit
     # issues with pathname normalisation very quickly.
     assert (r.path_task(tid) / "task_run.bat").exists()
+
+
+def test_provision_using_driver(tmp_path, mocker):
+    path = tmp_path / "a" / "b"
+    root.init(path)
+    r = root.open_root(path)
+    mock_mounts = [Mount("projects", "other", tmp_path)]
+    mock_provision = mock.MagicMock()
+    path_map = remap_path(path, mock_mounts)
+    mocker.patch("hipercow.dide.driver.detect_mounts", return_value=mock_mounts)
+    mocker.patch("hipercow.dide.driver._dide_provision", mock_provision)
+    configure(r, "dide")
+    environment_new(r, "default", "pip")
+    provision(r, "default", [])
+    assert mock_provision.call_count == 1
+    assert mock_provision.mock_calls[0] == mock.call(
+        r, "default", mock.ANY, path_map
+    )

@@ -12,7 +12,7 @@ from hipercow.environment import (
     environment_list,
     environment_new,
 )
-from hipercow.provision import provision
+from hipercow.provision import provision, provision_run
 from hipercow.task import (
     TaskStatus,
     task_list,
@@ -207,3 +207,11 @@ def cli_environment_new(name: str, engine: str):
 def cli_environment_provision(name: str, cmd: tuple[str]):
     r = root.open_root()
     provision(r, name, list(cmd))
+
+
+@environment.command("provision-run", hidden=True)
+@click.argument("name")
+@click.argument("id")
+def cli_environment_provision_run(name: str, id: str):
+    r = root.open_root()
+    provision_run(r, name, id)

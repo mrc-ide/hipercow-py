@@ -1,5 +1,6 @@
 import os
 import subprocess
+from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
 
@@ -31,6 +32,23 @@ def transient_working_directory(path):
     finally:
         if path is not None:
             os.chdir(origin)
+
+
+@contextmanager
+def transient_envvars(env: dict[str, str | None]) -> Iterator[None]:
+    def _set_envvars(env):
+        for k, v in env.items():
+            if v is None:
+                os.environ.pop(k, None)
+            else:
+                os.environ[k] = v
+
+    prev = {k: os.environ.get(k) for k in env.keys()}
+    try:
+        _set_envvars(env)
+        yield
+    finally:
+        _set_envvars(prev)
 
 
 def file_create(path: str | Path) -> None:
