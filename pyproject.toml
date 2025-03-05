@@ -47,11 +47,12 @@ dependencies = [
   "pytest",
   "pytest-cov",
   "pytest-mock",
+  "pytest-explicit",
   "responses",
 ]
 [tool.hatch.envs.default.scripts]
 test = "pytest {args:tests}"
-test-cov = "coverage run -m pytest {args:tests}"
+test-cov = "coverage run -m pytest {args:tests} --run-slow"
 cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=hipercow --cov=tests {args}"
 no-cov = "cov --no-cov {args}"
 cov-report-xml = [
@@ -176,3 +177,11 @@ unfixable = [
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
+
+[tool.pytest.ini_options]
+markers = [
+   "slow: slower integration tests",
+]
+explicit-only = [
+    "slow",
+]

@@ -9,10 +9,8 @@ from hipercow.task_create import task_create_shell
 from hipercow.task_eval import task_eval
 from hipercow.util import transient_working_directory
 
-longrun = pytest.mark.skipif("not config.getoption('longrun')")
 
-
-@longrun
+@pytest.mark.slow
 def test_run_in_environment(tmp_path):
     with transient_working_directory(tmp_path):
         root.init(tmp_path)
