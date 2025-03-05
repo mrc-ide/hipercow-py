@@ -111,10 +111,13 @@ def cli_task_list(with_status=None):
 @task.command("create")
 @click.argument("cmd", nargs=-1)
 @click.option("--environment", type=str)
-def cli_task_create(cmd: tuple[str], environment: str | None):
+@click.option("--wait", is_flag=True)
+def cli_task_create(cmd: tuple[str], environment: str | None, *, wait: bool):
     r = root.open_root()
     task_id = task_create_shell(r, list(cmd), environment=environment)
     click.echo(task_id)
+    if wait:
+        task_wait(r, task_id)
 
 
 @task.command("eval")
