@@ -15,7 +15,9 @@ def test_create_simple_task(tmp_path):
     with transient_working_directory(tmp_path):
         tid = tc.task_create_shell(r, ["echo", "hello world"])
     assert re.match("^[0-9a-f]{32}$", tid)
-    path_data = tmp_path / "hipercow" / "tasks" / tid[:2] / tid[2:] / "data"
+    path_data = (
+        tmp_path / "hipercow" / "py" / "tasks" / tid[:2] / tid[2:] / "data"
+    )
     assert path_data.exists()
     d = TaskData.read(root.open_root(tmp_path), tid)
     assert isinstance(d, TaskData)

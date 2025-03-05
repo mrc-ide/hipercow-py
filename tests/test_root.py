@@ -1,3 +1,5 @@
+import shutil
+
 import pytest
 
 from hipercow import root, util
@@ -8,7 +10,7 @@ def test_create_root(tmp_path):
     root.init(path)
     assert path.exists()
     assert path.is_dir()
-    assert (path / "hipercow" / "py").exists()
+    assert (path / "hipercow" / "py").is_dir()
     r = root.open_root(path)
     assert isinstance(r, root.Root)
     assert r.path == path
@@ -33,8 +35,9 @@ def test_notify_if_root_exists_below_requested(tmp_path, capsys):
 
 
 def test_error_if_root_invalid(tmp_path):
-    util.file_create(tmp_path / "hipercow")
-    with pytest.raises(Exception, match="Unexpected file 'hipercow'"):
+    (tmp_path / "hipercow").mkdir()
+    util.file_create(tmp_path / "hipercow" / "py")
+    with pytest.raises(Exception, match="Unexpected file 'hipercow/py'"):
         root.init(tmp_path)
 
 
@@ -45,7 +48,7 @@ def test_error_if_root_does_not_exist(tmp_path):
 
 def test_error_if_non_python_hipercow_root_found(tmp_path):
     root.init(tmp_path)
-    (tmp_path / "hipercow" / "py").unlink()
+    shutil.rmtree(tmp_path / "hipercow" / "py")
     pat = "Failed to open non-python 'hipercow' root at"
     with pytest.raises(Exception, match=pat):
         root.Root(tmp_path)

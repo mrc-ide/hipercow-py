@@ -32,7 +32,7 @@ def test_can_write_batch(tmp_path):
         tid = tc.task_create_shell(r, ["echo", "hello world"])
 
     unc = batch.write_batch_task_run(tid, path_map, r)
-    path_rel = f"hipercow/tasks/{tid[:2]}/{tid[2:]}/task_run.bat"
+    path_rel = f"hipercow/py/tasks/{tid[:2]}/{tid[2:]}/task_run.bat"
     assert unc == f"//wpia-hn/didehomes/bob/my/project/{path_rel}"
     assert (r.path / path_rel).exists()
 
@@ -59,6 +59,6 @@ def test_can_write_provision_batch(tmp_path):
     r = root.open_root(tmp_path)
 
     unc = batch.write_batch_provision("myenv", "abcdef", path_map, r)
-    path_rel = "hipercow/env/myenv/provision/abcdef/run.bat"
+    path_rel = "hipercow/py/env/myenv/provision/abcdef/run.bat"
     assert unc == f"//wpia-hn/didehomes/bob/my/project/{path_rel}"
     assert (r.path / path_rel).exists()

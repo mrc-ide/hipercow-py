@@ -50,7 +50,8 @@ def environment_new(root: Root, name: str, engine: str) -> None:
 
 def environment_list(root: Root) -> list[str]:
     special = ["empty"]
-    found = [x.name for x in (root.path / "hipercow" / "env").glob("*")]
+    path = root.path_environment(None)
+    found = [x.name for x in path.glob("*")]
     return sorted(special + found)
 
 

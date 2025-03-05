@@ -1,5 +1,4 @@
 import pickle
-import platform
 from abc import ABC, abstractmethod
 
 from hipercow.root import Root
@@ -22,8 +21,7 @@ class HipercowDriver(ABC):
 
 
 def list_drivers(root) -> list[str]:
-    hostname = platform.node()
-    path = root.path / "hipercow" / "config" / hostname
+    path = root.path_configuration(None)
     return [x.name for x in path.glob("*")]
 
 

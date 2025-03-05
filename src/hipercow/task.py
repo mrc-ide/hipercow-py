@@ -147,7 +147,7 @@ def task_info(root: Root, task_id: str) -> TaskInfo:
 def task_list(
     root: Root, *, with_status: TaskStatus | None = None
 ) -> list[str]:
-    contents = (root.path / "hipercow" / "tasks").rglob("data")
+    contents = root.path_task(None).rglob("data")
     ids = ["".join(el.parts[-3:-1]) for el in contents if el.is_file()]
     if with_status is not None:
         ids = [i for i in ids if task_status(root, i) & with_status]

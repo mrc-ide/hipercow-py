@@ -27,7 +27,7 @@ def test_can_provision_with_dide(tmp_path, mocker):
 
     assert mock_client.submit.call_count == 1
     assert mock_client.mock_calls[0] == mock.call.submit(
-        "//host//hostmount/path/to/dir/hipercow/env/myenv/provision/abcdef/run.bat",
+        "//host//hostmount/path/to/dir/hipercow/py/env/myenv/provision/abcdef/run.bat",
         "myenv/abcdef",
     )
 
