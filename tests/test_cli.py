@@ -289,3 +289,20 @@ def test_can_build_environment(tmp_path, mocker):
         assert mock_provision.mock_calls[0] == mock.call(
             mock.ANY, "example", "abcdef"
         )
+
+
+def test_can_create_on_task_and_wait(tmp_path, mocker):
+    runner = CliRunner()
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        runner.invoke(cli.init, ".")
+        mocker.patch("hipercow.cli.task_wait")
+        res = runner.invoke(
+            cli.cli_task_create, ["--wait", "echo", "hello", "world"]
+        )
+        assert res.exit_code == 0
+        task_id = res.stdout.strip()
+        assert cli.task_wait.call_count == 1
+        assert cli.task_wait.mock_calls[0] == mock.call(
+            mock.ANY,
+            task_id,
+        )
