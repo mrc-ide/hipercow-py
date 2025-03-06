@@ -1,3 +1,4 @@
+import time
 from unittest import mock
 
 import pytest
@@ -217,8 +218,11 @@ def test_can_detect_corrupt_recent_file(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     with transient_working_directory(tmp_path):
-        ids = [tc.task_create_shell(r, ["echo", "hello world"])
-               for _ in range(5)]
+        ids = []
+        for i in range(5):
+            if i > 0:
+                time.sleep(0.01)
+            ids.append(tc.task_create_shell(r, ["echo", "hello world"]))
     assert task_recent(r) == ids
     with r.path_recent().open("w") as f:
         for i in ids[:2] + [ids[2] + ids[3], ids[4]]:
@@ -229,5 +233,7 @@ def test_can_detect_corrupt_recent_file(tmp_path):
     assert task_recent(r) == ids
     task_recent_rebuild(r, limit=3)
     assert task_recent(r) == ids[2:]
+    task_recent_rebuild(r, limit=0)
+    assert task_recent(r) == []
     task_recent_rebuild(r, limit=0)
     assert task_recent(r) == []

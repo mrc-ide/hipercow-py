@@ -194,15 +194,16 @@ def task_wait(
 
 def task_recent_rebuild(root: Root, *, limit: int | None = None) -> None:
     path = root.path_recent()
-    if limit == 0:
+    if limit is not None and limit == 0:
         if path.exists():
             path.unlink()
+        return
 
     ids = task_list(root)
     time = [root.path_task_data(i).stat().st_ctime for i in ids]
     ids = [i for _, i in sorted(zip(time, ids, strict=False))]
 
-    if limit is not None and limit > len(ids):
+    if limit is not None and limit < len(ids):
         ids = ids[-limit:]
 
     with path.open("w") as f:
