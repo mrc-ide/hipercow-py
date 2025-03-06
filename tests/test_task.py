@@ -207,8 +207,9 @@ def test_can_get_recent_tasks(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     with transient_working_directory(tmp_path):
-        ids = [tc.task_create_shell(r, ["echo", "hello world"])
-               for _ in range(5)]
+        ids = [
+            tc.task_create_shell(r, ["echo", "hello world"]) for _ in range(5)
+        ]
     assert task_last(r) == ids[4]
     assert task_recent(r) == ids
     assert task_recent(r, limit=3) == ids[2:]
