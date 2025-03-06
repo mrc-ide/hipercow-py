@@ -1,0 +1,129 @@
+# Introduction
+
+This section will describe running a simple task on the cluster, using `hipercow`.  We make some assuptions, common to the [R version](https://mrc-ide.github.io/hipercow/):
+
+* You are a member of DIDE at Imperial College London
+* You have an account on our cluster; you can check this by logging into [the web portal](https://mrcdata.dide.ic.ac.uk/hpc) with your [DIDE credentials](https://mrc-ide.github.io/hipercow/articles/windows.html#about-our-usernames-and-passwords).  If you cannot log in, please email Wes.
+* You are working in a network share that the cluster can see. Ideally this is a **project share** and not your network home directory, as project shares are much faster and more reliable.  See the [R documentation](https://mrc-ide.github.io/hipercow/articles/windows.html#filesystems-and-paths) for more on this topic, including how to configure this on your machine
+* You have some Python code that you would like to run on the cluster, which currently works for you locally.
+* You are confident excecuting commands at the command line (bash or similar). If you are not, please do talk with us as we'd be interested in your workflows.
+
+We also make the assumption that you are ok with some rough edges while we develop this system.  Please be prepared to work with us to track down and understand the bugs that you will definitely run into, so that we can make this tool work for people as well as the R package does.
+
+## Project layout
+
+You may have an existing project, or you might be starting from scratch.  We are not at all prescriptive about how you might structure your files, but we will create a directory `hipercow/` at the root of your project, and you must not manually change or delete any file within that directory.  It is safe to mix R and Python hipercows within the same project but at the moment they are [completely unaware of each others existence despite occupying the same space](https://en.wikipedia.org/wiki/The_City_%26_the_City).  It is likely that you will have a `pyproject.toml` or a `requirements.txt` file at this level, and quite possibly your `.git/` directory.
+
+## Interaction with `hipercow`
+
+If you have [installed `hipercow`](index.md) successfully, then you will be able to run commands with the `hipercow` tool; try running
+
+```console
+$ hipercow --help
+Usage: hipercow [OPTIONS] COMMAND [ARGS]...
+
+Options:
+  --version  Show the version and exit.
+  --help     Show this message and exit.
+
+Commands:
+  dide
+  driver
+  environment
+  init
+  task
+```
+
+## Initialisation
+
+At the root of your project, run:
+
+```console
+$ hipercow init .
+Initialised hipercow at .
+```
+
+which creates the `hipercow/` directory and enables all other commands.
+
+Because you will want to submit tasks to the DIDE cluster, we need to configure the `dide` driver too:
+
+```console
+$ hipercow driver configure dide
+Configured hipercow to use 'dide'
+```
+
+## Running hello world
+
+Tasks are submitted using `hipercow task create`, followed by any shell command.  In order to make sure that credentials are correct, we recommend submitting a simple task first, like this:
+
+```console
+$ hipercow task create --wait echo hello hipercow world
+a182aa2b169c2e04aa0a5d27fff1acaa
+Waiting......OK
+hello hipercow world
+```
+
+The `--wait` option should occur before your command and indicates that hipercow should wait for the task to complete before returning.  The string printed out (`a182aa2b169c2e04aa0a5d27fff1acaa`) is the "task id" - every task gets one of these and they are unique.
+
+## Running some python code
+
+Running python code requires additional steps; we'll need to set an **environment** for our task to run in, containing any packages that are needed.  If you are in the position where your project does not depend on any packages other than those distributed with python (so no `numpy`, `matplotlib`, or anything else) you can skip this step.
+
+We need to know what packages you need.  There are a couple of ways of configuring this, though probably the easiest is to write a `requirements.txt` file suitable to use with `pip`.  We might have a `requirements.txt` file that contains simply:
+
+```
+cowsay
+```
+
+indicating that we need that package installed.  Or it could be a bunch of packages and version constraints.
+
+The next step is to indicate that we want a `pip`-based environment; this is the default but this command still needs to be run
+
+```console
+$ hipercow environment new
+Creating environment 'default' using 'pip'
+```
+
+Then we need to install our packages on the cluster, so that tasks that we submit find these packages:
+
+```console
+$ hipercow environment provision
+Waiting...OK
+Actual environment location may have moved due to redirects, links or junctions.
+  Requested location: "Q:\cluster\testing\hipercow\env\default\contents\venv-windows\Scripts\python.exe"
+  Actual location:    "\\qdrive\homes\rfitzjoh\cluster\testing\hipercow\env\default\contents\venv-windows\Scripts\python.exe"
+
+
+  Obtaining dependency information for cowsay from https://files.pythonhosted.org/packages/f1/13/63c0a02c44024ee16f664e0b36eefeb22d54e93531630bd99e237986f534/cowsay-6.1-py3-none-any.whl.metadata
+  Downloading cowsay-6.1-py3-none-any.whl.metadata (5.6 kB)
+Downloading cowsay-6.1-py3-none-any.whl (25 kB)
+Installing collected packages: cowsay
+
+
+```
+
+This can take a little while, and we're not really sure why.
+
+* You will see `Waiting` followed by dots until `OK` while the provisioning task queues.
+* The next lines of text are python creating a new empty virtual environment and complaining about paths (this can be ignored)
+* Finally, we see the installation of the `cowsay` package
+
+Now, we can submit tasks that use the `cowsay` package:
+
+```
+$ hipercow task create --wait -- cowsay -t hello hipercow
+fdfaa803fc22c9f4e05fd93247358671
+Waiting....OK
+  ______________
+| hello hipercow |
+  ==============
+              \
+               \
+                 ^__^
+                 (oo)\_______
+                 (__)\       )\/\
+                     ||----w |
+                     ||     ||
+```
+
+The `--` here in the command is (at least currently) required to separate the command between the bits that relate to `hipercow` and the bits for your command (here, the `-t` would make the tool complain).
