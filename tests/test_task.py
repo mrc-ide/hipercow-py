@@ -12,8 +12,11 @@ from hipercow.task import (
     set_task_status,
     task_exists,
     task_info,
+    task_last,
     task_list,
     task_log,
+    task_recent,
+    task_recent_rebuild,
     task_status,
     task_wait,
 )
@@ -188,3 +191,43 @@ def test_can_pass_to_task_wait(tmp_path, mocker):
     with transient_working_directory(tmp_path):
         tid = tc.task_create_shell(r, ["echo", "hello world"])
         assert task_wait(r, tid)
+
+
+def test_can_get_last_task_when_none_are_created(tmp_path):
+    root.init(tmp_path)
+    r = root.open_root(tmp_path)
+    assert task_last(r) is None
+    assert task_recent(r) == []
+
+
+# This might not work wonderfully on windows, because the timing there
+# tends to be too coarse.
+def test_can_get_recent_tasks(tmp_path):
+    root.init(tmp_path)
+    r = root.open_root(tmp_path)
+    with transient_working_directory(tmp_path):
+        ids = [tc.task_create_shell(r, ["echo", "hello world"])
+               for _ in range(5)]
+    assert task_last(r) == ids[4]
+    assert task_recent(r) == ids
+    assert task_recent(r, limit=3) == ids[2:]
+
+
+def test_can_detect_corrupt_recent_file(tmp_path):
+    root.init(tmp_path)
+    r = root.open_root(tmp_path)
+    with transient_working_directory(tmp_path):
+        ids = [tc.task_create_shell(r, ["echo", "hello world"])
+               for _ in range(5)]
+    assert task_recent(r) == ids
+    with r.path_recent().open("w") as f:
+        for i in ids[:2] + [ids[2] + ids[3], ids[4]]:
+            f.write(f"{i}\n")
+    with pytest.raises(Exception, match="Recent data list is corrupt"):
+        task_recent(r)
+    task_recent_rebuild(r)
+    assert task_recent(r) == ids
+    task_recent_rebuild(r, limit=3)
+    assert task_recent(r) == ids[2:]
+    task_recent_rebuild(r, limit=0)
+    assert task_recent(r) == []

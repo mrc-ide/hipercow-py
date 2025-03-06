@@ -231,4 +231,4 @@ def task_recent(root: Root, *, limit: int | None = None) -> list[str]:
 
 def task_last(root: Root) -> str | None:
     task_id = task_recent(root, limit=1)
-    return task_id[0] if task_id is not None else None
+    return task_id[0] if task_id else None
