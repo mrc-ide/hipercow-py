@@ -122,7 +122,8 @@ def cli_task_last():
     r = root.open_root()
     task_id = task_last(r)
     if task_id is None:
-        # set exit code
+        # we might set exit code to something nonzero here, but this
+        # seems slightly hard...
         pass
     else:
         click.echo(task_id)
