@@ -19,6 +19,7 @@ from hipercow.task import (
     task_list,
     task_log,
     task_recent,
+    task_recent_rebuild,
     task_status,
     task_wait,
 )
@@ -131,8 +132,11 @@ def cli_task_last():
 
 @task.command("recent")
 @click.option("--limit", type=int)
-def cli_task_recent(limit: int):
+@click.option("--rebuild", is_flag=True)
+def cli_task_recent(limit: int, *, rebuild: bool):
     r = root.open_root()
+    if rebuild:
+        task_recent_rebuild(r, limit=limit)
     for i in task_recent(r, limit=limit):
         click.echo(i)
 

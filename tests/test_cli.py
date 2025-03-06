@@ -1,3 +1,4 @@
+import time
 from pathlib import Path
 from unittest import mock
 
@@ -341,3 +342,35 @@ def test_can_get_last_task(tmp_path):
         res = runner.invoke(cli.cli_task_recent, ["--limit", 2])
         assert res.exit_code == 0
         assert res.stdout == "".join(i + "\n" for i in ids[-2:])
+
+
+def test_can_rebuild_recent_list(tmp_path):
+    runner = CliRunner()
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        root.init(".")
+        r = root.open_root()
+
+        ids = []
+        for i in range(5):
+            if i > 0:
+                time.sleep(0.01)
+            ids.append(task_create_shell(r, ["echo", "hello world"]))
+
+        res = runner.invoke(cli.cli_task_recent, [])
+        assert res.exit_code == 0
+        assert res.stdout == "".join(i + "\n" for i in ids)
+
+        with r.path_recent().open("w") as f:
+            for i in ids[:2] + [ids[2] + ids[3], ids[4]]:
+                f.write(f"{i}\n")
+
+        res = runner.invoke(cli.cli_task_recent, [])
+        assert res.exit_code == 1
+        assert res.stdout == ""
+        assert (
+            str(res.exception) == "Recent data list is corrupt, please rebuild"
+        )
+
+        res = runner.invoke(cli.cli_task_recent, ["--rebuild"])
+        assert res.exit_code == 0
+        assert res.stdout == "".join(i + "\n" for i in ids)
