@@ -1,10 +1,10 @@
 # See here for details:
 # https://squidfunk.github.io/mkdocs-material/setup/
 
-site_name: taskwait
-site_url: https://reside-ic.github.io/taskwait/
-repo_url: https://github.com/reside-ic/taskwait
-repo_name: reside-ic/taskwait
+site_name: hipercow
+site_url: https://mrc-ide.github.io/hipercow-py/
+repo_url: https://github.com/reside-ic/hipercow-py
+repo_name: mrc-ide/hipercow-py
 edit_uri: edit/main/docs/
 theme:
   name: material
