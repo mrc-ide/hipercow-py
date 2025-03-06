@@ -185,3 +185,13 @@ markers = [
 explicit-only = [
     "slow",
 ]
+
+[tool.hatch.envs.docs]
+extra-dependencies = [
+  "mkdocs-material",
+  "mkdocstrings-python",
+]
+
+[tool.hatch.envs.docs.scripts]
+build = "mkdocs build"
+serve = "mkdocs serve"

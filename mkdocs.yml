@@ -1,0 +1,41 @@
+# See here for details:
+# https://squidfunk.github.io/mkdocs-material/setup/
+
+site_name: taskwait
+site_url: https://reside-ic.github.io/taskwait/
+repo_url: https://github.com/reside-ic/taskwait
+repo_name: reside-ic/taskwait
+edit_uri: edit/main/docs/
+theme:
+  name: material
+  icon:
+    repo: fontawesome/brands/github
+  features:
+    - content.action.edit
+  palette:
+    # Palette toggle for automatic mode
+    - media: "(prefers-color-scheme)"
+      primary: blue
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      primary: blue
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      primary: blue
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+plugins:
+- search
+- mkdocstrings
