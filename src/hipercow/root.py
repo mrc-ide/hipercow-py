@@ -58,6 +58,9 @@ class Root:
     def path_task_log(self, task_id: str) -> Path:
         return self.path_task(task_id) / "log"
 
+    def path_recent(self) -> Path:
+        return self.path_base() / "recent"
+
     def path_configuration(self, name: str | None) -> Path:
         hostname = platform.node()
         return self.path_base() / "config" / hostname / (name or ".")
