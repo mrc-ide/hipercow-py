@@ -11,7 +11,11 @@ class DideConfiguration:
     python_version: str
 
     def __init__(
-        self, root: Root, *, mounts: list[Mount], python_version: str | None
+        self,
+        root: Root,
+        *,
+        mounts: list[Mount],
+        python_version: str | None = None,
     ):
         self.path_map = remap_path(root.path, mounts)
         self.python_version = check_python_version(python_version)
