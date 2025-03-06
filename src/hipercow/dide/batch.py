@@ -1,8 +1,10 @@
 import datetime
 import platform
+from pathlib import Path
 from string import Template
 
 from hipercow.__about__ import __version__ as version
+from hipercow.dide.configuration import DideConfiguration
 from hipercow.dide.mounts import PathMap
 from hipercow.root import Root
 
@@ -28,7 +30,7 @@ set REDIS_URL=10.0.2.254
 
 ECHO this is a single task
 
-I:\bootstrap-py-windows\python-311\bin\hipercow task eval --capture ${task_id}
+I:\bootstrap-py-windows\python-${python_version}\bin\hipercow task eval --capture ${task_id}
 
 @ECHO off
 set ErrorCode=%ERRORLEVEL%
@@ -60,7 +62,7 @@ if %TaskStatus% == 0 (
 ) else (
   ECHO Task did not complete successfully
   EXIT /b 1
-)"""
+)"""  # noqa: E501
 )
 
 PROVISION = Template(
@@ -81,7 +83,7 @@ ECHO working directory: %CD%
 
 ECHO this is a provisioning task
 
-I:\bootstrap-py-windows\python-311\bin\hipercow environment provision-run ${environment_name} ${provision_id}
+I:\bootstrap-py-windows\python-${python_version}\bin\hipercow environment provision-run ${environment_name} ${provision_id}
 
 @ECHO off
 %SystemDrive%
@@ -117,27 +119,25 @@ if %ERRORLEVEL% neq 0 (
 # needf the relative path and the absolute path to the task directory
 # and we build the unc base path twice (once with slash normalisation,
 # the other without).
-def write_batch_task_run(task_id: str, path_map: PathMap, root: Root) -> str:
-    data = _template_data_task_run(task_id, path_map)
-    path = str(root.path_task(task_id, relative=True) / "task_run.bat")
-    path = path.replace("\\", "/")
-    rel = path_map.relative
-    unc = f"//{path_map.mount.host}/{path_map.mount.remote}/{rel}/{path}"
+def write_batch_task_run(
+    task_id: str, config: DideConfiguration, root: Root
+) -> str:
+    data = _template_data_task_run(task_id, config)
+    path_map = config.path_map
+    path = root.path_task(task_id, relative=True) / "task_run.bat"
+    unc = _unc_path(path_map, path)
     with (root.path / path).open("w") as f:
         f.write(TASK_RUN.substitute(data))
     return unc
 
 
 def write_batch_provision(
-    name: str, provision_id: str, path_map: PathMap, root: Root
+    name: str, provision_id: str, config: DideConfiguration, root: Root
 ) -> str:
-    data = _template_data_provision(name, provision_id, path_map)
-    path = str(
-        root.path_provision(name, provision_id, relative=True) / "run.bat"
-    )
-    path = path.replace("\\", "/")
-    rel = path_map.relative
-    unc = f"//{path_map.mount.host}/{path_map.mount.remote}/{rel}/{path}"
+    path_map = config.path_map
+    data = _template_data_provision(name, provision_id, config)
+    path = root.path_provision(name, provision_id, relative=True) / "run.bat"
+    unc = _unc_path(path_map, path)
 
     path_abs = root.path / path
     path_abs.parent.mkdir(parents=True, exist_ok=True)
@@ -146,7 +146,8 @@ def write_batch_provision(
     return unc
 
 
-def _template_data_core(path_map: PathMap) -> dict[str, str]:
+def _template_data_core(config: DideConfiguration) -> dict[str, str]:
+    path_map = config.path_map
     host = path_map.mount.host
     unc_path = f"//{host}/{path_map.mount.remote}".replace("/", "\\")
     root_drive = path_map.remote
@@ -158,6 +159,7 @@ def _template_data_core(path_map: PathMap) -> dict[str, str]:
     return {
         "hostname": platform.node(),
         "date": str(datetime.datetime.now(tz=datetime.timezone.utc)),
+        "python_version": config.python_version.replace(".", ""),
         "hipercow_version": version,
         "hipercow_root_drive": root_drive,
         "hipercow_root_path": root_path,
@@ -166,8 +168,10 @@ def _template_data_core(path_map: PathMap) -> dict[str, str]:
     }
 
 
-def _template_data_task_run(task_id, path_map: PathMap) -> dict[str, str]:
-    return _template_data_core(path_map) | {
+def _template_data_task_run(
+    task_id, config: DideConfiguration
+) -> dict[str, str]:
+    return _template_data_core(config) | {
         "task_id": task_id,
         "task_id_1": task_id[:2],
         "task_id_2": task_id[2:],
@@ -175,9 +179,16 @@ def _template_data_task_run(task_id, path_map: PathMap) -> dict[str, str]:
 
 
 def _template_data_provision(
-    name: str, id: str, path_map: PathMap
+    name: str, id: str, config: DideConfiguration
 ) -> dict[str, str]:
-    return _template_data_core(path_map) | {
+    return _template_data_core(config) | {
         "environment_name": name,
         "provision_id": id,
     }
+
+
+def _unc_path(path_map: PathMap, path: Path):
+    path_str = str(path).replace("\\", "/")
+    rel = path_map.relative
+    rel = "" if rel == "." else rel + "/"
+    return f"//{path_map.mount.host}/{path_map.mount.remote}/{rel}{path_str}"

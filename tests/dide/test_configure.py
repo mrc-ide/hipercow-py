@@ -2,8 +2,8 @@ from unittest import mock
 
 from hipercow import root
 from hipercow.configure import configure, show_configuration
-from hipercow.dide.driver import DideConfiguration
-from hipercow.dide.mounts import Mount, remap_path
+from hipercow.dide.configuration import DideConfiguration
+from hipercow.dide.mounts import Mount
 from hipercow.dide.web import Credentials, DideWebClient
 from hipercow.driver import list_drivers, load_driver
 from hipercow.environment import environment_new
@@ -59,15 +59,15 @@ def test_provision_using_driver(tmp_path, mocker):
     r = root.open_root(path)
     mock_mounts = [Mount("projects", "other", tmp_path)]
     mock_provision = mock.MagicMock()
-    path_map = remap_path(path, mock_mounts)
     mocker.patch("hipercow.dide.driver.detect_mounts", return_value=mock_mounts)
     mocker.patch("hipercow.dide.driver._dide_provision", mock_provision)
     configure(r, "dide", python_version=None)
     environment_new(r, "default", "pip")
     provision(r, "default", [])
+    cfg = load_driver(r, None).config
     assert mock_provision.call_count == 1
     assert mock_provision.mock_calls[0] == mock.call(
-        r, "default", mock.ANY, path_map
+        r, "default", mock.ANY, cfg
     )
 
 

@@ -1,26 +1,12 @@
-from dataclasses import dataclass
-
 from taskwait import Task, taskwait
 
 from hipercow.dide.auth import fetch_credentials
 from hipercow.dide.batch import write_batch_provision, write_batch_task_run
-from hipercow.dide.mounts import Mount, PathMap, detect_mounts, remap_path
+from hipercow.dide.configuration import DideConfiguration
+from hipercow.dide.mounts import detect_mounts
 from hipercow.dide.web import DideWebClient
 from hipercow.driver import HipercowDriver
 from hipercow.root import Root
-from hipercow.util import check_python_version
-
-
-@dataclass
-class DideConfiguration:
-    path_map: PathMap
-    python_version: str
-
-    def __init__(
-        self, root: Root, *, mounts: list[Mount], python_version: str | None
-    ):
-        self.path_map = remap_path(root.path, mounts)
-        self.python_version = check_python_version(python_version)
 
 
 class DideDriver(HipercowDriver):
@@ -40,11 +26,11 @@ class DideDriver(HipercowDriver):
 
     def submit(self, task_id: str, root: Root) -> None:
         cl = _web_client()
-        unc = write_batch_task_run(task_id, self.config.path_map, root)
+        unc = write_batch_task_run(task_id, self.config, root)
         cl.submit(unc, task_id)
 
     def provision(self, root: Root, name: str, id: str) -> None:
-        _dide_provision(root, name, id, self.config.path_map)
+        _dide_provision(root, name, id, self.config)
 
 
 class ProvisionWaitWrapper(Task):
@@ -85,9 +71,9 @@ def _web_client() -> DideWebClient:
     return cl
 
 
-def _dide_provision(root: Root, name: str, id: str, path_map: PathMap):
+def _dide_provision(root: Root, name: str, id: str, config: DideConfiguration):
     cl = _web_client()
-    unc = write_batch_provision(name, id, path_map, root)
+    unc = write_batch_provision(name, id, config, root)
     dide_id = cl.submit(unc, f"{name}/{id}")
     task = ProvisionWaitWrapper(root, name, id, cl, dide_id)
     taskwait(task)

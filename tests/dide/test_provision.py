@@ -4,6 +4,7 @@ from unittest import mock
 import hipercow.dide.driver
 from hipercow import root
 from hipercow.dide import mounts
+from hipercow.dide.configuration import DideConfiguration
 from hipercow.dide.driver import ProvisionWaitWrapper, _dide_provision
 from hipercow.dide.web import DideWebClient
 from hipercow.task import TaskStatus
@@ -22,8 +23,12 @@ def test_can_provision_with_dide(tmp_path, mocker):
     mock_client = mock.MagicMock(spec=DideWebClient)
     mocker.patch("hipercow.dide.driver._web_client", return_value=mock_client)
     mocker.patch("hipercow.dide.driver.taskwait")
+    mocker.patch(
+        "hipercow.dide.configuration.remap_path", return_value=path_map
+    )
+    config = DideConfiguration(r, mounts=[m], python_version=None)
 
-    _dide_provision(r, "myenv", "abcdef", path_map)
+    _dide_provision(r, "myenv", "abcdef", config)
 
     assert mock_client.submit.call_count == 1
     assert mock_client.mock_calls[0] == mock.call.submit(
