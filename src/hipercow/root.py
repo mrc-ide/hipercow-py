@@ -1,15 +1,14 @@
 import platform
 from pathlib import Path
 
-from hipercow.util import file_create, find_file_descend
+from hipercow.util import find_file_descend
 
 
 def init(path: str | Path) -> None:
     path = Path(path)
-    dest_dir = path / "hipercow"
-    dest = dest_dir / "py"
+    dest = path / "hipercow" / "py"
 
-    if dest.exists():
+    if dest.is_dir():
         print(f"hipercow already initialised at {path}")
         return
 
@@ -17,36 +16,35 @@ def init(path: str | Path) -> None:
     if root is not None:
         print(f"hipercow already initialised at {root} (found from {path})")
 
-    if dest_dir.exists() and not dest_dir.is_dir():
+    if dest.exists() and not dest.is_dir():
         msg = (
-            "Unexpected file 'hipercow' (rather than directory)"
+            "Unexpected file 'hipercow/py' (rather than directory)"
             f"found at {path}"
         )
         raise Exception(msg)
 
-    dest_dir.mkdir(parents=True)
-    file_create(dest)
+    dest.mkdir(parents=True)
     print(f"Initialised hipercow at {path}")
 
 
 class Root:
     def __init__(self, path: str | Path) -> None:
-        path = Path(path)
-        if not (path / "hipercow").is_dir():
+        self.path = Path(path)
+        if not self.path_base().parent.is_dir():
             msg = f"Failed to open 'hipercow' root at {path}"
             raise Exception(msg)
-        if not (path / "hipercow" / "py").exists():
+        if not self.path_base().is_dir():
             msg = f"Failed to open non-python 'hipercow' root at {path}"
             raise Exception(msg)
 
-        self.path = path
-
     def path_base(self, *, relative: bool = False) -> Path:
-        return Path() if relative else self.path
+        return (Path() if relative else self.path) / "hipercow" / "py"
 
-    def path_task(self, task_id: str, *, relative: bool = False) -> Path:
+    def path_task(self, task_id: str | None, *, relative: bool = False) -> Path:
         base = self.path_base(relative=relative)
-        return base / "hipercow" / "tasks" / task_id[:2] / task_id[2:]
+        if task_id is None:
+            return base / "tasks"
+        return base / "tasks" / task_id[:2] / task_id[2:]
 
     def path_task_times(self, task_id: str) -> Path:
         return self.path_task(task_id) / "times"
@@ -60,13 +58,15 @@ class Root:
     def path_task_log(self, task_id: str) -> Path:
         return self.path_task(task_id) / "log"
 
-    def path_configuration(self, name: str) -> Path:
+    def path_configuration(self, name: str | None) -> Path:
         hostname = platform.node()
-        return self.path / "hipercow" / "config" / hostname / name
+        return self.path_base() / "config" / hostname / (name or ".")
 
-    def path_environment(self, name: str, *, relative: bool = False) -> Path:
+    def path_environment(
+        self, name: str | None, *, relative: bool = False
+    ) -> Path:
         base = self.path_base(relative=relative)
-        return base / "hipercow" / "env" / name
+        return base / "env" / (name or ".")
 
     def path_environment_config(self, name: str) -> Path:
         return self.path_environment(name) / "config"
