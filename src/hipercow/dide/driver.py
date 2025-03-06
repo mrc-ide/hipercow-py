@@ -1,35 +1,41 @@
-from dataclasses import dataclass
-
 from taskwait import Task, taskwait
 
 from hipercow.dide.auth import fetch_credentials
 from hipercow.dide.batch import write_batch_provision, write_batch_task_run
-from hipercow.dide.mounts import PathMap, detect_mounts, remap_path
+from hipercow.dide.mounts import Mount, PathMap, detect_mounts, remap_path
 from hipercow.dide.web import DideWebClient
 from hipercow.driver import HipercowDriver
 from hipercow.root import Root
-
-# Ignoring for now the need to get a different version of this for
-# each machine that submits (see for example the R version of this).
-# Better might be to allow interleaving old and new configurations
-# together somehow, but that's quite weird.
+from hipercow.util import check_python_version
 
 
-@dataclass
 class DideConfiguration:
     path_map: PathMap
+    python_version: str
+
+    def __init__(
+        self, root: Root, *, mounts: list[Mount], python_version: str | None
+    ):
+        self.path_map = remap_path(root.path, mounts)
+        self.python_version = check_python_version(python_version)
 
 
 class DideDriver(HipercowDriver):
     name = "dide"
     config: DideConfiguration
 
-    def __init__(self, root: Root, **kwargs):  #  noqa: ARG002
+    def __init__(self, root: Root, **kwargs):
         mounts = detect_mounts()
-        path = remap_path(root.path, mounts)
-        self.config = DideConfiguration(path)
+        self.config = DideConfiguration(root, mounts=mounts, **kwargs)
 
-    def submit(self, task_id: str, root: Root):
+    def show_configuration(self) -> None:
+        path_map  = self.config.path_map
+        print(f"path mapping:")
+        print(f"  drive: {path_map.remote}")
+        print(f"  share: \\\\{path_map.mount.host}\\{path_map.mount.remote}")
+        print(f"python version: {self.config.python_version}")
+
+    def submit(self, task_id: str, root: Root) -> None:
         cl = _web_client()
         unc = write_batch_task_run(task_id, self.config.path_map, root)
         cl.submit(unc, task_id)

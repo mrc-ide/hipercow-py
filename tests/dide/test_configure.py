@@ -1,7 +1,7 @@
 from unittest import mock
 
 from hipercow import root
-from hipercow.configure import configure
+from hipercow.configure import configure, show_configuration
 from hipercow.dide.driver import DideConfiguration
 from hipercow.dide.mounts import Mount, remap_path
 from hipercow.dide.web import Credentials, DideWebClient
@@ -68,3 +68,21 @@ def test_provision_using_driver(tmp_path, mocker):
     assert mock_provision.mock_calls[0] == mock.call(
         r, "default", mock.ANY, path_map
     )
+
+
+def test_configure_python_version(tmp_path, mocker, capsys):
+    path = tmp_path / "a" / "b"
+    root.init(path)
+    r = root.open_root(path)
+    mock_mounts = [Mount("projects", "other", tmp_path)]
+    mocker.patch("hipercow.dide.driver.detect_mounts", return_value=mock_mounts)
+    configure(r, "dide", python_version="3.12")
+    capsys.readouterr()
+    show_configuration(r)
+    out = capsys.readouterr().out
+    assert out == """Configuration for 'dide'
+path mapping:
+  drive: V:
+  share: \\\\projects\\other
+python version: 3.12
+"""
