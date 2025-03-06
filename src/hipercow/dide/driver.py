@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 from taskwait import Task, taskwait
 
 from hipercow.dide.auth import fetch_credentials
@@ -9,6 +11,7 @@ from hipercow.root import Root
 from hipercow.util import check_python_version
 
 
+@dataclass
 class DideConfiguration:
     path_map: PathMap
     python_version: str
@@ -29,8 +32,8 @@ class DideDriver(HipercowDriver):
         self.config = DideConfiguration(root, mounts=mounts, **kwargs)
 
     def show_configuration(self) -> None:
-        path_map  = self.config.path_map
-        print(f"path mapping:")
+        path_map = self.config.path_map
+        print("path mapping:")
         print(f"  drive: {path_map.remote}")
         print(f"  share: \\\\{path_map.mount.host}\\{path_map.mount.remote}")
         print(f"python version: {self.config.python_version}")
