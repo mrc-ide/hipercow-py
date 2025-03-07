@@ -98,7 +98,7 @@ def _bootstrap_target(
 
 def _bootstrap_args(*, force: bool, verbose: bool):
     args = ["--force" if force else "", "--verbose" if verbose else ""]
-    return " ".join(args)
+    return " ".join(args).strip()
 
 
 def _bootstrap_mount(mounts: list[Mount] | None = None) -> Mount:
