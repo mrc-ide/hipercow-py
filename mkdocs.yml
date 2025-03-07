@@ -41,3 +41,9 @@ theme:
 plugins:
 - search
 - mkdocstrings
+- spellcheck:
+    backends:
+    - symspellpy
+    - codespell:
+        dictionaries: [clear, rare]
+    known_words: known-words.txt

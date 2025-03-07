@@ -189,9 +189,10 @@ explicit-only = [
 [tool.hatch.envs.docs]
 extra-dependencies = [
   "mkdocs-material",
+  "mkdocs-spellcheck[all]",
   "mkdocstrings-python",
 ]
 
 [tool.hatch.envs.docs.scripts]
-build = "mkdocs build"
-serve = "mkdocs serve"
+build = "mkdocs build {args}"
+serve = "mkdocs serve {args}"
