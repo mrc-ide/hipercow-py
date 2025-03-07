@@ -76,8 +76,8 @@ def environment_delete(root: Root, name: str) -> None:
 
 def environment_check(root: Root, name: str | None) -> str:
     if name is None:
-        return "default"
-    if name in {"empty", "default"} or environment_exists(root, name):
+        return "default" if environment_exists(root, "default") else "empty"
+    if name == "empty" or environment_exists(root, name):
         return name
     msg = f"No such environment '{name}'"
     raise Exception(msg)

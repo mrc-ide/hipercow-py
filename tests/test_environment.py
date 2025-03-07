@@ -27,8 +27,9 @@ def test_environment_selection(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     assert environment_check(r, "empty") == "empty"
-    assert environment_check(r, None) == "default"
-    assert environment_check(r, "default") == "default"
+    assert environment_check(r, None) == "empty"
+    with pytest.raises(Exception, match="No such environment 'default'"):
+        environment_check(r, "default")
     with pytest.raises(Exception, match="No such environment 'other'"):
         environment_check(r, "other")
 
