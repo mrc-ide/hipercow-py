@@ -1,18 +1,18 @@
 # Introduction
 
-This section will describe running a simple task on the cluster, using `hipercow`.  We make some assuptions, common to the [R version](https://mrc-ide.github.io/hipercow/):
+This section will describe running a simple task on the cluster, using `hipercow`.  We make some assumptions, common to the [R version](https://mrc-ide.github.io/hipercow/):
 
 * You are a member of DIDE at Imperial College London
 * You have an account on our cluster; you can check this by logging into [the web portal](https://mrcdata.dide.ic.ac.uk/hpc) with your [DIDE credentials](https://mrc-ide.github.io/hipercow/articles/windows.html#about-our-usernames-and-passwords).  If you cannot log in, please email Wes.
 * You are working in a network share that the cluster can see. Ideally this is a **project share** and not your network home directory, as project shares are much faster and more reliable.  See the [R documentation](https://mrc-ide.github.io/hipercow/articles/windows.html#filesystems-and-paths) for more on this topic, including how to configure this on your machine
 * You have some Python code that you would like to run on the cluster, which currently works for you locally.
-* You are confident excecuting commands at the command line (bash or similar). If you are not, please do talk with us as we'd be interested in your workflows.
+* You are confident executing commands at the command line (bash or similar). If you are not, please do talk with us as we'd be interested in your workflows.
 
-We also make the assumption that you are ok with some rough edges while we develop this system.  Please be prepared to work with us to track down and understand the bugs that you will definitely run into, so that we can make this tool work for people as well as the R package does.
+We also make the assumption that you are OK with some rough edges while we develop this system.  Please be prepared to work with us to track down and understand the bugs that you will definitely run into, so that we can make this tool work for people as well as the R package does.
 
 ## Project layout
 
-You may have an existing project, or you might be starting from scratch.  We are not at all prescriptive about how you might structure your files, but we will create a directory `hipercow/` at the root of your project, and you must not manually change or delete any file within that directory.  It is safe to mix R and Python hipercows within the same project but at the moment they are [completely unaware of each others existence despite occupying the same space](https://en.wikipedia.org/wiki/The_City_%26_the_City).  It is likely that you will have a `pyproject.toml` or a `requirements.txt` file at this level, and quite possibly your `.git/` directory.
+You may have an existing project, or you might be starting from scratch.  We are not at all prescriptive about how you might structure your files, but we will create a directory `hipercow/` at the root of your project, and you must not manually change or delete any file within that directory.  It is safe to mix R and Python `hipercow`s within the same project but at the moment they are [completely unaware of each others existence despite occupying the same space](https://en.wikipedia.org/wiki/The_City_%26_the_City).  It is likely that you will have a `pyproject.toml` or a `requirements.txt` file at this level, and quite possibly your `.git/` directory.
 
 ## Interaction with `hipercow`
 
@@ -32,6 +32,52 @@ Commands:
   environment
   init
   task
+```
+
+## Authentication
+
+Before starting anything, we should sort out your DIDE credentials.  You need your DIDE username and password - the password might differ from your ICT password, see [our guide to passwords](https://mrc-ide.github.io/hipercow/articles/windows.html#about-our-usernames-and-passwords).  If unsure, you can check by logging into [the web portal](https://mrcdata.dide.ic.ac.uk/hpc).
+
+You can run `hipercow dide authenticate` to store credentials in your system keychain.
+
+```console
+$ hipercow dide authenticate
+# Please enter your DIDE credentials
+
+We need to know your DIDE username and password in order to log you into
+the cluster. This will be shared across all projects on this machine, with
+the username and password stored securely in your system keychain. You will
+have to run this command again on other computers
+
+Your DIDE password may differ from your Imperial password, and in some
+cases your username may also differ. If in doubt, perhaps try logging in
+at https://mrcdata.dide.ic.ac.uk/hpc" and use the combination that works
+for you there.
+
+DIDE username (default: rfitzjoh) >
+Using username 'rfitzjoh'
+
+Password:
+I am going to to try and log in with your password now.
+If this fails we can always try again
+
+Success! I'm saving these into your keyring now so that we can reuse these
+when we need to log into the cluster.
+```
+
+At any point you can check credentials by running
+
+```console
+$ hipercow dide authenticate --check
+Fetching credentials
+Testing credentials
+Success!
+```
+
+and you can delete them by running
+
+```console
+$ hipercow dide authenticate --clear
 ```
 
 ## Initialisation
@@ -63,7 +109,7 @@ Waiting......OK
 hello hipercow world
 ```
 
-The `--wait` option should occur before your command and indicates that hipercow should wait for the task to complete before returning.  The string printed out (`a182aa2b169c2e04aa0a5d27fff1acaa`) is the "task id" - every task gets one of these and they are unique.
+The `--wait` option should occur before your command and indicates that `hipercow` should wait for the task to complete before returning.  The string printed out (`a182aa2b169c2e04aa0a5d27fff1acaa`) is the "task id" - every task gets one of these and they are unique.
 
 ## Running some python code
 
