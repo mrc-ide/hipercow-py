@@ -15,8 +15,11 @@ from hipercow.environment import (
 from hipercow.provision import provision, provision_run
 from hipercow.task import (
     TaskStatus,
+    task_last,
     task_list,
     task_log,
+    task_recent,
+    task_recent_rebuild,
     task_status,
     task_wait,
 )
@@ -113,6 +116,29 @@ def cli_task_list(with_status=None):
     with_status = _process_with_status(with_status)
     for task_id in task_list(r, with_status=with_status):
         click.echo(task_id)
+
+
+@task.command("last")
+def cli_task_last():
+    r = root.open_root()
+    task_id = task_last(r)
+    if task_id is None:
+        # we might set exit code to something nonzero here, but this
+        # seems slightly hard...
+        pass
+    else:
+        click.echo(task_id)
+
+
+@task.command("recent")
+@click.option("--limit", type=int)
+@click.option("--rebuild", is_flag=True)
+def cli_task_recent(limit: int, *, rebuild: bool):
+    r = root.open_root()
+    if rebuild:
+        task_recent_rebuild(r, limit=limit)
+    for i in task_recent(r, limit=limit):
+        click.echo(i)
 
 
 @task.command("create")

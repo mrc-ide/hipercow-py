@@ -3,7 +3,7 @@
 
 site_name: hipercow
 site_url: https://mrc-ide.github.io/hipercow-py/
-repo_url: https://github.com/reside-ic/hipercow-py
+repo_url: https://github.com/mrc-ide/hipercow-py
 repo_name: mrc-ide/hipercow-py
 edit_uri: edit/main/docs/
 theme:

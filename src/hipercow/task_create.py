@@ -44,6 +44,8 @@ def _task_create(
     task_id = _new_task_id()
     environment = environment_check(root, environment)
     TaskData(task_id, method, data, str(path), environment, envvars).write(root)
+    with root.path_recent().open("a") as f:
+        f.write(f"{task_id}\n")
     _submit_maybe(task_id, driver, root)
     return task_id
 

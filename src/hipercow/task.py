@@ -190,3 +190,46 @@ def task_wait(
     status = TaskStatus[result.status.upper()]
 
     return status == TaskStatus.SUCCESS
+
+
+def task_recent_rebuild(root: Root, *, limit: int | None = None) -> None:
+    path = root.path_recent()
+    if limit is not None and limit == 0:
+        if path.exists():
+            path.unlink()
+        return
+
+    ids = task_list(root)
+    time = [root.path_task_data(i).stat().st_ctime for i in ids]
+    ids = [i for _, i in sorted(zip(time, ids, strict=False))]
+
+    if limit is not None and limit < len(ids):
+        ids = ids[-limit:]
+
+    with path.open("w") as f:
+        for i in ids:
+            f.write(f"{i}\n")
+
+
+def task_recent(root: Root, *, limit: int | None = None) -> list[str]:
+    path = root.path_recent()
+    if not path.exists():
+        return []
+
+    with path.open() as f:
+        ids = [i.strip() for i in f.readlines()]
+
+    id_length = 32
+    if not all(len(i) == id_length for i in ids):
+        msg = "Recent data list is corrupt, please rebuild"
+        raise Exception(msg)
+
+    if limit is not None and limit < len(ids):
+        ids = ids[-limit:]
+
+    return ids
+
+
+def task_last(root: Root) -> str | None:
+    task_id = task_recent(root, limit=1)
+    return task_id[0] if task_id else None

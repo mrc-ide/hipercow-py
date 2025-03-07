@@ -1,3 +1,4 @@
+import time
 from pathlib import Path
 from unittest import mock
 
@@ -5,6 +6,7 @@ from click.testing import CliRunner
 
 from hipercow import cli, root, task
 from hipercow.task import TaskData, TaskStatus
+from hipercow.task_create import task_create_shell
 
 
 def test_can_init_repository(tmp_path):
@@ -310,3 +312,65 @@ def test_can_create_on_task_and_wait(tmp_path, mocker):
             mock.ANY,
             task_id,
         )
+
+
+def test_can_get_last_task(tmp_path):
+    runner = CliRunner()
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        root.init(".")
+        r = root.open_root()
+
+        # No tasks
+        res = runner.invoke(cli.cli_task_last, [])
+        assert res.exit_code == 0
+        assert res.stdout == ""
+
+        res = runner.invoke(cli.cli_task_recent, [])
+        assert res.exit_code == 0
+        assert res.stdout == ""
+
+        ids = [task_create_shell(r, ["true"]) for _ in range(5)]
+
+        res = runner.invoke(cli.cli_task_last, [])
+        assert res.exit_code == 0
+        assert res.stdout == f"{ids[-1]}\n"
+
+        res = runner.invoke(cli.cli_task_recent, [])
+        assert res.exit_code == 0
+        assert res.stdout == "".join(i + "\n" for i in ids)
+
+        res = runner.invoke(cli.cli_task_recent, ["--limit", 2])
+        assert res.exit_code == 0
+        assert res.stdout == "".join(i + "\n" for i in ids[-2:])
+
+
+def test_can_rebuild_recent_list(tmp_path):
+    runner = CliRunner()
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        root.init(".")
+        r = root.open_root()
+
+        ids = []
+        for i in range(5):
+            if i > 0:
+                time.sleep(0.01)
+            ids.append(task_create_shell(r, ["echo", "hello world"]))
+
+        res = runner.invoke(cli.cli_task_recent, [])
+        assert res.exit_code == 0
+        assert res.stdout == "".join(i + "\n" for i in ids)
+
+        with r.path_recent().open("w") as f:
+            for i in ids[:2] + [ids[2] + ids[3], ids[4]]:
+                f.write(f"{i}\n")
+
+        res = runner.invoke(cli.cli_task_recent, [])
+        assert res.exit_code == 1
+        assert res.stdout == ""
+        assert (
+            str(res.exception) == "Recent data list is corrupt, please rebuild"
+        )
+
+        res = runner.invoke(cli.cli_task_recent, ["--rebuild"])
+        assert res.exit_code == 0
+        assert res.stdout == "".join(i + "\n" for i in ids)
