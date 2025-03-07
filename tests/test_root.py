@@ -65,3 +65,24 @@ def test_error_if_no_root_found_by_descending(tmp_path):
     path = tmp_path / "a" / "b"
     with pytest.raises(Exception, match="Failed to find 'hipercow' from"):
         root.open_root(path)
+
+
+def test_create_gitignore_in_root(tmp_path):
+    path = tmp_path / "ex"
+    gi = path / "hipercow" / ".gitignore"
+    root.init(path)
+    assert gi.exists()
+    with gi.open() as f:
+        assert f.read() == "*\n"
+
+
+def test_dont_overwrite_existing_gitignore(tmp_path):
+    path = tmp_path / "ex"
+    gi = path / "hipercow" / ".gitignore"
+    (path / "hipercow").mkdir(parents=True)
+    with gi.open("w") as f:
+        f.write("hello!\n")
+    root.init(path)
+    assert gi.exists()
+    with gi.open() as f:
+        assert f.read() == "hello!\n"
