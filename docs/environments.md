@@ -4,10 +4,10 @@ We use the term "environment" to refer to the context in which a task runs, cont
 
 There are two key sorts of environments we (aim to) support:
 
-* [Python virtual environments](https://docs.python.org/3/tutorial/venv.html), generally installed via `pip`.  This is effectively a directory of installed python packages, plus some machinery to set the `PATH` environment variable (where the operating system looks for programmes) and the python search path (`sys.path`; where Python looks for packages).
+* [Python virtual environments](https://docs.python.org/3/tutorial/venv.html), generally installed via `pip`.  This is effectively a directory of installed python packages, plus some machinery to set the `PATH` environment variable (where the operating system looks for programs) and the python search path (`sys.path`: where Python looks for packages).
 * [Conda environments](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html), generally installed by `conda`, `miniconda`, `mamba` or `micromamba`.  This is a framework popular in bioinformatics and can be used to create a self-consistent installation of a great many tools, isolated from system libraries.
 
-Environments are necessary because we aim to support the minimum useful number of globally installed software on the cluster.  This reduces the number of times you have to wait for someone else to install or update some piece of software that you depend on for your work.
+Environments are necessary because we aim to keep globally installed software on the cluster to a minimum.  This reduces the number of times you have to wait for someone else to install or update some piece of software that you depend on for your work.
 
 ## In a nutshell
 

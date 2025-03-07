@@ -12,7 +12,7 @@ We also make the assumption that you are OK with some rough edges while we devel
 
 ## Project layout
 
-You may have an existing project, or you might be starting from scratch.  We are not at all prescriptive about how you might structure your files, but we will create a directory `hipercow/` at the root of your project, and you must not manually change or delete any file within that directory.  It is safe to mix R and Python `hipercow`s within the same project but at the moment they are [completely unaware of each others existence despite occupying the same space](https://en.wikipedia.org/wiki/The_City_%26_the_City).  It is likely that you will have a `pyproject.toml` or a `requirements.txt` file at this level, and quite possibly your `.git/` directory.
+You may have an existing project, or you might be starting from scratch.  We are not at all prescriptive about how you might structure your files, but we will create a directory `hipercow/` at the root of your project, and you must not manually change or delete any file within that directory.  It is safe to mix R and Python `hipercow`s within the same project but at the moment they are [completely unaware of each other's existence despite occupying the same space](https://en.wikipedia.org/wiki/The_City_%26_the_City).  It is likely that you will have a `pyproject.toml` or a `requirements.txt` file at this level, and quite possibly your `.git/` directory.
 
 ## Interaction with `hipercow`
 
