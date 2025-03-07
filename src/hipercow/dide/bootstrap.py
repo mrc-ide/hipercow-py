@@ -24,7 +24,8 @@ def bootstrap(
     client = _web_client()
     mount = _bootstrap_mount()
 
-    # TODO: duplicates list in hipercow/util.py
+    # NOTE: duplicates list in hipercow/util.py, we'll tidy this up
+    # later too.
     python_versions = ["3.10", "3.11", "3.12", "3.13"]
     bootstrap_id = secrets.token_hex(4)
 
