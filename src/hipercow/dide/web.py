@@ -116,8 +116,10 @@ class DideWebClient:
     def logged_in(self) -> bool:
         return self._client.logged_in()
 
-    def submit(self, path: str, name: str) -> str:
-        data = _client_body_submit(path, name, self._cluster)
+    def submit(self, path: str, name: str, *,
+               template: str | None = None,
+               workdir: str | None = None) -> str:
+        data = _client_body_submit(path, name, self._cluster, template=template, workdir=workdir)
         response = self._client.request("POST", "submit_1.php", data=data)
         return _client_parse_submit(response.text)
 
@@ -171,19 +173,18 @@ def _client_check_access(cluster: str, valid: list[str]) -> None:
     raise Exception(msg)
 
 
-def _client_body_submit(path: str, name: str, cluster: str) -> dict:
-    # NOTE: list2cmdline is undocumented but needed.
-    # not documented https://github.com/conan-io/conan/pull/11553/
-    path_call = f"call {list2cmdline([path])}"
+def _client_body_submit(path: str, name: str, cluster: str, *,
+                        template: str | None,
+                        workdir: str | None) -> dict:
     data = {
         "cluster": encode64(cluster),
-        "template": encode64("AllNodes"),
-        "jn": encode64(name or ""),  # job name
-        "wd": encode64(""),  # work dir - unset as we do this in the .bat
-        "se": encode64(""),  # stderr
-        "so": encode64(""),  # stdout
-        "jobs": encode64(path_call),
-        "dep": encode64(""),  # dependencies, eventually
+        "template": encode64(template or "AllNodes"),
+        "jn": encode64(name or ""),    # job name
+        "wd": encode64(workdir or ""), # work dir
+        "se": encode64(""),            # stderr
+        "so": encode64(""),            # stdout
+        "jobs": encode64(_call_quote_batch_path(path)),
+        "dep": encode64(""),           # dependencies, eventually
         "hpcfunc": "submit",
         "ver": encode64("hipercow-py"),
     }
@@ -292,3 +293,9 @@ def _parse_dide_timestamp(time: str) -> datetime.datetime:
     return datetime.datetime.strptime(time, "%Y%m%d%H%M%S").astimezone(
         datetime.timezone.utc
     )
+
+
+def _call_quote_batch_path(path: str) -> str:
+    # NOTE: list2cmdline is undocumented but needed.
+    # not documented https://github.com/conan-io/conan/pull/11553/
+    return f"call {list2cmdline([path])}"
