@@ -1,41 +1,36 @@
-from dataclasses import dataclass
-
 from taskwait import Task, taskwait
 
 from hipercow.dide.auth import fetch_credentials
 from hipercow.dide.batch import write_batch_provision, write_batch_task_run
-from hipercow.dide.mounts import PathMap, detect_mounts, remap_path
+from hipercow.dide.configuration import DideConfiguration
+from hipercow.dide.mounts import detect_mounts
 from hipercow.dide.web import DideWebClient
 from hipercow.driver import HipercowDriver
 from hipercow.root import Root
-
-# Ignoring for now the need to get a different version of this for
-# each machine that submits (see for example the R version of this).
-# Better might be to allow interleaving old and new configurations
-# together somehow, but that's quite weird.
-
-
-@dataclass
-class DideConfiguration:
-    path_map: PathMap
 
 
 class DideDriver(HipercowDriver):
     name = "dide"
     config: DideConfiguration
 
-    def __init__(self, root: Root, **kwargs):  #  noqa: ARG002
+    def __init__(self, root: Root, **kwargs):
         mounts = detect_mounts()
-        path = remap_path(root.path, mounts)
-        self.config = DideConfiguration(path)
+        self.config = DideConfiguration(root, mounts=mounts, **kwargs)
 
-    def submit(self, task_id: str, root: Root):
+    def show_configuration(self) -> None:
+        path_map = self.config.path_map
+        print("path mapping:")
+        print(f"  drive: {path_map.remote}")
+        print(f"  share: \\\\{path_map.mount.host}\\{path_map.mount.remote}")
+        print(f"python version: {self.config.python_version}")
+
+    def submit(self, task_id: str, root: Root) -> None:
         cl = _web_client()
-        unc = write_batch_task_run(task_id, self.config.path_map, root)
+        unc = write_batch_task_run(task_id, self.config, root)
         cl.submit(unc, task_id)
 
     def provision(self, root: Root, name: str, id: str) -> None:
-        _dide_provision(root, name, id, self.config.path_map)
+        _dide_provision(root, name, id, self.config)
 
 
 class ProvisionWaitWrapper(Task):
@@ -76,9 +71,9 @@ def _web_client() -> DideWebClient:
     return cl
 
 
-def _dide_provision(root: Root, name: str, id: str, path_map: PathMap):
+def _dide_provision(root: Root, name: str, id: str, config: DideConfiguration):
     cl = _web_client()
-    unc = write_batch_provision(name, id, path_map, root)
+    unc = write_batch_provision(name, id, config, root)
     dide_id = cl.submit(unc, f"{name}/{id}")
     task = ProvisionWaitWrapper(root, name, id, cl, dide_id)
     taskwait(task)

@@ -1,4 +1,6 @@
 import os
+import platform
+import re
 import subprocess
 from collections.abc import Iterator
 from contextlib import contextmanager
@@ -86,3 +88,22 @@ def subprocess_run(
             with filename.open("a") as f:
                 print(err, file=f)
         return subprocess.CompletedProcess(cmd, -1)
+
+
+def check_python_version(
+    version: str | None, valid: list[str] | None = None
+) -> str:
+    if valid is None:
+        valid = ["3.10", "3.11", "3.12", "3.13"]
+    if not version:
+        v = ".".join(platform.python_version_tuple()[:2])
+    else:
+        m = re.match(r"^([0-9]+)\.([0-9]+)(\.[0-9]+)?$", version)
+        if not m:
+            msg = f"'{version}' does not parse as a valid version string"
+            raise Exception(msg)
+        v = ".".join(m.groups()[:2])
+    if v not in valid:
+        msg = f"Version '{version}' is not supported"
+        raise Exception(msg)
+    return v

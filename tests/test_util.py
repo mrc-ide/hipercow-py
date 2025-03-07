@@ -1,9 +1,11 @@
 import os
+import platform
 from pathlib import Path
 
 import pytest
 
 from hipercow.util import (
+    check_python_version,
     find_file_descend,
     subprocess_run,
     transient_envvars,
@@ -76,3 +78,18 @@ def test_can_unset_envvars_if_none():
         assert os.environ.get("hc_a") == "1"
         assert "hc_b" not in os.environ
         assert os.environ.get("hc_c") == "3"
+
+
+def test_can_check_python_version():
+    ours3 = platform.python_version()
+    ours2 = ".".join(ours3.split(".")[:2])
+    assert check_python_version(None) == ours2
+    assert check_python_version(ours3) == ours2
+    assert check_python_version(ours2) == ours2
+    assert check_python_version("3.10") == "3.10"
+    assert check_python_version("3.11") == "3.11"
+    with pytest.raises(Exception, match="does not parse as a valid version"):
+        check_python_version("3.11a")
+    with pytest.raises(Exception, match="is not supported"):
+        check_python_version("3.9")
+    assert check_python_version("3.9", ["3.9", "3.10"]) == "3.9"

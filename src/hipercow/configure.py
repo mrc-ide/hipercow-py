@@ -1,7 +1,7 @@
 import pickle
 
 from hipercow.dide.driver import DideDriver
-from hipercow.driver import HipercowDriver
+from hipercow.driver import HipercowDriver, load_driver
 from hipercow.example import ExampleDriver
 from hipercow.root import Root
 from hipercow.util import transient_working_directory
@@ -28,6 +28,12 @@ def unconfigure(root: Root, name: str) -> None:
         print(
             f"Did not remove configuration for '{name}' as it was not enabled"
         )
+
+
+def show_configuration(root: Root, driver: str | None = None) -> None:
+    dr = load_driver(root, driver)
+    print(f"Configuration for '{dr.name}'")
+    dr.show_configuration()
 
 
 # ahead of some sort of global store of drivers:

@@ -4,7 +4,7 @@ from operator import ior
 import click
 
 from hipercow import root
-from hipercow.configure import configure, unconfigure
+from hipercow.configure import configure, show_configuration, unconfigure
 from hipercow.dide import auth as dide_auth
 from hipercow.driver import list_drivers
 from hipercow.environment import (
@@ -63,6 +63,13 @@ def cli_driver_configure(name: str):
 def cli_driver_unconfigure(name: str):
     r = root.open_root()
     unconfigure(r, name)
+
+
+@driver.command("show")
+@click.argument("name", required=False)
+def cli_driver_show(name: str | None):
+    r = root.open_root()
+    show_configuration(r, name)
 
 
 @driver.command("list")

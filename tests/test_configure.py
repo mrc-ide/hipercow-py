@@ -1,7 +1,12 @@
 import pytest
 
 from hipercow import root
-from hipercow.configure import _write_configuration, configure, unconfigure
+from hipercow.configure import (
+    _write_configuration,
+    configure,
+    show_configuration,
+    unconfigure,
+)
 from hipercow.driver import list_drivers, load_driver, load_driver_optional
 from hipercow.example import ExampleDriver
 
@@ -72,3 +77,15 @@ def test_get_default_driver(tmp_path):
     _write_configuration(r, b)
     with pytest.raises(Exception, match="More than one candidate driver"):
         load_driver(r, None)
+
+
+def test_can_show_configuration(tmp_path, capsys):
+    path = tmp_path / "ex"
+    root.init(path)
+    r = root.open_root(path)
+    configure(r, "example")
+    capsys.readouterr()
+    capsys.readouterr()
+    show_configuration(r, None)
+    out = capsys.readouterr().out
+    assert out == "Configuration for 'example'\n(no configuration)\n"

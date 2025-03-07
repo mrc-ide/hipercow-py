@@ -9,6 +9,9 @@ class ExampleDriver(HipercowDriver):
     def __init__(self, root: Root, **kwargs):
         pass
 
+    def show_configuration(self) -> None:
+        print("(no configuration)")
+
     def submit(self, task_id, root: Root) -> None:  # noqa: ARG002
         print(f"submitting '{task_id}'")
 
