@@ -6,6 +6,7 @@ import click
 from hipercow import root
 from hipercow.configure import configure, show_configuration, unconfigure
 from hipercow.dide import auth as dide_auth
+from hipercow.dide.bootstrap import bootstrap as dide_bootstrap
 from hipercow.driver import list_drivers
 from hipercow.environment import (
     environment_delete,
@@ -209,6 +210,14 @@ def cli_dide_authenticate(action: str):
     else:
         msg = f"No such action '{action}'; must be one of set/check/clear"
         raise Exception(msg)
+
+
+@dide.command("bootstrap", hidden=True)
+@click.argument("target")
+@click.option("--force/--no-force", default=False)
+@click.option("--verbose/--no-verbose", default=False)
+def cli_dide_bootstrap(target: str, *, force: bool, verbose: bool):
+    dide_bootstrap(target, force=force, verbose=verbose)
 
 
 @cli.group()
