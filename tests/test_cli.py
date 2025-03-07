@@ -121,16 +121,23 @@ def test_can_call_cli_dide_authenticate(mocker):
     assert cli.dide_auth.clear.call_count == 0
     assert cli.dide_auth.authenticate.call_count == 1
 
-    res = runner.invoke(cli.cli_dide_authenticate, ["--clear"])
+    res = runner.invoke(cli.cli_dide_authenticate, ["clear"])
     assert res.exit_code == 0
     assert res.output.strip() == ""
     assert cli.dide_auth.check.call_count == 0
     assert cli.dide_auth.clear.call_count == 1
     assert cli.dide_auth.authenticate.call_count == 1
 
-    res = runner.invoke(cli.cli_dide_authenticate, ["--check"])
+    res = runner.invoke(cli.cli_dide_authenticate, ["check"])
     assert res.exit_code == 0
     assert res.output.strip() == ""
+    assert cli.dide_auth.check.call_count == 1
+    assert cli.dide_auth.clear.call_count == 1
+    assert cli.dide_auth.authenticate.call_count == 1
+
+    res = runner.invoke(cli.cli_dide_authenticate, ["other"])
+    assert res.exit_code == 1
+    assert "No such action 'other'" in str(res.exception)
     assert cli.dide_auth.check.call_count == 1
     assert cli.dide_auth.clear.call_count == 1
     assert cli.dide_auth.authenticate.call_count == 1
