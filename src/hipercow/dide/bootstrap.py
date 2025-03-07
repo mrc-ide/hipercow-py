@@ -137,4 +137,5 @@ def _batch_bootstrap(version: str, target: str, args: str) -> str:
 
 
 def _bootstrap_unc(path: Path):
-    return f"\\\\wpia-hn\\hipercow\\{str(path).replace('/', '\\')}"
+    path_str = str(path).replace("/", "\\")
+    return f"\\\\wpia-hn\\hipercow\\{path_str}"
