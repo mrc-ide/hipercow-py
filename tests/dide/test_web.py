@@ -293,7 +293,9 @@ def test_no_error_if_access_is_ok(mocker):
 
 def test_create_basic_submit_data():
     path = r"\\server\share\script.bat"
-    data = web._client_body_submit(path, "job", "windows", template=None, workdir=None)
+    data = web._client_body_submit(
+        path, "job", "windows", template=None, workdir=None
+    )
     assert data == {
         "cluster": web.encode64("windows"),
         "template": web.encode64("AllNodes"),
@@ -306,20 +308,28 @@ def test_create_basic_submit_data():
         "hpcfunc": "submit",
         "ver": web.encode64("hipercow-py"),
         "rc": web.encode64("1"),
-        "rt": web.encode64("Cores")
+        "rt": web.encode64("Cores"),
     }
 
 
 def test_can_set_template():
     path = r"\\server\share\script.bat"
-    data = web._client_body_submit(path, "job", "windows", template="BuildQueue", workdir=None)
-    data_cmp = web._client_body_submit(path, "job", "windows", template=None, workdir=None)
+    data = web._client_body_submit(
+        path, "job", "windows", template="BuildQueue", workdir=None
+    )
+    data_cmp = web._client_body_submit(
+        path, "job", "windows", template=None, workdir=None
+    )
     assert data == data_cmp | {"template": web.encode64("BuildQueue")}
 
 
 def test_can_set_workdir():
     path = r"\\server\share\script.bat"
     workdir = r"r\\server\share\some\path"
-    data = web._client_body_submit(path, "job", "windows", template=None, workdir=workdir)
-    data_cmp = web._client_body_submit(path, "job", "windows", template=None, workdir=None)
+    data = web._client_body_submit(
+        path, "job", "windows", template=None, workdir=workdir
+    )
+    data_cmp = web._client_body_submit(
+        path, "job", "windows", template=None, workdir=None
+    )
     assert data == data_cmp | {"wd": web.encode64(workdir)}
