@@ -1,8 +1,13 @@
 bioinformatics
 conda
 commandline
+dide
+entrypoint
+eval
 keychain
 pythonic
 roadmap
 stacktrace
+subcommands
+unconfigure
 wes
