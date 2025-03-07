@@ -198,15 +198,17 @@ def dide():
 
 
 @dide.command("authenticate")
-@click.option("--clear", is_flag=True)
-@click.option("--check", is_flag=True)
-def cli_dide_authenticate(clear, check):
-    if check:
+@click.argument("action", default="set")
+def cli_dide_authenticate(action: str):
+    if action == "set":
+        dide_auth.authenticate()
+    elif action == "check":
         dide_auth.check()
-    elif clear:
+    elif action == "clear":
         dide_auth.clear()
     else:
-        dide_auth.authenticate()
+        msg = f"No such action '{action}'; must be one of set/check/clear"
+        raise Exception(msg)
 
 
 @cli.group()

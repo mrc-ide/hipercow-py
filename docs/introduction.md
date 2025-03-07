@@ -68,16 +68,16 @@ when we need to log into the cluster.
 At any point you can check credentials by running
 
 ```console
-$ hipercow dide authenticate --check
+$ hipercow dide authenticate check
 Fetching credentials
 Testing credentials
 Success!
 ```
 
-and you can delete them by running
+and you can clear them by running
 
 ```console
-$ hipercow dide authenticate --clear
+$ hipercow dide authenticate clear
 ```
 
 ## Initialisation
