@@ -24,6 +24,7 @@ def init(path: str | Path) -> None:
         raise Exception(msg)
 
     dest.mkdir(parents=True)
+    _add_gitignore(dest.parent)
     print(f"Initialised hipercow at {path}")
 
 
@@ -106,3 +107,10 @@ def open_root(path: None | str | Path = None) -> Root:
         msg = f"Failed to find 'hipercow' from {path}"
         raise Exception(msg)
     return Root(root)
+
+
+def _add_gitignore(path: Path):
+    dest = path / ".gitignore"
+    if not dest.exists():
+        with dest.open("w") as f:
+            f.write("*\n")
