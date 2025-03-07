@@ -17,7 +17,7 @@ This document is only of interest to people developing `hipercow` and administer
 
 In general, we'll want the bootstrap updated from released the versions of the package from PyPI.  In the R version of the project though, we have found it useful to have the concept of a development bootstrap, and the most flexible installation approach would be from disk.
 
-If the version of hipercow is on PyPI, you should be able to run, from anywhere:
+If the version of `hipercow` is on PyPI, you should be able to run, from anywhere:
 
 ```command
 hipercow dide bootstrap
