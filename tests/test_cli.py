@@ -381,3 +381,26 @@ def test_can_rebuild_recent_list(tmp_path):
         res = runner.invoke(cli.cli_task_recent, ["--rebuild"])
         assert res.exit_code == 0
         assert res.stdout == "".join(i + "\n" for i in ids)
+
+
+def test_can_call_cli_dide_bootstrap(mocker):
+    mocker.patch("hipercow.cli.dide_bootstrap")
+    runner = CliRunner()
+
+    res = runner.invoke(cli.cli_dide_bootstrap, [])
+    assert res.exit_code == 0
+    assert res.output.strip() == ""
+    assert cli.dide_bootstrap.call_count == 1
+    assert cli.dide_bootstrap.mock_calls[0] == mock.call(
+        None, force=False, verbose=False
+    )
+
+    res = runner.invoke(
+        cli.cli_dide_bootstrap, ["myfile", "--verbose", "--force"]
+    )
+    assert res.exit_code == 0
+    assert res.output.strip() == ""
+    assert cli.dide_bootstrap.call_count == 2
+    assert cli.dide_bootstrap.mock_calls[1] == mock.call(
+        "myfile", force=True, verbose=True
+    )
