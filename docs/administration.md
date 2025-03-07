@@ -1,6 +1,6 @@
 # Administration
 
-This document is only of interest to people developing `hipercow` and administering the cluster.  If you are user, none of the commands here are for you.
+This document is only of interest to people developing `hipercow` and administering the cluster.  If you are a user, none of the commands here are for you.
 
 ## Making a release
 
@@ -15,7 +15,7 @@ This document is only of interest to people developing `hipercow` and administer
 
 ## Updating the bootstrap
 
-In general, we'll want the bootstrap updated from released the versions of the package from PyPI.  In the R version of the project though, we have found it useful to have the concept of a development bootstrap, and the most flexible installation approach would be from disk.
+In general, we'll want the bootstrap updated from the released versions of the package from PyPI.  In the R version of the project though, we have found it useful to have the concept of a development bootstrap, and the most flexible installation approach would be from disk.
 
 If the version of `hipercow` is on PyPI, you should be able to run, from anywhere:
 
