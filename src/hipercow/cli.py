@@ -213,7 +213,7 @@ def cli_dide_authenticate(action: str):
 
 
 @dide.command("bootstrap", hidden=True)
-@click.argument("target")
+@click.argument("target", required=False)
 @click.option("--force/--no-force", default=False)
 @click.option("--verbose/--no-verbose", default=False)
 def cli_dide_bootstrap(target: str, *, force: bool, verbose: bool):
