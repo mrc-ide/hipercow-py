@@ -19,7 +19,7 @@ def test_provision_with_example_driver(tmp_path, mocker):
     configure(r, "example")
     mock_run = mock.MagicMock()
     mocker.patch("subprocess.run", mock_run)
-    environment_new(r, "default", "pip")
+    environment_new("default", "pip", r)
     provision(r, "default", [])
 
     pr = Pip(r, "default")
@@ -64,7 +64,7 @@ def test_dont_create_on_second_provision(tmp_path, mocker):
     mock_run = mock.MagicMock()
     mocker.patch("subprocess.run", mock_run)
 
-    environment_new(r, "default", "pip")
+    environment_new("default", "pip", r)
     pr = Pip(r, "default")
     pr.path().mkdir(parents=True)
 
@@ -88,7 +88,7 @@ def test_record_provisioning_error(tmp_path, mocker):
     mock_run = mock.MagicMock(side_effect=Exception("some ghastly error"))
     mocker.patch("subprocess.run", mock_run)
 
-    environment_new(r, "default", "pip")
+    environment_new("default", "pip", r)
     pr = Pip(r, "default")
     pr.path().mkdir(parents=True)
 

@@ -25,8 +25,8 @@ def test_pip_environment_can_be_created(tmp_path, mocker):
     root.init(tmp_path)
     file_create(tmp_path / "requirements.txt")
     r = root.open_root(tmp_path)
-    environment_new(r, "default", "pip")
-    env = environment_engine(r, "default")
+    environment_new("default", "pip", r)
+    env = environment_engine("default", r)
     assert isinstance(env, Pip)
 
     venv_path = str(env.path())

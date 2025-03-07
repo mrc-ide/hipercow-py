@@ -20,7 +20,7 @@ def test_run_in_environment(tmp_path):
             f.write("cowsay\n")
 
         configure(r, "example")
-        environment_new(r, "default", "pip")
+        environment_new("default", "pip", r)
         provision(r, "default", [])
         tid = task_create_shell(r, ["cowsay", "-t", "hello"])
         task_eval(r, tid, capture=True)

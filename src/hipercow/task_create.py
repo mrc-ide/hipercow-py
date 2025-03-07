@@ -42,7 +42,7 @@ def _task_create(
 ) -> str:
     path = relative_workdir(root.path)
     task_id = _new_task_id()
-    environment = environment_check(root, environment)
+    environment = environment_check(environment, root)
     TaskData(task_id, method, data, str(path), environment, envvars).write(root)
     with root.path_recent().open("a") as f:
         f.write(f"{task_id}\n")

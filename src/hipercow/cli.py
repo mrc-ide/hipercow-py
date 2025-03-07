@@ -387,7 +387,7 @@ def cli_environment_list():
 def cli_environment_delete(name: str):
     """Delete an environment."""
     r = root.open_root()
-    environment_delete(r, name)
+    environment_delete(name, r)
 
 
 @environment.command("new")
@@ -406,7 +406,7 @@ def cli_environment_new(name: str, engine: str):
 
     """
     r = root.open_root()
-    environment_new(r, name, engine)
+    environment_new(name, engine, r)
 
 
 @environment.command(

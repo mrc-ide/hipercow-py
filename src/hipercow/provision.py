@@ -83,7 +83,7 @@ def provision_run(root: Root, name: str, id: str) -> None:
         msg = f"Provisioning task '{id}' for '{name}' has already been run"
         raise Exception(msg)
     data = ProvisioningData.read(root, name, id)
-    env = environment_engine(root, name)
+    env = environment_engine(name, root)
     logfile = root.path_provision_log(name, id)
     start = time.time()
     with transient_working_directory(root.path):

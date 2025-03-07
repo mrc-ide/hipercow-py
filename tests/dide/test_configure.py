@@ -62,7 +62,7 @@ def test_provision_using_driver(tmp_path, mocker):
     mocker.patch("hipercow.dide.driver.detect_mounts", return_value=mock_mounts)
     mocker.patch("hipercow.dide.driver._dide_provision", mock_provision)
     configure(r, "dide", python_version=None)
-    environment_new(r, "default", "pip")
+    environment_new("default", "pip", r)
     provision(r, "default", [])
     cfg = load_driver(r, None).config
     assert mock_provision.call_count == 1
