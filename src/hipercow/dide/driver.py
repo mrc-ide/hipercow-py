@@ -74,6 +74,6 @@ def _web_client() -> DideWebClient:
 def _dide_provision(root: Root, name: str, id: str, config: DideConfiguration):
     cl = _web_client()
     unc = write_batch_provision(name, id, config, root)
-    dide_id = cl.submit(unc, f"{name}/{id}")
+    dide_id = cl.submit(unc, f"{name}/{id}", template="BuildQueue")
     task = ProvisionWaitWrapper(root, name, id, cl, dide_id)
     taskwait(task)
