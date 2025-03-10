@@ -41,7 +41,7 @@ def init(path: str):
     """Initialise a new `hipercow` root.
 
     Create a new `hipercow` root at the path `path`.  This path should
-    the root directory of your project (e.g., the path containing
+    be the root directory of your project (e.g., the path containing
     `.git`) and we will create a directory `hipercow/` within that
     directory.
 
@@ -217,7 +217,7 @@ def cli_task_create(cmd: tuple[str], environment: str | None, *, wait: bool):
     hipercow task create -- cowsay -t hello
     ```
 
-    which passes the `-t` argument through to `cowsay`.  We may this
+    which passes the `-t` argument through to `cowsay`.  We may remove this
     requirement in a future version.
 
     If you have multiple environments, you can specify the environment
@@ -381,7 +381,7 @@ def cli_environment_provision(name: str, cmd: tuple[str]):
 
     This will launch a cluster task that installs the packages you
     have requested.  You can pass a command to run here, or use the
-    defaults if your project has a well know (and well behaved)
+    defaults if your project has a well known (and well behaved)
     environment description.
 
     """
