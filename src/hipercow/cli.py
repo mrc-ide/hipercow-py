@@ -426,7 +426,7 @@ def cli_environment_provision(name: str, cmd: tuple[str]):
 
     """
     r = root.open_root()
-    provision(r, name, list(cmd))
+    provision(name, list(cmd), root=r)
 
 
 @environment.command("provision-run", hidden=True)

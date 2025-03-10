@@ -63,11 +63,11 @@ def test_provision_using_driver(tmp_path, mocker):
     mocker.patch("hipercow.dide.driver._dide_provision", mock_provision)
     configure("dide", python_version=None, root=r)
     environment_new("default", "pip", r)
-    provision(r, "default", [])
+    provision("default", [], root=r)
     cfg = load_driver(None, r).config
     assert mock_provision.call_count == 1
     assert mock_provision.mock_calls[0] == mock.call(
-        r, "default", mock.ANY, cfg
+        "default", mock.ANY, cfg, r
     )
 
 

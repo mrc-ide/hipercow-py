@@ -29,8 +29,8 @@ class DideDriver(HipercowDriver):
         unc = write_batch_task_run(task_id, self.config, root)
         cl.submit(unc, task_id)
 
-    def provision(self, root: Root, name: str, id: str) -> None:
-        _dide_provision(root, name, id, self.config)
+    def provision(self, name: str, id: str, root: Root) -> None:
+        _dide_provision(name, id, self.config, root)
 
 
 class ProvisionWaitWrapper(Task):
@@ -71,7 +71,7 @@ def _web_client() -> DideWebClient:
     return cl
 
 
-def _dide_provision(root: Root, name: str, id: str, config: DideConfiguration):
+def _dide_provision(name: str, id: str, config: DideConfiguration, root: Root):
     cl = _web_client()
     unc = write_batch_provision(name, id, config, root)
     dide_id = cl.submit(unc, f"{name}/{id}", template="BuildQueue")

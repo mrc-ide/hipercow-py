@@ -21,7 +21,7 @@ def test_run_in_environment(tmp_path):
 
         configure("example", root=r)
         environment_new("default", "pip", r)
-        provision(r, "default", [])
+        provision("default", [], root=r)
         tid = task_create_shell(r, ["cowsay", "-t", "hello"])
         task_eval(tid, capture=True, root=r)
 

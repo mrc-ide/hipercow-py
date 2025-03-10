@@ -34,7 +34,7 @@ class ProvisioningResult:
     start: float
     end: float = field(default_factory=time.time, init=False)
 
-    def write(self, root: Root, name: str, id: str) -> None:
+    def write(self, name: str, id: str, root: Root) -> None:
         path = root.path_provision_result(name, id)
         with path.open("wb") as f:
             pickle.dump(self, f)
@@ -61,11 +61,11 @@ class ProvisioningRecord:
 
 
 def provision(
-    root: Root,
     name: str,
     cmd: list[str] | None,
     *,
     driver: str | None = None,
+    root: Root,
 ):
     path_config = root.path_environment_config(name)
     if not path_config.exists():
@@ -75,7 +75,7 @@ def provision(
 
     id = secrets.token_hex(8)
     ProvisioningData(name, id, cmd).write(root)
-    dr.provision(root, name, id)
+    dr.provision(name, id, root)
 
 
 def provision_run(name: str, id: str, root: Root) -> None:
@@ -91,9 +91,9 @@ def provision_run(name: str, id: str, root: Root) -> None:
             env.create(filename=logfile)
         try:
             env.provision(data.cmd, filename=logfile)
-            ProvisioningResult(None, start).write(root, name, id)
+            ProvisioningResult(None, start).write(name, id, root)
         except Exception as e:
-            ProvisioningResult(e, start).write(root, name, id)
+            ProvisioningResult(e, start).write(name, id, root)
             msg = "Provisioning failed"
             raise Exception(msg) from e
 

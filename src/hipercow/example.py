@@ -15,5 +15,5 @@ class ExampleDriver(HipercowDriver):
     def submit(self, task_id, root: Root) -> None:  # noqa: ARG002
         print(f"submitting '{task_id}'")
 
-    def provision(self, root: Root, name: str, id: str) -> None:
+    def provision(self, name: str, id: str, root: Root) -> None:
         provision_run(name, id, root)

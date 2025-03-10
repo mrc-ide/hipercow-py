@@ -20,7 +20,7 @@ def test_provision_with_example_driver(tmp_path, mocker):
     mock_run = mock.MagicMock()
     mocker.patch("subprocess.run", mock_run)
     environment_new("default", "pip", r)
-    provision(r, "default", [])
+    provision("default", [], root=r)
 
     pr = Pip(r, "default")
     venv_path = str(pr.path())
@@ -68,7 +68,7 @@ def test_dont_create_on_second_provision(tmp_path, mocker):
     pr = Pip(r, "default")
     pr.path().mkdir(parents=True)
 
-    provision(r, "default", [])
+    provision("default", [], root=r)
     assert mock_run.call_count == 1
 
     assert mock_run.mock_calls[0] == mock.call(
@@ -93,7 +93,7 @@ def test_record_provisioning_error(tmp_path, mocker):
     pr.path().mkdir(parents=True)
 
     with pytest.raises(Exception, match="Provisioning failed"):
-        provision(r, "default", [])
+        provision("default", [], root=r)
     assert mock_run.call_count == 1
 
     assert mock_run.mock_calls[0] == mock.call(
@@ -114,4 +114,4 @@ def test_throw_on_provision_if_no_environment(tmp_path):
     r = root.open_root(tmp_path)
     configure("example", root=r)
     with pytest.raises(Exception, match="Environment 'default' does not exist"):
-        provision(r, "default", [])
+        provision("default", [], root=r)
