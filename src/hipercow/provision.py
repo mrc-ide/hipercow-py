@@ -66,7 +66,36 @@ def provision(
     *,
     driver: str | None = None,
     root: OptionalRoot = None,
-):
+) -> None:
+    """Provision an environment.
+
+    This function requires that your root has a driver configured
+    (with `hipercow.configure`) and an environment created (with
+    `hipercow.environment_new`).
+
+    Note that in the commandline tool, this command is grouped into
+    the `environment` group; we may move this function into the
+    `environment` module in future.
+
+    Args:
+        name: The name of the environment to provision
+
+        cmd: Optionally the command to run to do the provisioning. If
+            `None` then the environment engine will select an
+            appropriate command if it is well defined for your setup.
+            The details here depend on the engine.
+
+        driver: The name of the driver to use in provisioning.
+            Normally this can be omitted, as `None` (the default) will
+            select your driver automatically if only one is
+            configured.
+
+        root: The root, or if given search from the current directory.
+
+    Returns:
+        Nothing, called for side effects only.
+
+    """
     root = open_root(root)
     path_config = root.path_environment_config(name)
     if not path_config.exists():

@@ -1,3 +1,5 @@
+"""Interact with the hipercow root."""
+
 import platform
 from pathlib import Path
 from typing import TypeAlias
@@ -6,6 +8,22 @@ from hipercow.util import find_file_descend
 
 
 def init(path: str | Path) -> None:
+    """Initialise a hipercow root.
+
+    Sets up a new hipercow root at `path`, creating the directory
+    `<path>/hipercow/` which will contain all of hipercow's files.  It
+    is safe to re-initialise an already-created hipercow root (in
+    which case nothing happens) and safe to initialise a *Python*
+    hipercow root at the same location as an R one, though at the
+    moment they do not interact.
+
+    Args:
+        path: The path to the project root
+
+    Returns:
+        Nothing, called for side effects only.
+
+    """
     path = Path(path)
     dest = path / "hipercow" / "py"
 
@@ -103,9 +121,36 @@ class Root:
 
 
 OptionalRoot: TypeAlias = None | str | Path | Root
+"""Optional root type, for user-facing functions.
+
+Represents different inputs to the user-facing functions in hipercow,
+recognising that most of the time the working directory will be within
+a hipercow environment.  The possible types represent different
+possibilities:
+
+* `None`: search for the root from the current directory (like `git` does)
+* `str`: the name of a path to search from
+* `Path`: a `pathlib.Path` object representing the path to search from
+* `Root`: a root previously opened with [`open_root`][hipercow.root.open_root]
+
+"""
 
 
 def open_root(path: OptionalRoot = None) -> Root:
+    """Open a hipercow root.
+
+    Locate and validate a hipercow root, converting an `OptionalRoot` type
+    into a real `Root` object.  This function is used in most user-facing
+    functions in hipercow, but you can call it yourself to validate the
+    root early.
+
+    Args:
+        path: A path to the root to open, a `Root`, or `None`.
+
+    Returns:
+        The opened `Root` object.
+
+    """
     if isinstance(path, Root):
         return path
     root = find_file_descend("hipercow", path or Path.cwd())

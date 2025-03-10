@@ -5,6 +5,7 @@ dide
 entrypoint
 eval
 hipercow
+installable
 keychain
 pythonic
 roadmap
