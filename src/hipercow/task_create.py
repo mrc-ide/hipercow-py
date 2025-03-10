@@ -7,7 +7,6 @@ from hipercow.task import TaskData, TaskStatus, set_task_status
 from hipercow.util import relative_workdir
 
 
-# API here very subject to change in terms of argument order etc.
 def task_create_shell(
     cmd: list[str],
     *,
@@ -16,6 +15,37 @@ def task_create_shell(
     driver: str | None = None,
     root: OptionalRoot = None,
 ) -> str:
+    """Create a shell command task.
+
+    This is the first type of task that we support, and more types
+    will likely follow.  A shell command will evaluate an arbitrary
+    command on the cluster - it does not even need to be written in
+    Python! However, if you are using the `pip` environment engine
+    then it will need to be `pip`-installable.
+
+    The interface here is somewhat subject to change, but we think the
+    basics here are reasonable.
+
+    Args:
+        cmd: The command to execute, as a list of strings
+
+        environment: The name of the environment to evaluate the
+            command in.  The default (`None`) will select `default` if
+            available, falling back on `empty`.
+
+        envvars: A dictionary of environment variables to set before
+            the task runs.  Do not set `PATH` in here, it will not
+            currently have an effect.
+
+        driver: The driver to launch the task with.  Generally this is
+            not needed as we expect most people to have a single
+            driver set.
+
+        root: The root, or if given search from the current directory.
+
+    Returns:
+        The newly-created task identifier, a 32-character hex string.
+    """
     root = open_root(root)
     if not cmd:
         msg = "'cmd' cannot be empty"
