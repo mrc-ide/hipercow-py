@@ -13,6 +13,19 @@ from hipercow.util import transient_working_directory
 # * https://docs.pytest.org/en/stable/how-to/writing_plugins.html#pip-installable-plugins
 # * https://packaging.python.org/en/latest/specifications/entry-points/
 def configure(name: str, *, root: OptionalRoot = None, **kwargs) -> None:
+    """Configure a driver.
+
+    Configures a `hipercow` root to use a driver.
+
+    Args:
+        name: The name of the driver.  This will be `dide` unless you
+            are developing `hipercow` itself :)
+        root: The root, or if not given search from the current directory.
+        **kwargs (Any): Arguments passed to, and supported by, your driver.
+
+    Returns:
+        Nothing, called for side effects only.
+    """
     root = open_root(root)
     driver = _get_driver(name)
     with transient_working_directory(root.path):
@@ -21,6 +34,16 @@ def configure(name: str, *, root: OptionalRoot = None, **kwargs) -> None:
 
 
 def unconfigure(name: str, root: OptionalRoot = None) -> None:
+    """Unconfigure (remove) a driver.
+
+    Args:
+        name: The name of the driver.  This will be `dide` unless you
+            are developing `hipercow` itself :)
+        root: The root, or if not given search from the current directory.
+
+    Returns:
+        Nothing, called for side effects only.
+    """
     root = open_root(root)
     path = root.path_configuration(name)
     if path.exists():
@@ -33,10 +56,20 @@ def unconfigure(name: str, root: OptionalRoot = None) -> None:
 
 
 def show_configuration(
-    driver: str | None = None, root: OptionalRoot = None
+    name: str | None = None, root: OptionalRoot = None
 ) -> None:
+    """Show a driver configuration.
+
+    Args:
+        name: The name of the driver.  This will be `dide` unless you
+            are developing `hipercow` itself :)
+        root: The root, or if not given search from the current directory.
+
+    Returns:
+        Nothing, called for side effects only.
+    """
     root = open_root(root)
-    dr = load_driver(driver, root)
+    dr = load_driver(name, root)
     print(f"Configuration for '{dr.name}'")
     dr.show_configuration()
 

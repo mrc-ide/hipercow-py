@@ -1,3 +1,5 @@
+"""Functions for interacting with tasks."""
+
 import pickle
 from dataclasses import dataclass
 from enum import Flag, auto
@@ -9,6 +11,21 @@ from hipercow.util import file_create
 
 
 class TaskStatus(Flag):
+    """Status of a task.
+
+    Tasks move from `CREATED` to `SUBMITTED` to `RUNNING` to one of
+    `SUCCESS` or `FAILURE`.  In addition a task might be `CANCELLED`
+    (this could happen from `CREATED`, `SUBMITTED` or `RUNNING`) or
+    might be `MISSING` if it does not exist.
+
+    A runnable task is one that we could use `task_eval` with; it
+    might be `CREATED` or `SUBMITTED`.
+
+    A terminal task is one that has reached the latest state it will
+    reach, and is `SUCCESS`, `FAILURE` or `CANCELLED`.
+
+    """
+
     CREATED = auto()
     SUBMITTED = auto()
     RUNNING = auto()
@@ -20,9 +37,11 @@ class TaskStatus(Flag):
     RUNNABLE = CREATED | SUBMITTED
 
     def is_runnable(self) -> bool:
+        """Check if a status implies a task can be run."""
         return bool(self & TaskStatus.RUNNABLE)
 
     def is_terminal(self) -> bool:
+        """Check if a status implies a task is completed."""
         return bool(self & TaskStatus.TERMINAL)
 
     def __str__(self) -> str:
@@ -68,11 +87,32 @@ class TaskTimes:
 
 
 def task_exists(task_id: str, root: OptionalRoot = None) -> bool:
+    """Test if a task exists.
+
+    A task exists if the `task_id` was used with this hipercow root
+    (i.e., if any files associated with it exist).
+
+    Args:
+        task_id: The task identifier, a 32-character hex string.
+        root: The root, or if not given search from the current directory.
+
+    Returns:
+        `True` if the task exists.
+    """
     root = open_root(root)
     return root.path_task(task_id).exists()
 
 
 def task_status(task_id: str, root: OptionalRoot = None) -> TaskStatus:
+    """Read task status.
+
+    Args:
+        task_id: The task identifier to check, a 32-character hex string.
+        root: The root, or if not given search from the current directory.
+
+    Returns:
+        The status of the task.
+    """
     root = open_root(root)
     # check_task_id(task_id)
     path = root.path_task(task_id)
@@ -85,6 +125,23 @@ def task_status(task_id: str, root: OptionalRoot = None) -> TaskStatus:
 
 
 def task_log(task_id: str, root: OptionalRoot = None) -> str | None:
+    """Read the task log.
+
+    Not all tasks have logs; tasks that have not yet started (status
+    of `CREATED` or `SUBMITTED` and those `CANCELLED` before starting)
+    will not have logs, and tasks that were run without capturing
+    output will not produce a log either.  Be sure to check if a
+    string was returned.
+
+    Args:
+        task_id: The task identifier to fetch the log for, a
+            32-character hex string.
+        root: The root, or if not given search from the current directory.
+
+    Returns:
+        The log as a single string, if present.
+
+    """
     root = open_root(root)
     if not task_exists(task_id, root):
         msg = f"Task '{task_id}' does not exist"
@@ -151,6 +208,23 @@ def task_info(task_id: str, root: OptionalRoot = None) -> TaskInfo:
 def task_list(
     *, root: OptionalRoot = None, with_status: TaskStatus | None = None
 ) -> list[str]:
+    """List known tasks.
+
+    Warning:
+      This function could take a long time to execute on large
+      projects with many tasks, particularly on large file systems.
+      Because the tasks are just returned as a list of strings, it may
+      not be terribly useful either.  Think before building a workflow
+      around this.
+
+    Args:
+      root: The root to search from.
+      with_status: Optional status, or set of statuses, to match
+
+    Returns:
+      A list of task identifiers.
+
+    """
     root = open_root(root)
     contents = root.path_task(None).rglob("data")
     ids = ["".join(el.parts[-3:-1]) for el in contents if el.is_file()]
@@ -184,6 +258,25 @@ def task_wait(
     allow_created: bool = False,
     **kwargs,
 ) -> bool:
+    """Wait for a task to complete.
+
+    Args:
+        task_id: The task to wait on.
+        root: The root, or if not given search from the current directory.
+        allow_created: Allow waiting on a task that has status
+            `CREATED`.  Normally this is not allowed because a task
+            that is `CREATED` (and not `SUBMITTED`) will not start; if
+            you pass `allow_created=True` it is expected that you are
+            also manually evaluating this task!
+        **kwargs (Any): Additional arguments to `taskwait.taskwait`.
+
+    Returns:
+        `True` if the task completes successfully, `False` if it
+        fails.  A timeout will throw an error.  We return this boolean
+        rather than the `TaskStatus` because this generalises to
+        multiple tasks.
+
+    """
     root = open_root(root)
     task = TaskWaitWrapper(task_id, root)
 
@@ -205,6 +298,17 @@ def task_wait(
 def task_recent_rebuild(
     *, root: OptionalRoot = None, limit: int | None = None
 ) -> None:
+    """Rebuild the list of recent tasks.
+
+    Args:
+        root: The root, or if not given search from the current directory.
+        limit: The maximum number of tasks to add to the recent
+            list. Use `limit=0` to truncate the list.
+
+    Returns:
+        Nothing, called for side effects only.
+
+    """
     root = open_root(root)
     path = root.path_recent()
     if limit is not None and limit == 0:
@@ -227,6 +331,19 @@ def task_recent_rebuild(
 def task_recent(
     *, root: OptionalRoot = None, limit: int | None = None
 ) -> list[str]:
+    """Return a list of recently created tasks.
+
+    Args:
+        root: The root, or if not given search from the current directory.
+        limit: The maximum number of tasks to return.
+
+    Return:
+        A list of task identifiers.  The most recent tasks will be
+        **last** in this list (we might change this in a future
+        version - yes, that will be annoying).  Note that this is
+        recency in **creation**, not **completion**.
+
+    """
     root = open_root(root)
     path = root.path_recent()
     if not path.exists():
@@ -247,6 +364,17 @@ def task_recent(
 
 
 def task_last(root: OptionalRoot = None) -> str | None:
+    """Return the most recently created task.
+
+    Args:
+        root: The root, or if not given search from the current directory.
+
+    Return:
+        A task identifier (a 32-character hex string) if any tasks
+        have been created (and if the recent task list has not been
+        truncated), or `None` if no tasks have been created.
+
+    """
     root = open_root(root)
     task_id = task_recent(limit=1, root=root)
     return task_id[0] if task_id else None
