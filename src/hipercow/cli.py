@@ -1,10 +1,10 @@
 import sys
 from functools import reduce
 from operator import ior
-from typing import Never
 
 import click
 from rich.console import Console
+from typing_extensions import Never  # 3.10 does not have this in typing
 
 from hipercow import root
 from hipercow.configure import configure, show_configuration, unconfigure
