@@ -266,7 +266,6 @@ def test_can_wait_on_task(tmp_path, mocker):
         assert cli.task_wait.call_count == 1
         assert cli.task_wait.mock_calls[0] == mock.call(
             task_id,
-            root=mock.ANY,
             poll=1,
             timeout=None,
             show_log=True,
@@ -281,7 +280,6 @@ def test_can_wait_on_task(tmp_path, mocker):
         assert cli.task_wait.call_count == 2
         assert cli.task_wait.mock_calls[1] == mock.call(
             task_id,
-            root=mock.ANY,
             poll=0.1,
             timeout=200,
             show_log=False,
@@ -320,7 +318,6 @@ def test_can_create_on_task_and_wait(tmp_path, mocker):
         assert cli.task_wait.call_count == 1
         assert cli.task_wait.mock_calls[0] == mock.call(
             task_id,
-            root=mock.ANY,
         )
 
 

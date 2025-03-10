@@ -3,7 +3,7 @@ import pickle
 from hipercow.dide.driver import DideDriver
 from hipercow.driver import HipercowDriver, load_driver
 from hipercow.example import ExampleDriver
-from hipercow.root import Root
+from hipercow.root import OptionalRoot, Root, open_root
 from hipercow.util import transient_working_directory
 
 
@@ -12,14 +12,16 @@ from hipercow.util import transient_working_directory
 # of pytest:
 # * https://docs.pytest.org/en/stable/how-to/writing_plugins.html#pip-installable-plugins
 # * https://packaging.python.org/en/latest/specifications/entry-points/
-def configure(name: str, *, root: Root, **kwargs) -> None:
+def configure(name: str, *, root: OptionalRoot = None, **kwargs) -> None:
+    root = open_root(root)
     driver = _get_driver(name)
     with transient_working_directory(root.path):
         config = driver(root, **kwargs)
     _write_configuration(config, root)
 
 
-def unconfigure(name: str, root: Root) -> None:
+def unconfigure(name: str, root: OptionalRoot = None) -> None:
+    root = open_root(root)
     path = root.path_configuration(name)
     if path.exists():
         path.unlink()
@@ -30,8 +32,10 @@ def unconfigure(name: str, root: Root) -> None:
         )
 
 
-# NOTE: Temporarily removing the 'None' default on 'driver'
-def show_configuration(driver: str | None, root: Root) -> None:
+def show_configuration(
+    driver: str | None = None, root: OptionalRoot = None
+) -> None:
+    root = open_root(root)
     dr = load_driver(driver, root)
     print(f"Configuration for '{dr.name}'")
     dr.show_configuration()

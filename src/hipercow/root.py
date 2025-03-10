@@ -1,5 +1,6 @@
 import platform
 from pathlib import Path
+from typing import TypeAlias
 
 from hipercow.util import find_file_descend
 
@@ -101,7 +102,10 @@ class Root:
         return self.path_provision(name, id, relative=relative) / "log"
 
 
-def open_root(path: None | str | Path = None) -> Root:
+OptionalRoot: TypeAlias = None | str | Path | Root
+
+
+def open_root(path: OptionalRoot = None) -> Root:
     if isinstance(path, Root):
         return path
     root = find_file_descend("hipercow", path or Path.cwd())

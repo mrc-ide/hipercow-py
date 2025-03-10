@@ -7,7 +7,7 @@ from hipercow.environment_engines import (
     EnvironmentEngine,
     Pip,
 )
-from hipercow.root import Root
+from hipercow.root import OptionalRoot, Root, open_root
 
 
 @dataclass
@@ -32,7 +32,8 @@ class EnvironmentConfiguration:
 # Called 'new' and not 'create' to make it clear that this does not
 # actually create the environment, just the definition of that
 # environment.
-def environment_new(name: str, engine: str, root: Root) -> None:
+def environment_new(name: str, engine: str, root: OptionalRoot = None) -> None:
+    root = open_root(root)
     path = root.path_environment(name)
 
     # We might make this friendlier later
@@ -48,14 +49,16 @@ def environment_new(name: str, engine: str, root: Root) -> None:
     EnvironmentConfiguration(engine).write(name, root)
 
 
-def environment_list(root: Root) -> list[str]:
+def environment_list(root: OptionalRoot = None) -> list[str]:
+    root = open_root(root)
     special = ["empty"]
     path = root.path_environment(None)
     found = [x.name for x in path.glob("*")]
     return sorted(special + found)
 
 
-def environment_delete(name: str, root: Root) -> None:
+def environment_delete(name: str, root: OptionalRoot = None) -> None:
+    root = open_root(root)
     if name == "empty":
         msg = "Can't delete the empty environment"
         raise Exception(msg)
@@ -74,7 +77,8 @@ def environment_delete(name: str, root: Root) -> None:
     shutil.rmtree(str(root.path_environment(name)))
 
 
-def environment_check(name: str | None, root: Root) -> str:
+def environment_check(name: str | None, root: OptionalRoot = None) -> str:
+    root = open_root(root)
     if name is None:
         return "default" if environment_exists("default", root) else "empty"
     if name == "empty" or environment_exists(name, root):
@@ -83,7 +87,8 @@ def environment_check(name: str | None, root: Root) -> str:
     raise Exception(msg)
 
 
-def environment_exists(name: str, root: Root) -> bool:
+def environment_exists(name: str, root: OptionalRoot = None) -> bool:
+    root = open_root(root)
     return root.path_environment(name).exists()
 
 

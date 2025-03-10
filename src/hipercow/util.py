@@ -7,7 +7,7 @@ from contextlib import contextmanager
 from pathlib import Path
 
 
-def find_file_descend(filename, path):
+def find_file_descend(filename: str, path: str | Path) -> Path | None:
     path = Path(path)
     root = Path(path.anchor)
 
