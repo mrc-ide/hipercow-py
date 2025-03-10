@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 
 from hipercow.driver import load_driver
 from hipercow.environment import environment_engine
-from hipercow.root import Root
+from hipercow.root import OptionalRoot, Root, open_root
 from hipercow.util import transient_working_directory
 
 
@@ -65,8 +65,9 @@ def provision(
     cmd: list[str] | None,
     *,
     driver: str | None = None,
-    root: Root,
+    root: OptionalRoot = None,
 ):
+    root = open_root(root)
     path_config = root.path_environment_config(name)
     if not path_config.exists():
         msg = f"Environment '{name}' does not exist"

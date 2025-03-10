@@ -2,7 +2,7 @@ import secrets
 
 from hipercow.driver import load_driver_optional
 from hipercow.environment import environment_check
-from hipercow.root import Root
+from hipercow.root import OptionalRoot, Root, open_root
 from hipercow.task import TaskData, TaskStatus, set_task_status
 from hipercow.util import relative_workdir
 
@@ -14,8 +14,9 @@ def task_create_shell(
     environment: str | None = None,
     envvars: dict[str, str] | None = None,
     driver: str | None = None,
-    root: Root,
+    root: OptionalRoot,
 ) -> str:
+    root = open_root(root)
     if not cmd:
         msg = "'cmd' cannot be empty"
         raise Exception(msg)

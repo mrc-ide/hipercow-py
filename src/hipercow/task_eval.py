@@ -3,7 +3,7 @@ import time
 from dataclasses import dataclass
 
 from hipercow.environment import environment_engine
-from hipercow.root import Root
+from hipercow.root import OptionalRoot, Root, open_root
 from hipercow.task import (
     TaskData,
     TaskStatus,
@@ -20,7 +20,10 @@ class TaskResult:
     data: object
 
 
-def task_eval(task_id: str, *, capture: bool, root: Root) -> None:
+def task_eval(
+    task_id: str, *, capture: bool, root: OptionalRoot = None
+) -> None:
+    root = open_root(root)
     data = TaskData.read(task_id, root)
     task_eval_data(data, capture=capture, root=root)
 

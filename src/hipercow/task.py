@@ -4,7 +4,7 @@ from enum import Flag, auto
 
 import taskwait
 
-from hipercow.root import Root
+from hipercow.root import OptionalRoot, Root, open_root
 from hipercow.util import file_create
 
 
@@ -67,11 +67,13 @@ class TaskTimes:
         return TaskTimes(created, running, None)
 
 
-def task_exists(task_id: str, root: Root) -> bool:
+def task_exists(task_id: str, root: OptionalRoot = None) -> bool:
+    root = open_root(root)
     return root.path_task(task_id).exists()
 
 
-def task_status(task_id: str, root: Root) -> TaskStatus:
+def task_status(task_id: str, root: OptionalRoot = None) -> TaskStatus:
+    root = open_root(root)
     # check_task_id(task_id)
     path = root.path_task(task_id)
     if not path.exists():
@@ -82,7 +84,8 @@ def task_status(task_id: str, root: Root) -> TaskStatus:
     return TaskStatus.CREATED
 
 
-def task_log(task_id: str, root: Root) -> str | None:
+def task_log(task_id: str, root: OptionalRoot) -> str | None:
+    root = open_root(root)
     if not task_exists(task_id, root):
         msg = f"Task '{task_id}' does not exist"
         raise Exception(msg)
@@ -134,7 +137,8 @@ class TaskInfo:
     times: TaskTimes
 
 
-def task_info(task_id: str, root: Root) -> TaskInfo:
+def task_info(task_id: str, root: OptionalRoot = None) -> TaskInfo:
+    root = open_root(root)
     status = task_status(task_id, root)
     if status == TaskStatus.MISSING:
         msg = f"Task '{task_id}' does not exist"
@@ -145,8 +149,9 @@ def task_info(task_id: str, root: Root) -> TaskInfo:
 
 
 def task_list(
-    *, root: Root, with_status: TaskStatus | None = None
+    *, root: OptionalRoot = None, with_status: TaskStatus | None = None
 ) -> list[str]:
+    root = open_root(root)
     contents = root.path_task(None).rglob("data")
     ids = ["".join(el.parts[-3:-1]) for el in contents if el.is_file()]
     if with_status is not None:
@@ -173,8 +178,13 @@ class TaskWaitWrapper(taskwait.Task):
 
 
 def task_wait(
-    task_id: str, *, root: Root, allow_created: bool = False, **kwargs
+    task_id: str,
+    *,
+    root: OptionalRoot = None,
+    allow_created: bool = False,
+    **kwargs,
 ) -> bool:
+    root = open_root(root)
     task = TaskWaitWrapper(task_id, root)
 
     status = task_status(task_id, root)
@@ -192,7 +202,10 @@ def task_wait(
     return status == TaskStatus.SUCCESS
 
 
-def task_recent_rebuild(*, root: Root, limit: int | None = None) -> None:
+def task_recent_rebuild(
+    *, root: OptionalRoot = None, limit: int | None = None
+) -> None:
+    root = open_root(root)
     path = root.path_recent()
     if limit is not None and limit == 0:
         if path.exists():
@@ -211,7 +224,10 @@ def task_recent_rebuild(*, root: Root, limit: int | None = None) -> None:
             f.write(f"{i}\n")
 
 
-def task_recent(*, root: Root, limit: int | None = None) -> list[str]:
+def task_recent(
+    *, root: OptionalRoot = None, limit: int | None = None
+) -> list[str]:
+    root = open_root(root)
     path = root.path_recent()
     if not path.exists():
         return []
@@ -230,6 +246,7 @@ def task_recent(*, root: Root, limit: int | None = None) -> list[str]:
     return ids
 
 
-def task_last(root: Root) -> str | None:
+def task_last(root: OptionalRoot = None) -> str | None:
+    root = open_root(root)
     task_id = task_recent(limit=1, root=root)
     return task_id[0] if task_id else None
