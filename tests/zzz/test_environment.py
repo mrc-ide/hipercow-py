@@ -19,11 +19,11 @@ def test_run_in_environment(tmp_path):
         with open("requirements.txt", "w") as f:
             f.write("cowsay\n")
 
-        configure(r, "example")
-        environment_new(r, "default", "pip")
-        provision(r, "default", [])
-        tid = task_create_shell(r, ["cowsay", "-t", "hello"])
-        task_eval(r, tid, capture=True)
+        configure("example", root=r)
+        environment_new("default", "pip", r)
+        provision("default", [], root=r)
+        tid = task_create_shell(["cowsay", "-t", "hello"], root=r)
+        task_eval(tid, capture=True, root=r)
 
-        assert task_status(r, tid) == TaskStatus.SUCCESS
-        assert "| hello |" in task_log(r, tid)
+        assert task_status(tid, r) == TaskStatus.SUCCESS
+        assert "| hello |" in task_log(tid, r)

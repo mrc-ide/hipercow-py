@@ -21,8 +21,8 @@ def test_empty_environment_has_no_path_but_always_exists(tmp_path):
 def test_can_load_empty_engine(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
-    assert isinstance(environment_engine(r, "empty"), Empty)
-    assert isinstance(environment_engine(r, "default"), Empty)
+    assert isinstance(environment_engine("empty", r), Empty)
+    assert isinstance(environment_engine("default", r), Empty)
 
 
 def test_empty_environment_cannot_be_created(tmp_path):

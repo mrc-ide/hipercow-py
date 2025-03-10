@@ -9,19 +9,19 @@ from hipercow.util import relative_workdir
 
 # API here very subject to change in terms of argument order etc.
 def task_create_shell(
-    root: Root,
     cmd: list[str],
     *,
     environment: str | None = None,
     envvars: dict[str, str] | None = None,
     driver: str | None = None,
+    root: Root,
 ) -> str:
     if not cmd:
         msg = "'cmd' cannot be empty"
         raise Exception(msg)
     data = {"cmd": cmd}
     task_id = _task_create(
-        root,
+        root=root,
         method="shell",
         environment=environment,
         driver=driver,
@@ -32,8 +32,8 @@ def task_create_shell(
 
 
 def _task_create(
-    root: Root,
     *,
+    root: Root,
     method: str,
     environment: str | None,
     driver: str | None,
@@ -42,7 +42,7 @@ def _task_create(
 ) -> str:
     path = relative_workdir(root.path)
     task_id = _new_task_id()
-    environment = environment_check(root, environment)
+    environment = environment_check(environment, root)
     TaskData(task_id, method, data, str(path), environment, envvars).write(root)
     with root.path_recent().open("a") as f:
         f.write(f"{task_id}\n")
@@ -55,6 +55,6 @@ def _new_task_id() -> str:
 
 
 def _submit_maybe(task_id: str, driver: str | None, root: Root) -> None:
-    if dr := load_driver_optional(root, driver):
+    if dr := load_driver_optional(driver, root):
         dr.submit(task_id, root)
-        set_task_status(root, task_id, TaskStatus.SUBMITTED)
+        set_task_status(task_id, TaskStatus.SUBMITTED, root)

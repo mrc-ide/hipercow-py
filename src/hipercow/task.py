@@ -45,12 +45,12 @@ class TaskTimes:
     started: float | None
     finished: float | None
 
-    def write(self, root: Root, task_id: str):
+    def write(self, task_id: str, root: Root):
         with root.path_task_times(task_id).open("wb") as f:
             pickle.dump(self, f)
 
     @staticmethod
-    def read(root: Root, task_id: str):
+    def read(task_id: str, root: Root):
         path_times = root.path_task_times(task_id)
         if path_times.exists():
             with path_times.open("rb") as f:
@@ -67,11 +67,11 @@ class TaskTimes:
         return TaskTimes(created, running, None)
 
 
-def task_exists(root: Root, task_id: str) -> bool:
+def task_exists(task_id: str, root: Root) -> bool:
     return root.path_task(task_id).exists()
 
 
-def task_status(root: Root, task_id: str) -> TaskStatus:
+def task_status(task_id: str, root: Root) -> TaskStatus:
     # check_task_id(task_id)
     path = root.path_task(task_id)
     if not path.exists():
@@ -82,8 +82,8 @@ def task_status(root: Root, task_id: str) -> TaskStatus:
     return TaskStatus.CREATED
 
 
-def task_log(root: Root, task_id: str) -> str | None:
-    if not task_exists(root, task_id):
+def task_log(task_id: str, root: Root) -> str | None:
+    if not task_exists(task_id, root):
         msg = f"Task '{task_id}' does not exist"
         raise Exception(msg)
     path = root.path_task_log(task_id)
@@ -93,7 +93,7 @@ def task_log(root: Root, task_id: str) -> str | None:
         return f.read()
 
 
-def set_task_status(root: Root, task_id: str, status: TaskStatus):
+def set_task_status(task_id: str, status: TaskStatus, root: Root):
     file_create(root.path_task(task_id) / STATUS_FILE_MAP[status])
 
 
@@ -107,14 +107,14 @@ class TaskData:
     envvars: dict[str, str]
 
     def write(self, root: Root):
-        task_data_write(root, self)
+        task_data_write(self, root)
 
     @staticmethod
-    def read(root: Root, task_id: str):
-        return task_data_read(root, task_id)
+    def read(task_id: str, root: Root):
+        return task_data_read(task_id, root)
 
 
-def task_data_write(root: Root, data: TaskData) -> None:
+def task_data_write(data: TaskData, root: Root) -> None:
     task_id = data.task_id
     path_task_dir = root.path_task(task_id)
     path_task_dir.mkdir(parents=True, exist_ok=True)
@@ -122,7 +122,7 @@ def task_data_write(root: Root, data: TaskData) -> None:
         pickle.dump(data, f)
 
 
-def task_data_read(root: Root, task_id: str) -> TaskData:
+def task_data_read(task_id: str, root: Root) -> TaskData:
     with root.path_task_data(task_id).open("rb") as f:
         return pickle.load(f)
 
@@ -134,38 +134,38 @@ class TaskInfo:
     times: TaskTimes
 
 
-def task_info(root: Root, task_id: str) -> TaskInfo:
-    status = task_status(root, task_id)
+def task_info(task_id: str, root: Root) -> TaskInfo:
+    status = task_status(task_id, root)
     if status == TaskStatus.MISSING:
         msg = f"Task '{task_id}' does not exist"
         raise Exception(msg)
-    data = TaskData.read(root, task_id)
-    times = TaskTimes.read(root, task_id)
+    data = TaskData.read(task_id, root)
+    times = TaskTimes.read(task_id, root)
     return TaskInfo(status, data, times)
 
 
 def task_list(
-    root: Root, *, with_status: TaskStatus | None = None
+    *, root: Root, with_status: TaskStatus | None = None
 ) -> list[str]:
     contents = root.path_task(None).rglob("data")
     ids = ["".join(el.parts[-3:-1]) for el in contents if el.is_file()]
     if with_status is not None:
-        ids = [i for i in ids if task_status(root, i) & with_status]
+        ids = [i for i in ids if task_status(i, root) & with_status]
     return ids
 
 
 class TaskWaitWrapper(taskwait.Task):
-    def __init__(self, root: Root, task_id: str):
+    def __init__(self, task_id: str, root: Root):
         self.root = root
         self.task_id = task_id
         self.status_waiting = {"created", "submitted"}
         self.status_running = {"running"}
 
     def status(self) -> str:
-        return str(task_status(self.root, self.task_id))
+        return str(task_status(self.task_id, self.root))
 
     def log(self) -> list[str] | None:
-        value = task_log(self.root, self.task_id)
+        value = task_log(self.task_id, self.root)
         return value.splitlines() if value else None
 
     def has_log(self):
@@ -173,11 +173,11 @@ class TaskWaitWrapper(taskwait.Task):
 
 
 def task_wait(
-    root: Root, task_id: str, *, allow_created: bool = False, **kwargs
+    task_id: str, *, root: Root, allow_created: bool = False, **kwargs
 ) -> bool:
-    task = TaskWaitWrapper(root, task_id)
+    task = TaskWaitWrapper(task_id, root)
 
-    status = task_status(root, task_id)
+    status = task_status(task_id, root)
 
     if status == TaskStatus.CREATED and not allow_created:
         msg = "Cannot wait on task '{task_id}' which has not been submitted"
@@ -192,14 +192,14 @@ def task_wait(
     return status == TaskStatus.SUCCESS
 
 
-def task_recent_rebuild(root: Root, *, limit: int | None = None) -> None:
+def task_recent_rebuild(*, root: Root, limit: int | None = None) -> None:
     path = root.path_recent()
     if limit is not None and limit == 0:
         if path.exists():
             path.unlink()
         return
 
-    ids = task_list(root)
+    ids = task_list(root=root)
     time = [root.path_task_data(i).stat().st_ctime for i in ids]
     ids = [i for _, i in sorted(zip(time, ids, strict=False))]
 
@@ -211,7 +211,7 @@ def task_recent_rebuild(root: Root, *, limit: int | None = None) -> None:
             f.write(f"{i}\n")
 
 
-def task_recent(root: Root, *, limit: int | None = None) -> list[str]:
+def task_recent(*, root: Root, limit: int | None = None) -> list[str]:
     path = root.path_recent()
     if not path.exists():
         return []
@@ -231,5 +231,5 @@ def task_recent(root: Root, *, limit: int | None = None) -> list[str]:
 
 
 def task_last(root: Root) -> str | None:
-    task_id = task_recent(root, limit=1)
+    task_id = task_recent(limit=1, root=root)
     return task_id[0] if task_id else None

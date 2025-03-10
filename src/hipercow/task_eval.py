@@ -20,14 +20,14 @@ class TaskResult:
     data: object
 
 
-def task_eval(root: Root, task_id: str, *, capture: bool = False) -> None:
-    data = TaskData.read(root, task_id)
-    task_eval_data(root, data, capture=capture)
+def task_eval(task_id: str, *, capture: bool, root: Root) -> None:
+    data = TaskData.read(task_id, root)
+    task_eval_data(data, capture=capture, root=root)
 
 
-def task_eval_data(root: Root, data: TaskData, *, capture: bool) -> None:
+def task_eval_data(data: TaskData, *, capture: bool, root: Root) -> None:
     task_id = data.task_id
-    status = task_status(root, task_id)
+    status = task_status(task_id, root)
     if not status.is_runnable():
         msg = f"Can't run '{task_id}', which has status '{status}'"
         raise Exception(msg)
@@ -35,10 +35,10 @@ def task_eval_data(root: Root, data: TaskData, *, capture: bool) -> None:
     t_created = root.path_task_data(task_id).stat().st_ctime
     t_start = time.time()
 
-    set_task_status(root, task_id, TaskStatus.RUNNING)
+    set_task_status(task_id, TaskStatus.RUNNING, root)
 
     assert data.method == "shell"  # noqa: S101
-    res = task_eval_shell(root, data, capture=capture)
+    res = task_eval_shell(data, capture=capture, root=root)
 
     t_end = time.time()
 
@@ -47,17 +47,17 @@ def task_eval_data(root: Root, data: TaskData, *, capture: bool) -> None:
         pickle.dump(res.data, f)
 
     times = TaskTimes(t_created, t_start, t_end)
-    times.write(root, task_id)
+    times.write(task_id, root)
 
-    set_task_status(root, task_id, status)
+    set_task_status(task_id, status, root)
 
 
-def task_eval_shell(root: Root, data: TaskData, *, capture=False) -> TaskResult:
+def task_eval_shell(data: TaskData, *, capture: bool, root: Root) -> TaskResult:
     cmd = data.data["cmd"]
     env = data.envvars
     path = root.path / data.path
     filename = root.path_task_log(data.task_id) if capture else None
-    res = environment_engine(root, data.environment).run(
+    res = environment_engine(data.environment, root).run(
         cmd, check=False, env=env, cwd=path, filename=filename
     )
     success = res.returncode == 0

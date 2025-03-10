@@ -28,7 +28,7 @@ def test_can_provision_with_dide(tmp_path, mocker):
     )
     config = DideConfiguration(r, mounts=[m], python_version=None)
 
-    _dide_provision(r, "myenv", "abcdef", config)
+    _dide_provision("myenv", "abcdef", config, r)
 
     assert mock_client.submit.call_count == 1
     assert mock_client.mock_calls[0] == mock.call.submit(

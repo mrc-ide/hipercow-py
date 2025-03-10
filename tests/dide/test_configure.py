@@ -18,10 +18,10 @@ def test_can_configure_dide_mount(tmp_path, mocker):
     r = root.open_root(path)
     mock_mounts = [Mount("projects", "other", tmp_path)]
     mocker.patch("hipercow.dide.driver.detect_mounts", return_value=mock_mounts)
-    configure(r, "dide", python_version=None)
+    configure("dide", python_version=None, root=r)
 
     assert list_drivers(r) == ["dide"]
-    driver = load_driver(r, "dide")
+    driver = load_driver("dide", r)
     assert driver.config == DideConfiguration(
         r, mounts=mock_mounts, python_version=None
     )
@@ -39,9 +39,9 @@ def test_creating_task_triggers_submission(tmp_path, mocker):
         "hipercow.dide.driver.fetch_credentials", return_value=mock_creds
     )
     mocker.patch("hipercow.dide.driver.DideWebClient", mock_web_client)
-    configure(r, "dide", python_version=None)
+    configure("dide", python_version=None, root=r)
     with transient_working_directory(path):
-        tid = task_create_shell(r, ["echo", "hello world"])
+        tid = task_create_shell(["echo", "hello world"], root=r)
 
     assert mock_web_client.call_count == 1
     assert mock_web_client.call_args == mock.call(mock_creds)
@@ -61,13 +61,13 @@ def test_provision_using_driver(tmp_path, mocker):
     mock_provision = mock.MagicMock()
     mocker.patch("hipercow.dide.driver.detect_mounts", return_value=mock_mounts)
     mocker.patch("hipercow.dide.driver._dide_provision", mock_provision)
-    configure(r, "dide", python_version=None)
-    environment_new(r, "default", "pip")
-    provision(r, "default", [])
-    cfg = load_driver(r, None).config
+    configure("dide", python_version=None, root=r)
+    environment_new("default", "pip", r)
+    provision("default", [], root=r)
+    cfg = load_driver(None, r).config
     assert mock_provision.call_count == 1
     assert mock_provision.mock_calls[0] == mock.call(
-        r, "default", mock.ANY, cfg
+        "default", mock.ANY, cfg, r
     )
 
 
@@ -77,9 +77,9 @@ def test_configure_python_version(tmp_path, mocker, capsys):
     r = root.open_root(path)
     mock_mounts = [Mount("projects", "other", tmp_path)]
     mocker.patch("hipercow.dide.driver.detect_mounts", return_value=mock_mounts)
-    configure(r, "dide", python_version="3.12")
+    configure("dide", python_version="3.12", root=r)
     capsys.readouterr()
-    show_configuration(r)
+    show_configuration(None, r)
     out = capsys.readouterr().out
     assert (
         out

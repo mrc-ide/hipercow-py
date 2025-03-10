@@ -102,6 +102,8 @@ class Root:
 
 
 def open_root(path: None | str | Path = None) -> Root:
+    if isinstance(path, Root):
+        return path
     root = find_file_descend("hipercow", path or Path.cwd())
     if not root:
         msg = f"Failed to find 'hipercow' from {path}"

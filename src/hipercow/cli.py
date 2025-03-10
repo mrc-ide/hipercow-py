@@ -123,7 +123,7 @@ def cli_driver_configure(name: str):
     #
     # For now, let's just have it on/off.
     r = root.open_root()
-    configure(r, name)
+    configure(name, root=r)
 
 
 @driver.command("unconfigure")
@@ -131,7 +131,7 @@ def cli_driver_configure(name: str):
 def cli_driver_unconfigure(name: str):
     """Unconfigure (remove) a driver."""
     r = root.open_root()
-    unconfigure(r, name)
+    unconfigure(name, r)
 
 
 @driver.command("show")
@@ -139,7 +139,7 @@ def cli_driver_unconfigure(name: str):
 def cli_driver_show(name: str | None):
     """Show configuration for a driver."""
     r = root.open_root()
-    show_configuration(r, name)
+    show_configuration(name, r)
 
 
 @driver.command("list")
@@ -170,7 +170,7 @@ def cli_task_status(task_id: str):
 
     """
     r = root.open_root()
-    click.echo(task_status(r, task_id))
+    click.echo(task_status(task_id, r))
 
 
 @task.command("log")
@@ -188,7 +188,7 @@ def cli_task_log(task_id: str, *, filename=False):
     if filename:
         click.echo(r.path_task_log(task_id))
     else:
-        value = task_log(r, task_id)
+        value = task_log(task_id, r)
         if value is not None:
             click.echo(value)
 
@@ -204,7 +204,7 @@ def cli_task_list(with_status=None):
     """
     r = root.open_root()
     with_status = _process_with_status(with_status)
-    for task_id in task_list(r, with_status=with_status):
+    for task_id in task_list(with_status=with_status, root=r):
         click.echo(task_id)
 
 
@@ -230,8 +230,8 @@ def cli_task_recent(limit: int, *, rebuild: bool):
     """List recent tasks."""
     r = root.open_root()
     if rebuild:
-        task_recent_rebuild(r, limit=limit)
-    for i in task_recent(r, limit=limit):
+        task_recent_rebuild(limit=limit, root=r)
+    for i in task_recent(limit=limit, root=r):
         click.echo(i)
 
 
@@ -271,10 +271,10 @@ def cli_task_create(cmd: tuple[str], environment: str | None, *, wait: bool):
 
     """
     r = root.open_root()
-    task_id = task_create_shell(r, list(cmd), environment=environment)
+    task_id = task_create_shell(list(cmd), environment=environment, root=r)
     click.echo(task_id)
     if wait:
-        task_wait(r, task_id)
+        task_wait(task_id, root=r)
 
 
 @task.command("eval", hidden=True)
@@ -282,7 +282,7 @@ def cli_task_create(cmd: tuple[str], environment: str | None, *, wait: bool):
 @click.option("--capture/--no-capture", default=False)
 def cli_task_eval(task_id: str, *, capture: bool):
     r = root.open_root()
-    task_eval(r, task_id, capture=capture)
+    task_eval(task_id, capture=capture, root=r)
 
 
 @task.command("wait")
@@ -317,8 +317,8 @@ def cli_task_wait(
     """Wait for a task to complete."""
     r = root.open_root()
     task_wait(
-        r,
         task_id,
+        root=r,
         poll=poll,
         timeout=timeout,
         show_log=show_log,
@@ -387,7 +387,7 @@ def cli_environment_list():
 def cli_environment_delete(name: str):
     """Delete an environment."""
     r = root.open_root()
-    environment_delete(r, name)
+    environment_delete(name, r)
 
 
 @environment.command("new")
@@ -406,7 +406,7 @@ def cli_environment_new(name: str, engine: str):
 
     """
     r = root.open_root()
-    environment_new(r, name, engine)
+    environment_new(name, engine, r)
 
 
 @environment.command(
@@ -426,7 +426,7 @@ def cli_environment_provision(name: str, cmd: tuple[str]):
 
     """
     r = root.open_root()
-    provision(r, name, list(cmd))
+    provision(name, list(cmd), root=r)
 
 
 @environment.command("provision-run", hidden=True)
@@ -434,4 +434,4 @@ def cli_environment_provision(name: str, cmd: tuple[str]):
 @click.argument("id")
 def cli_environment_provision_run(name: str, id: str):
     r = root.open_root()
-    provision_run(r, name, id)
+    provision_run(name, id, r)

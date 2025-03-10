@@ -16,11 +16,11 @@ def test_provision_with_example_driver(tmp_path, mocker):
     r = root.open_root(tmp_path)
     with (r.path / "requirements.txt").open("w") as f:
         f.write("cowsay\n")
-    configure(r, "example")
+    configure("example", root=r)
     mock_run = mock.MagicMock()
     mocker.patch("subprocess.run", mock_run)
-    environment_new(r, "default", "pip")
-    provision(r, "default", [])
+    environment_new("default", "pip", r)
+    provision("default", [], root=r)
 
     pr = Pip(r, "default")
     venv_path = str(pr.path())
@@ -42,16 +42,16 @@ def test_provision_with_example_driver(tmp_path, mocker):
         stdout=mock.ANY,
     )
 
-    h = provision_history(r, "default")
+    h = provision_history("default", r)
     assert len(h) == 1
     assert h[0].result.error is None
 
     id = h[0].data.id
     with pytest.raises(Exception, match="has already been run"):
-        provision_run(r, "default", id)
+        provision_run("default", id, r)
 
     r.path_provision_result("default", id).unlink()
-    h2 = provision_history(r, "default")
+    h2 = provision_history("default", r)
     assert len(h) == 1
     assert h2[0].result is None
 
@@ -60,15 +60,15 @@ def test_dont_create_on_second_provision(tmp_path, mocker):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     file_create(r.path / "pyproject.toml")
-    configure(r, "example")
+    configure("example", root=r)
     mock_run = mock.MagicMock()
     mocker.patch("subprocess.run", mock_run)
 
-    environment_new(r, "default", "pip")
+    environment_new("default", "pip", r)
     pr = Pip(r, "default")
     pr.path().mkdir(parents=True)
 
-    provision(r, "default", [])
+    provision("default", [], root=r)
     assert mock_run.call_count == 1
 
     assert mock_run.mock_calls[0] == mock.call(
@@ -84,16 +84,16 @@ def test_record_provisioning_error(tmp_path, mocker):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     file_create(r.path / "pyproject.toml")
-    configure(r, "example")
+    configure("example", root=r)
     mock_run = mock.MagicMock(side_effect=Exception("some ghastly error"))
     mocker.patch("subprocess.run", mock_run)
 
-    environment_new(r, "default", "pip")
+    environment_new("default", "pip", r)
     pr = Pip(r, "default")
     pr.path().mkdir(parents=True)
 
     with pytest.raises(Exception, match="Provisioning failed"):
-        provision(r, "default", [])
+        provision("default", [], root=r)
     assert mock_run.call_count == 1
 
     assert mock_run.mock_calls[0] == mock.call(
@@ -104,7 +104,7 @@ def test_record_provisioning_error(tmp_path, mocker):
         stdout=mock.ANY,
     )
 
-    h = provision_history(r, "default")
+    h = provision_history("default", r)
     assert len(h) == 1
     assert isinstance(h[0].result.error, Exception)
 
@@ -112,6 +112,6 @@ def test_record_provisioning_error(tmp_path, mocker):
 def test_throw_on_provision_if_no_environment(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
-    configure(r, "example")
+    configure("example", root=r)
     with pytest.raises(Exception, match="Environment 'default' does not exist"):
-        provision(r, "default", [])
+        provision("default", [], root=r)

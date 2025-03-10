@@ -11,44 +11,44 @@ def test_can_set_task_status(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     with transient_working_directory(tmp_path):
-        tid = tc.task_create_shell(r, ["echo", "hello world"])
-    assert task_status(r, tid) == TaskStatus.CREATED
-    task_eval(r, tid)
-    assert task_status(r, tid) == TaskStatus.SUCCESS
+        tid = tc.task_create_shell(["echo", "hello world"], root=r)
+    assert task_status(tid, r) == TaskStatus.CREATED
+    task_eval(tid, capture=False, root=r)
+    assert task_status(tid, r) == TaskStatus.SUCCESS
 
 
 def test_cant_run_complete_task(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     with transient_working_directory(tmp_path):
-        tid = tc.task_create_shell(r, ["echo", "hello world"])
-    task_eval(r, tid)
+        tid = tc.task_create_shell(["echo", "hello world"], root=r)
+    task_eval(tid, capture=False, root=r)
     msg = f"Can't run '{tid}', which has status 'success'"
     with pytest.raises(Exception, match=msg):
-        task_eval(r, tid)
+        task_eval(tid, capture=False, root=r)
 
 
 def test_can_capture_output_to_auto_file(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     with transient_working_directory(tmp_path):
-        tid = tc.task_create_shell(r, ["echo", "hello world"])
-    task_eval(r, tid, capture=True)
+        tid = tc.task_create_shell(["echo", "hello world"], root=r)
+    task_eval(tid, capture=True, root=r)
 
     path = r.path_task_log(tid)
     with path.open("r") as f:
         assert f.read().strip() == "hello world"
 
-    assert task_log(r, tid) == "hello world\n"
+    assert task_log(tid, r) == "hello world\n"
 
 
 def test_return_information_about_failure_to_find_path(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     with transient_working_directory(tmp_path):
-        tid = tc.task_create_shell(r, ["adsfasdfasdfa", "arg"])
-    task_eval(r, tid, capture=True)
+        tid = tc.task_create_shell(["adsfasdfasdfa", "arg"], root=r)
+    task_eval(tid, capture=True, root=r)
 
     path = r.path_task_log(tid)
     assert path.exists()
-    assert task_status(r, tid) == TaskStatus.FAILURE
+    assert task_status(tid, r) == TaskStatus.FAILURE
