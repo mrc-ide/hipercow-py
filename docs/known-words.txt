@@ -4,6 +4,7 @@ commandline
 dide
 entrypoint
 eval
+hipercow
 keychain
 pythonic
 roadmap
