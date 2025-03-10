@@ -47,3 +47,8 @@ plugins:
     - codespell:
         dictionaries: [clear, rare]
     known_words: known-words.txt
+
+
+markdown_extensions:
+  - attr_list
+  - mkdocs-click

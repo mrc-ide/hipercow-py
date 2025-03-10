@@ -188,6 +188,7 @@ explicit-only = [
 
 [tool.hatch.envs.docs]
 extra-dependencies = [
+  "mkdocs-click",
   "mkdocs-material",
   "mkdocs-spellcheck[all]",
   "mkdocstrings-python",
