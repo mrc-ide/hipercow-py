@@ -71,7 +71,7 @@ def provision(
     if not path_config.exists():
         msg = f"Environment '{name}' does not exist"
         raise Exception(msg)
-    dr = load_driver(root, driver)
+    dr = load_driver(driver, root)
 
     id = secrets.token_hex(8)
     ProvisioningData(name, id, cmd).write(root)

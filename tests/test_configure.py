@@ -16,11 +16,11 @@ def test_no_drivers_are_available_by_default(tmp_path):
     root.init(path)
     r = root.open_root(path)
     assert list_drivers(r) == []
-    assert load_driver_optional(r, None) is None
+    assert load_driver_optional(None, r) is None
     with pytest.raises(Exception, match="No driver configured"):
-        load_driver(r, None)
+        load_driver(None, r)
     with pytest.raises(Exception, match="No such driver 'example'"):
-        load_driver(r, "example")
+        load_driver("example", r)
 
 
 def test_can_configure_driver(tmp_path):
@@ -29,7 +29,7 @@ def test_can_configure_driver(tmp_path):
     r = root.open_root(path)
     configure("example", root=r)
     assert list_drivers(r) == ["example"]
-    assert isinstance(load_driver(r, None), ExampleDriver)
+    assert isinstance(load_driver(None, r), ExampleDriver)
 
 
 def test_can_unconfigure_driver(tmp_path):
@@ -76,7 +76,7 @@ def test_get_default_driver(tmp_path):
     _write_configuration(a, r)
     _write_configuration(b, r)
     with pytest.raises(Exception, match="More than one candidate driver"):
-        load_driver(r, None)
+        load_driver(None, r)
 
 
 def test_can_show_configuration(tmp_path, capsys):

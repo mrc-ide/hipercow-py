@@ -32,7 +32,7 @@ def unconfigure(name: str, root: Root) -> None:
 
 # NOTE: Temporarily removing the 'None' default on 'driver'
 def show_configuration(driver: str | None, root: Root) -> None:
-    dr = load_driver(root, driver)
+    dr = load_driver(driver, root)
     print(f"Configuration for '{dr.name}'")
     dr.show_configuration()
 

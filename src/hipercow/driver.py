@@ -29,8 +29,8 @@ def list_drivers(root) -> list[str]:
     return [x.name for x in path.glob("*")]
 
 
-def load_driver(root: Root, driver: str | None) -> HipercowDriver:
-    dr = _load_driver(root, driver)
+def load_driver(driver: str | None, root: Root) -> HipercowDriver:
+    dr = _load_driver(driver, root)
     if not dr:
         msg = "No driver configured"
         raise Exception(msg)
@@ -38,12 +38,13 @@ def load_driver(root: Root, driver: str | None) -> HipercowDriver:
 
 
 def load_driver_optional(
-    root: Root, driver: str | None
+    driver: str | None,
+    root: Root,
 ) -> HipercowDriver | None:
-    return _load_driver(root, driver)
+    return _load_driver(driver, root)
 
 
-def _load_driver(root: Root, driver: str | None) -> HipercowDriver | None:
+def _load_driver(driver: str | None, root: Root) -> HipercowDriver | None:
     if not driver:
         return _default_driver(root)
     path = root.path_configuration(driver)
@@ -62,4 +63,4 @@ def _default_driver(root: Root) -> HipercowDriver | None:
     if n > 1:
         msg = "More than one candidate driver"
         raise Exception(msg)
-    return load_driver(root, candidates[0])
+    return load_driver(candidates[0], root)

@@ -21,7 +21,7 @@ def test_can_configure_dide_mount(tmp_path, mocker):
     configure("dide", python_version=None, root=r)
 
     assert list_drivers(r) == ["dide"]
-    driver = load_driver(r, "dide")
+    driver = load_driver("dide", r)
     assert driver.config == DideConfiguration(
         r, mounts=mock_mounts, python_version=None
     )
@@ -64,7 +64,7 @@ def test_provision_using_driver(tmp_path, mocker):
     configure("dide", python_version=None, root=r)
     environment_new("default", "pip", r)
     provision(r, "default", [])
-    cfg = load_driver(r, None).config
+    cfg = load_driver(None, r).config
     assert mock_provision.call_count == 1
     assert mock_provision.mock_calls[0] == mock.call(
         r, "default", mock.ANY, cfg
