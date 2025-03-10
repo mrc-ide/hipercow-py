@@ -3,6 +3,8 @@ from functools import reduce
 from operator import ior
 
 import click
+from click_repl import repl  # type: ignore
+from prompt_toolkit.history import FileHistory
 from rich.console import Console
 from typing_extensions import Never  # 3.10 does not have this in typing
 
@@ -88,6 +90,36 @@ def init(path: str):
     Once initialised, you should configure a driver and environment.
     """
     root.init(path)
+
+
+@cli.command("repl")
+@click.pass_context
+def cli_repl(ctx):
+    """Launch the interactive REPL.
+
+    Running this creates an interactive session where you can send a
+    series of commands to `hipercow`, with nice autocompletion. It
+    requires a reasonable terminal to run in (Windows users probably
+    need "git-bash" or similar; please let us know what works for
+    you).
+
+    To quit the REPL, use Ctrl-D.
+
+    Warning: Currently any exception thrown in the application will
+    cause the REPL to exit.  This is generally unwanted, please let us
+    know how annoying this is in practice.
+
+    """
+    try:
+        r = root.open_root()
+        history = FileHistory(r.path_repl_history())
+    except Exception:
+        history = None
+    prompt_kwargs = {
+        "message": "hipercow> ",
+        "history": history,
+    }
+    repl(ctx, prompt_kwargs=prompt_kwargs)
 
 
 @cli.group()
