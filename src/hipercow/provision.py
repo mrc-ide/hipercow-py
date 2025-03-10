@@ -90,7 +90,7 @@ def provision(
             select your driver automatically if only one is
             configured.
 
-        root: The root, or if given search from the current directory.
+        root: The root, or if not given search from the current directory.
 
     Returns:
         Nothing, called for side effects only.

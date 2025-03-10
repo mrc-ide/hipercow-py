@@ -48,7 +48,7 @@ def environment_new(name: str, engine: str, root: OptionalRoot = None) -> None:
         engine: The environment engine to use.  The options here are
             `pip` and `empty`.  Soon we will support `conda` too.
 
-        root: The root, or if given search from the current directory.
+        root: The root, or if not given search from the current directory.
 
     Returns:
         Nothing, called for side effects.
@@ -74,7 +74,7 @@ def environment_list(root: OptionalRoot = None) -> list[str]:
     """List known environments.
 
     Args:
-        root: The root, or if given search from the current directory.
+        root: The root, or if not given search from the current directory.
 
     Returns:
         A sorted list of environment names.  The name `empty` will
@@ -93,7 +93,7 @@ def environment_delete(name: str, root: OptionalRoot = None) -> None:
 
     Args:
         name: The name of the environment to delete.
-        root: The root, or if given search from the current directory.
+        root: The root, or if not given search from the current directory.
 
     Returns:
         Nothing, called for side effects only.
@@ -128,7 +128,7 @@ def environment_check(name: str | None, root: OptionalRoot = None) -> str:
     Args:
         name: The name of the environment to use, or `None` to select
             the appropriate default.
-        root: The root, or if given search from the current directory.
+        root: The root, or if not given search from the current directory.
 
     Returns:
         The resolved environment name.
@@ -152,10 +152,10 @@ def environment_exists(name: str, root: OptionalRoot = None) -> bool:
 
     Args:
         name: The name of the environment to check.
-        root: The root, or if given search from the current directory.
+        root: The root, or if not given search from the current directory.
 
     Returns:
-        `True` if the environment exist, otherwise `False`.
+        `True` if the environment exists, otherwise `False`.
 
     """
     root = open_root(root)

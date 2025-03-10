@@ -20,7 +20,7 @@ def configure(name: str, *, root: OptionalRoot = None, **kwargs) -> None:
     Args:
         name: The name of the driver.  This will be `dide` unless you
             are developing `hipercow` itself :)
-        root: The root, or if given search from the current directory.
+        root: The root, or if not given search from the current directory.
         **kwargs (Any): Arguments passed to, and supported by, your driver.
 
     Returns:
@@ -39,7 +39,7 @@ def unconfigure(name: str, root: OptionalRoot = None) -> None:
     Args:
         name: The name of the driver.  This will be `dide` unless you
             are developing `hipercow` itself :)
-        root: The root, or if given search from the current directory.
+        root: The root, or if not given search from the current directory.
 
     Returns:
         Nothing, called for side effects only.
@@ -63,7 +63,7 @@ def show_configuration(
     Args:
         name: The name of the driver.  This will be `dide` unless you
             are developing `hipercow` itself :)
-        root: The root, or if given search from the current directory.
+        root: The root, or if not given search from the current directory.
 
     Returns:
         Nothing, called for side effects only.

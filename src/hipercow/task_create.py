@@ -41,7 +41,7 @@ def task_create_shell(
             not needed as we expect most people to have a single
             driver set.
 
-        root: The root, or if given search from the current directory.
+        root: The root, or if not given search from the current directory.
 
     Returns:
         The newly-created task identifier, a 32-character hex string.

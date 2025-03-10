@@ -18,7 +18,7 @@ class TaskStatus(Flag):
     (this could happen from `CREATED`, `SUBMITTED` or `RUNNING`) or
     might be `MISSING` if it does not exist.
 
-    A runnable  task is  one that  we could  use `task_eval`  with; it
+    A runnable task is one that we could use `task_eval` with; it
     might be `CREATED` or `SUBMITTED`.
 
     A terminal task is one that has reached the latest state it will
@@ -94,7 +94,7 @@ def task_exists(task_id: str, root: OptionalRoot = None) -> bool:
 
     Args:
         task_id: The task identifier, a 32-character hex string.
-        root: The root, or if given search from the current directory.
+        root: The root, or if not given search from the current directory.
 
     Returns:
         `True` if the task exists.
@@ -108,7 +108,7 @@ def task_status(task_id: str, root: OptionalRoot = None) -> TaskStatus:
 
     Args:
         task_id: The task identifier to check, a 32-character hex string.
-        root: The root, or if given search from the current directory.
+        root: The root, or if not given search from the current directory.
 
     Returns:
         The status of the task.
@@ -136,7 +136,7 @@ def task_log(task_id: str, root: OptionalRoot = None) -> str | None:
     Args:
         task_id: The task identifier to fetch the log for, a
             32-character hex string.
-        root: The root, or if given search from the current directory.
+        root: The root, or if not given search from the current directory.
 
     Returns:
         The log as a single string, if present.
@@ -262,7 +262,7 @@ def task_wait(
 
     Args:
         task_id: The task to wait on.
-        root: The root, or if given search from the current directory.
+        root: The root, or if not given search from the current directory.
         allow_created: Allow waiting on a task that has status
             `CREATED`.  Normally this is not allowed because a task
             that is `CREATED` (and not `SUBMITTED`) will not start; if
@@ -301,7 +301,7 @@ def task_recent_rebuild(
     """Rebuild the list of recent tasks.
 
     Args:
-        root: The root, or if given search from the current directory.
+        root: The root, or if not given search from the current directory.
         limit: The maximum number of tasks to add to the recent
             list. Use `limit=0` to truncate the list.
 
@@ -334,7 +334,7 @@ def task_recent(
     """Return a list of recently created tasks.
 
     Args:
-        root: The root, or if given search from the current directory.
+        root: The root, or if not given search from the current directory.
         limit: The maximum number of tasks to return.
 
     Return:
@@ -367,7 +367,7 @@ def task_last(root: OptionalRoot = None) -> str | None:
     """Return the most recently created task.
 
     Args:
-        root: The root, or if given search from the current directory.
+        root: The root, or if not given search from the current directory.
 
     Return:
         A task identifier (a 32-character hex string) if any tasks
