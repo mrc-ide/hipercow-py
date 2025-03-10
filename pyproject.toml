@@ -27,6 +27,7 @@ dependencies = [
   "defusedxml",
   "keyring",
   "requests",
+  "rich",
   "taskwait",
 ]
 dynamic = ["version"]
@@ -37,7 +38,7 @@ Issues = "https://github.com/unknown/hipercow/issues"
 Source = "https://github.com/unknown/hipercow"
 
 [project.scripts]
-hipercow = "hipercow.cli:cli"
+hipercow = "hipercow.cli:cli_safe"
 
 [tool.hatch.version]
 path = "src/hipercow/__about__.py"

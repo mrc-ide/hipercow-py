@@ -10,6 +10,7 @@ from hipercow.util import (
     subprocess_run,
     transient_envvars,
     transient_working_directory,
+    truthy_envvar,
 )
 
 
@@ -93,3 +94,14 @@ def test_can_check_python_version():
     with pytest.raises(Exception, match="is not supported"):
         check_python_version("3.9")
     assert check_python_version("3.9", ["3.9", "3.10"]) == "3.9"
+
+
+def test_can_convert_envvar_to_bool():
+    with transient_envvars({"hc_a": "1", "hc_b": "true", "hc_c": "TRUE"}):
+        assert truthy_envvar("hc_a")
+        assert truthy_envvar("hc_b")
+        assert truthy_envvar("hc_c")
+    with transient_envvars({"hc_a": None, "hc_b": "0", "hc_c": "t"}):
+        assert not truthy_envvar("hc_a")
+        assert not truthy_envvar("hc_b")
+        assert not truthy_envvar("hc_c")

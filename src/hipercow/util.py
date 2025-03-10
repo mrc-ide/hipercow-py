@@ -107,3 +107,8 @@ def check_python_version(
         msg = f"Version '{version}' is not supported"
         raise Exception(msg)
     return v
+
+
+def truthy_envvar(name: str) -> bool:
+    value = os.environ.get(name)
+    return value is not None and (value.lower() in {"1", "true"})
