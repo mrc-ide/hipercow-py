@@ -83,7 +83,7 @@ def test_configure_python_version(tmp_path, mocker, capsys):
     out = capsys.readouterr().out
     assert (
         out
-        == """Configuration for 'dide'
+        == """Configuration for 'dide-windows'
 path mapping:
   drive: V:
   share: \\\\projects\\other
