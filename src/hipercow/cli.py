@@ -139,7 +139,7 @@ def cli_driver_unconfigure(name: str):
 def cli_driver_show(name: str | None):
     """Show configuration for a driver."""
     r = root.open_root()
-    show_configuration(name, root=r)
+    show_configuration(name, r)
 
 
 @driver.command("list")
