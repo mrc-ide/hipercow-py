@@ -99,11 +99,24 @@ def init(path: str):
 @cli.command("repl")
 @click.pass_context
 def cli_repl(ctx):
-    """Launch the interactive REPL."""
-    r = root.open_root()
+    """Launch the interactive REPL.
+
+    Running this creates an interactive session where you can send a
+    series of commands to `hipercow`, with nice autocompletion. It
+    requires a reasonable terminal to run in (Windows users probably
+    need "git-bash" or similar; please let us know what works for
+    you).
+
+    To quit the REPL, use Ctrl-D.
+    """
+    try:
+        r = root.open_root()
+        history = FileHistory(r.path_repl_history())
+    except Exception:
+        history = None
     prompt_kwargs = {
         "message": "hipercow> ",
-        "history": FileHistory(r.path_repl_history()),
+        "history": history,
     }
     repl(ctx, prompt_kwargs=prompt_kwargs)
 

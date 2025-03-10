@@ -13,6 +13,8 @@ from hipercow.task import TaskData, TaskStatus
 from hipercow.task_create import task_create_shell
 from hipercow.util import transient_envvars
 
+from tests.helpers import AnyInstanceOf
+
 
 def test_can_init_repository(tmp_path):
     runner = CliRunner()
@@ -494,7 +496,22 @@ def test_can_launch_repl(tmp_path, mocker):
     mock_repl = mock.MagicMock()
     mocker.patch("hipercow.cli.repl", mock_repl)
     with runner.isolated_filesystem(temp_dir=tmp_path):
-        runner.invoke(cli.init, ".")
         res = runner.invoke(cli.cli_repl, [])
         assert res.exit_code == 0
         assert mock_repl.call_count == 1
+        assert mock_repl.mock_calls[0] == mock.call(
+            AnyInstanceOf(click.Context),
+            prompt_kwargs={"message": "hipercow> ", "history": None},
+        )
+
+        runner.invoke(cli.init, ".")
+        res = runner.invoke(cli.cli_repl, [])
+        assert res.exit_code == 0
+        assert mock_repl.call_count == 2
+        assert mock_repl.mock_calls[1] == mock.call(
+            AnyInstanceOf(click.Context),
+            prompt_kwargs={
+                "message": "hipercow> ",
+                "history": AnyInstanceOf(cli.FileHistory),
+            },
+        )
