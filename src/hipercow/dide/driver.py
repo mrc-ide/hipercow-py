@@ -9,8 +9,8 @@ from hipercow.driver import HipercowDriver
 from hipercow.root import Root
 
 
-class DideDriver(HipercowDriver):
-    name = "dide"
+class DideWindowsDriver(HipercowDriver):
+    name = "dide-windows"
     config: DideConfiguration
 
     def __init__(self, root: Root, **kwargs):
