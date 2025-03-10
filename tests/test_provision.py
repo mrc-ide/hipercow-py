@@ -16,7 +16,7 @@ def test_provision_with_example_driver(tmp_path, mocker):
     r = root.open_root(tmp_path)
     with (r.path / "requirements.txt").open("w") as f:
         f.write("cowsay\n")
-    configure(r, "example")
+    configure("example", root=r)
     mock_run = mock.MagicMock()
     mocker.patch("subprocess.run", mock_run)
     environment_new("default", "pip", r)
@@ -60,7 +60,7 @@ def test_dont_create_on_second_provision(tmp_path, mocker):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     file_create(r.path / "pyproject.toml")
-    configure(r, "example")
+    configure("example", root=r)
     mock_run = mock.MagicMock()
     mocker.patch("subprocess.run", mock_run)
 
@@ -84,7 +84,7 @@ def test_record_provisioning_error(tmp_path, mocker):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     file_create(r.path / "pyproject.toml")
-    configure(r, "example")
+    configure("example", root=r)
     mock_run = mock.MagicMock(side_effect=Exception("some ghastly error"))
     mocker.patch("subprocess.run", mock_run)
 
@@ -112,6 +112,6 @@ def test_record_provisioning_error(tmp_path, mocker):
 def test_throw_on_provision_if_no_environment(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
-    configure(r, "example")
+    configure("example", root=r)
     with pytest.raises(Exception, match="Environment 'default' does not exist"):
         provision(r, "default", [])

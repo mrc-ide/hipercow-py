@@ -12,14 +12,14 @@ from hipercow.util import transient_working_directory
 # of pytest:
 # * https://docs.pytest.org/en/stable/how-to/writing_plugins.html#pip-installable-plugins
 # * https://packaging.python.org/en/latest/specifications/entry-points/
-def configure(root: Root, name: str, **kwargs) -> None:
+def configure(name: str, *, root: Root, **kwargs) -> None:
     driver = _get_driver(name)
     with transient_working_directory(root.path):
         config = driver(root, **kwargs)
-    _write_configuration(root, config)
+    _write_configuration(config, root)
 
 
-def unconfigure(root: Root, name: str) -> None:
+def unconfigure(name: str, root: Root) -> None:
     path = root.path_configuration(name)
     if path.exists():
         path.unlink()
@@ -30,7 +30,8 @@ def unconfigure(root: Root, name: str) -> None:
         )
 
 
-def show_configuration(root: Root, driver: str | None = None) -> None:
+# NOTE: Temporarily removing the 'None' default on 'driver'
+def show_configuration(driver: str | None, root: Root) -> None:
     dr = load_driver(root, driver)
     print(f"Configuration for '{dr.name}'")
     dr.show_configuration()
@@ -48,7 +49,7 @@ def _get_driver(name: str) -> type[HipercowDriver]:
         raise Exception(msg) from None
 
 
-def _write_configuration(root: Root, driver: HipercowDriver) -> None:
+def _write_configuration(driver: HipercowDriver, root: Root) -> None:
     name = driver.name
     path = root.path_configuration(name)
     exists = path.exists()

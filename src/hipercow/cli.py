@@ -123,7 +123,7 @@ def cli_driver_configure(name: str):
     #
     # For now, let's just have it on/off.
     r = root.open_root()
-    configure(r, name)
+    configure(name, root=r)
 
 
 @driver.command("unconfigure")
@@ -131,7 +131,7 @@ def cli_driver_configure(name: str):
 def cli_driver_unconfigure(name: str):
     """Unconfigure (remove) a driver."""
     r = root.open_root()
-    unconfigure(r, name)
+    unconfigure(name, r)
 
 
 @driver.command("show")
@@ -139,7 +139,7 @@ def cli_driver_unconfigure(name: str):
 def cli_driver_show(name: str | None):
     """Show configuration for a driver."""
     r = root.open_root()
-    show_configuration(r, name)
+    show_configuration(name, root=r)
 
 
 @driver.command("list")

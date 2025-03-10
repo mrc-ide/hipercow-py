@@ -39,7 +39,7 @@ def test_tasks_cannot_be_empty(tmp_path):
 def test_submit_with_driver_if_configured(tmp_path, capsys):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
-    configure(r, "example")
+    configure("example", root=r)
     capsys.readouterr()
     with transient_working_directory(tmp_path):
         tid = tc.task_create_shell(r, ["echo", "hello world"])

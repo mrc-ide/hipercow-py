@@ -19,7 +19,7 @@ def test_run_in_environment(tmp_path):
         with open("requirements.txt", "w") as f:
             f.write("cowsay\n")
 
-        configure(r, "example")
+        configure("example", root=r)
         environment_new("default", "pip", r)
         provision(r, "default", [])
         tid = task_create_shell(r, ["cowsay", "-t", "hello"])
