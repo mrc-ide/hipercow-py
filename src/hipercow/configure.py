@@ -1,6 +1,6 @@
 import pickle
 
-from hipercow.dide.driver import DideDriver
+from hipercow.dide.driver import DideWindowsDriver
 from hipercow.driver import HipercowDriver, load_driver
 from hipercow.example import ExampleDriver
 from hipercow.root import OptionalRoot, Root, open_root
@@ -42,7 +42,7 @@ def show_configuration(
 
 
 # ahead of some sort of global store of drivers:
-_DRIVERS = {d.name: d for d in [ExampleDriver, DideDriver]}
+_DRIVERS = {d.name: d for d in [ExampleDriver, DideWindowsDriver]}
 
 
 def _get_driver(name: str) -> type[HipercowDriver]:

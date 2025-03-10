@@ -95,7 +95,7 @@ Because you will want to submit tasks to the DIDE cluster, we need to configure 
 
 ```console
 $ hipercow driver configure dide
-Configured hipercow to use 'dide'
+Configured hipercow to use 'dide-windows'
 ```
 
 ## Running hello world
