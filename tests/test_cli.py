@@ -303,7 +303,7 @@ def test_can_build_environment(tmp_path, mocker):
         assert res.exit_code == 0
         assert mock_provision.call_count == 1
         assert mock_provision.mock_calls[0] == mock.call(
-            mock.ANY, "example", "abcdef"
+            "example", "abcdef", mock.ANY
         )
 
 

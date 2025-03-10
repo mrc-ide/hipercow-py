@@ -434,4 +434,4 @@ def cli_environment_provision(name: str, cmd: tuple[str]):
 @click.argument("id")
 def cli_environment_provision_run(name: str, id: str):
     r = root.open_root()
-    provision_run(r, name, id)
+    provision_run(name, id, r)

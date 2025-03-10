@@ -23,7 +23,7 @@ class ProvisioningData:
             pickle.dump(self, f)
 
     @staticmethod
-    def read(root: Root, name: str, id: str) -> "ProvisioningData":
+    def read(name: str, id: str, root: Root) -> "ProvisioningData":
         with root.path_provision_data(name, id).open("rb") as f:
             return pickle.load(f)
 
@@ -40,7 +40,7 @@ class ProvisioningResult:
             pickle.dump(self, f)
 
     @staticmethod
-    def read(root: Root, name: str, id: str) -> "ProvisioningResult":
+    def read(name: str, id: str, root: Root) -> "ProvisioningResult":
         with root.path_provision_result(name, id).open("rb") as f:
             return pickle.load(f)
 
@@ -51,10 +51,10 @@ class ProvisioningRecord:
     result: ProvisioningResult | None
 
     @staticmethod
-    def read(root: Root, name: str, id: str) -> "ProvisioningRecord":
-        data = ProvisioningData.read(root, name, id)
+    def read(name: str, id: str, root: Root) -> "ProvisioningRecord":
+        data = ProvisioningData.read(name, id, root)
         try:
-            result = ProvisioningResult.read(root, name, id)
+            result = ProvisioningResult.read(name, id, root)
         except FileNotFoundError:
             result = None
         return ProvisioningRecord(data, result)
@@ -78,11 +78,11 @@ def provision(
     dr.provision(root, name, id)
 
 
-def provision_run(root: Root, name: str, id: str) -> None:
+def provision_run(name: str, id: str, root: Root) -> None:
     if root.path_provision_result(name, id).exists():
         msg = f"Provisioning task '{id}' for '{name}' has already been run"
         raise Exception(msg)
-    data = ProvisioningData.read(root, name, id)
+    data = ProvisioningData.read(name, id, root)
     env = environment_engine(name, root)
     logfile = root.path_provision_log(name, id)
     start = time.time()
@@ -98,9 +98,9 @@ def provision_run(root: Root, name: str, id: str) -> None:
             raise Exception(msg) from e
 
 
-def provision_history(root: Root, name: str) -> list[ProvisioningRecord]:
+def provision_history(name: str, root: Root) -> list[ProvisioningRecord]:
     results = [
-        ProvisioningRecord.read(root, name, x.name)
+        ProvisioningRecord.read(name, x.name, root)
         for x in (root.path_environment(name) / "provision").glob("*")
     ]
     results.sort(key=lambda x: x.data.time)

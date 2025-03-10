@@ -42,16 +42,16 @@ def test_provision_with_example_driver(tmp_path, mocker):
         stdout=mock.ANY,
     )
 
-    h = provision_history(r, "default")
+    h = provision_history("default", r)
     assert len(h) == 1
     assert h[0].result.error is None
 
     id = h[0].data.id
     with pytest.raises(Exception, match="has already been run"):
-        provision_run(r, "default", id)
+        provision_run("default", id, r)
 
     r.path_provision_result("default", id).unlink()
-    h2 = provision_history(r, "default")
+    h2 = provision_history("default", r)
     assert len(h) == 1
     assert h2[0].result is None
 
@@ -104,7 +104,7 @@ def test_record_provisioning_error(tmp_path, mocker):
         stdout=mock.ANY,
     )
 
-    h = provision_history(r, "default")
+    h = provision_history("default", r)
     assert len(h) == 1
     assert isinstance(h[0].result.error, Exception)
 
