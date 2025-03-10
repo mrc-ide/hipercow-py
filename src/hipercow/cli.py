@@ -108,6 +108,11 @@ def cli_repl(ctx):
     you).
 
     To quit the REPL, use Ctrl-D.
+
+    Warning: Currently any exception thrown in the application will
+    cause the REPL to exit.  This is generally unwanted, please let us
+    know how annoying this is in practice.
+
     """
     try:
         r = root.open_root()
