@@ -14,7 +14,7 @@ def task_create_shell(
     environment: str | None = None,
     envvars: dict[str, str] | None = None,
     driver: str | None = None,
-    root: OptionalRoot,
+    root: OptionalRoot = None,
 ) -> str:
     root = open_root(root)
     if not cmd:

@@ -87,7 +87,7 @@ def environment_check(name: str | None, root: OptionalRoot = None) -> str:
     raise Exception(msg)
 
 
-def environment_exists(name: str, root: OptionalRoot) -> bool:
+def environment_exists(name: str, root: OptionalRoot = None) -> bool:
     root = open_root(root)
     return root.path_environment(name).exists()
 

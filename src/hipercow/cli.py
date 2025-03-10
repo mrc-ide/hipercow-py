@@ -122,24 +122,21 @@ def cli_driver_configure(name: str):
     # https://stackoverflow.com/q/36513706 (old)
     #
     # For now, let's just have it on/off.
-    r = root.open_root()
-    configure(name, root=r)
+    configure(name)
 
 
 @driver.command("unconfigure")
 @click.argument("name")
 def cli_driver_unconfigure(name: str):
     """Unconfigure (remove) a driver."""
-    r = root.open_root()
-    unconfigure(name, r)
+    unconfigure(name)
 
 
 @driver.command("show")
 @click.argument("name", required=False)
 def cli_driver_show(name: str | None):
     """Show configuration for a driver."""
-    r = root.open_root()
-    show_configuration(name, r)
+    show_configuration(name)
 
 
 @driver.command("list")
@@ -169,8 +166,7 @@ def cli_task_status(task_id: str):
     added in future as we expand the tool.
 
     """
-    r = root.open_root()
-    click.echo(task_status(task_id, r))
+    click.echo(task_status(task_id))
 
 
 @task.command("log")
@@ -184,11 +180,11 @@ def cli_task_log(task_id: str, *, filename=False):
     If the log does not yet exist, we return nothing.
 
     """
-    r = root.open_root()
     if filename:
+        r = root.open_root()
         click.echo(r.path_task_log(task_id))
     else:
-        value = task_log(task_id, r)
+        value = task_log(task_id)
         if value is not None:
             click.echo(value)
 
@@ -202,17 +198,15 @@ def cli_task_list(with_status=None):
     interesting and it might take a while to find them all.
 
     """
-    r = root.open_root()
     with_status = _process_with_status(with_status)
-    for task_id in task_list(with_status=with_status, root=r):
+    for task_id in task_list(with_status=with_status):
         click.echo(task_id)
 
 
 @task.command("last")
 def cli_task_last():
     """List the most recently created task."""
-    r = root.open_root()
-    task_id = task_last(r)
+    task_id = task_last()
     if task_id is None:
         # we might set exit code to something nonzero here, but this
         # seems slightly hard...
@@ -228,10 +222,9 @@ def cli_task_last():
 @click.option("--rebuild", is_flag=True, help="Rebuild the recent task list")
 def cli_task_recent(limit: int, *, rebuild: bool):
     """List recent tasks."""
-    r = root.open_root()
     if rebuild:
-        task_recent_rebuild(limit=limit, root=r)
-    for i in task_recent(limit=limit, root=r):
+        task_recent_rebuild(limit=limit)
+    for i in task_recent(limit=limit):
         click.echo(i)
 
 
@@ -270,19 +263,17 @@ def cli_task_create(cmd: tuple[str], environment: str | None, *, wait: bool):
     wait for a very long time if the cluster is busy.
 
     """
-    r = root.open_root()
-    task_id = task_create_shell(list(cmd), environment=environment, root=r)
+    task_id = task_create_shell(list(cmd), environment=environment)
     click.echo(task_id)
     if wait:
-        task_wait(task_id, root=r)
+        task_wait(task_id)
 
 
 @task.command("eval", hidden=True)
 @click.argument("task_id")
 @click.option("--capture/--no-capture", default=False)
 def cli_task_eval(task_id: str, *, capture: bool):
-    r = root.open_root()
-    task_eval(task_id, capture=capture, root=r)
+    task_eval(task_id, capture=capture)
 
 
 @task.command("wait")
@@ -315,10 +306,8 @@ def cli_task_wait(
     progress: bool,
 ):
     """Wait for a task to complete."""
-    r = root.open_root()
     task_wait(
         task_id,
-        root=r,
         poll=poll,
         timeout=timeout,
         show_log=show_log,

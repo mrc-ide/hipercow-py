@@ -84,7 +84,7 @@ def task_status(task_id: str, root: OptionalRoot = None) -> TaskStatus:
     return TaskStatus.CREATED
 
 
-def task_log(task_id: str, root: OptionalRoot) -> str | None:
+def task_log(task_id: str, root: OptionalRoot = None) -> str | None:
     root = open_root(root)
     if not task_exists(task_id, root):
         msg = f"Task '{task_id}' does not exist"
