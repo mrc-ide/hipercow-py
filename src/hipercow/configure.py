@@ -32,8 +32,9 @@ def unconfigure(name: str, root: OptionalRoot = None) -> None:
         )
 
 
-# NOTE: Temporarily removing the 'None' default on 'driver'
-def show_configuration(driver: str | None, root: OptionalRoot = None) -> None:
+def show_configuration(
+    driver: str | None = None, root: OptionalRoot = None
+) -> None:
     root = open_root(root)
     dr = load_driver(driver, root)
     print(f"Configuration for '{dr.name}'")
