@@ -3,7 +3,7 @@ from functools import reduce
 from operator import ior
 
 import click
-from click_repl import repl
+from click_repl import repl  # type: ignore
 from prompt_toolkit.history import FileHistory
 from rich.console import Console
 from typing_extensions import Never  # 3.10 does not have this in typing
