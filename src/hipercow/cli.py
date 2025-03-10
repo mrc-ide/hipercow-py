@@ -3,6 +3,8 @@ from functools import reduce
 from operator import ior
 
 import click
+from click_repl import repl
+from prompt_toolkit.history import FileHistory
 from rich.console import Console
 from typing_extensions import Never  # 3.10 does not have this in typing
 
@@ -92,6 +94,18 @@ def init(path: str):
 
     """
     root.init(path)
+
+
+@cli.command("repl")
+@click.pass_context
+def cli_repl(ctx):
+    """Launch the interactive REPL."""
+    r = root.open_root()
+    prompt_kwargs = {
+        "message": "hipercow> ",
+        "history": FileHistory(r.path_repl_history()),
+    }
+    repl(ctx, prompt_kwargs=prompt_kwargs)
 
 
 @cli.group()

@@ -487,3 +487,14 @@ def test_can_set_python_version(tmp_path):
         )
         assert res.exit_code == 0
         assert list_drivers(r) == ["example"]
+
+
+def test_can_launch_repl(tmp_path, mocker):
+    runner = CliRunner()
+    mock_repl = mock.MagicMock()
+    mocker.patch("hipercow.cli.repl", mock_repl)
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        runner.invoke(cli.init, ".")
+        res = runner.invoke(cli.cli_repl, [])
+        assert res.exit_code == 0
+        assert mock_repl.call_count == 1
