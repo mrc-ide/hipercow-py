@@ -10,7 +10,6 @@ from hipercow import cli, root, task
 from hipercow.task import TaskData, TaskStatus
 from hipercow.task_create import task_create_shell
 from hipercow.util import transient_envvars
-
 from tests.helpers import AnyInstanceOf
 
 
