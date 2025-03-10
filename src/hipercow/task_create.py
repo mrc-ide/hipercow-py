@@ -9,19 +9,19 @@ from hipercow.util import relative_workdir
 
 # API here very subject to change in terms of argument order etc.
 def task_create_shell(
-    root: Root,
     cmd: list[str],
     *,
     environment: str | None = None,
     envvars: dict[str, str] | None = None,
     driver: str | None = None,
+    root: Root,
 ) -> str:
     if not cmd:
         msg = "'cmd' cannot be empty"
         raise Exception(msg)
     data = {"cmd": cmd}
     task_id = _task_create(
-        root,
+        root=root,
         method="shell",
         environment=environment,
         driver=driver,
@@ -32,8 +32,8 @@ def task_create_shell(
 
 
 def _task_create(
-    root: Root,
     *,
+    root: Root,
     method: str,
     environment: str | None,
     driver: str | None,

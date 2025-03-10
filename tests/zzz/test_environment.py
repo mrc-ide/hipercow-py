@@ -22,7 +22,7 @@ def test_run_in_environment(tmp_path):
         configure("example", root=r)
         environment_new("default", "pip", r)
         provision("default", [], root=r)
-        tid = task_create_shell(r, ["cowsay", "-t", "hello"])
+        tid = task_create_shell(["cowsay", "-t", "hello"], root=r)
         task_eval(tid, capture=True, root=r)
 
         assert task_status(tid, r) == TaskStatus.SUCCESS

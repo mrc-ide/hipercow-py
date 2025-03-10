@@ -271,7 +271,7 @@ def cli_task_create(cmd: tuple[str], environment: str | None, *, wait: bool):
 
     """
     r = root.open_root()
-    task_id = task_create_shell(r, list(cmd), environment=environment)
+    task_id = task_create_shell(list(cmd), environment=environment, root=r)
     click.echo(task_id)
     if wait:
         task_wait(task_id, root=r)

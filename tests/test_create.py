@@ -13,7 +13,7 @@ def test_create_simple_task(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     with transient_working_directory(tmp_path):
-        tid = tc.task_create_shell(r, ["echo", "hello world"])
+        tid = tc.task_create_shell(["echo", "hello world"], root=r)
     assert re.match("^[0-9a-f]{32}$", tid)
     path_data = (
         tmp_path / "hipercow" / "py" / "tasks" / tid[:2] / tid[2:] / "data"
@@ -33,7 +33,7 @@ def test_tasks_cannot_be_empty(tmp_path):
     r = root.open_root(tmp_path)
     with pytest.raises(Exception, match="cannot be empty"):
         with transient_working_directory(tmp_path):
-            tc.task_create_shell(r, [])
+            tc.task_create_shell([], root=r)
 
 
 def test_submit_with_driver_if_configured(tmp_path, capsys):
@@ -42,7 +42,7 @@ def test_submit_with_driver_if_configured(tmp_path, capsys):
     configure("example", root=r)
     capsys.readouterr()
     with transient_working_directory(tmp_path):
-        tid = tc.task_create_shell(r, ["echo", "hello world"])
+        tid = tc.task_create_shell(["echo", "hello world"], root=r)
     str1 = capsys.readouterr().out
     assert str1.startswith(f"submitting '{tid}'")
     assert task_status(tid, r) == TaskStatus.SUBMITTED

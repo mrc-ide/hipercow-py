@@ -40,7 +40,7 @@ def test_can_set_task_status(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     with transient_working_directory(tmp_path):
-        tid = tc.task_create_shell(r, ["echo", "hello world"])
+        tid = tc.task_create_shell(["echo", "hello world"], root=r)
     assert task_exists(tid, r)
     assert task_status(tid, r) == TaskStatus.CREATED
     set_task_status(tid, TaskStatus.RUNNING, r)
@@ -72,7 +72,7 @@ def test_read_task_info(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     with transient_working_directory(tmp_path):
-        tid = tc.task_create_shell(r, ["echo", "hello world"])
+        tid = tc.task_create_shell(["echo", "hello world"], root=r)
     info = task_info(tid, r)
     assert info.status == TaskStatus.CREATED
     assert info.data == TaskData.read(tid, r)
@@ -94,7 +94,7 @@ def test_that_can_read_info_for_completed_task(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     with transient_working_directory(tmp_path):
-        tid = tc.task_create_shell(r, ["echo", "hello world"])
+        tid = tc.task_create_shell(["echo", "hello world"], root=r)
         task_eval(tid, capture=False, root=r)
         info = task_info(tid, r)
     assert info.status == TaskStatus.SUCCESS
@@ -110,10 +110,10 @@ def test_can_list_tasks(tmp_path):
     r = root.open_root(tmp_path)
     assert task_list(root=r) == []
     with transient_working_directory(tmp_path):
-        t1 = tc.task_create_shell(r, ["echo", "hello world"])
+        t1 = tc.task_create_shell(["echo", "hello world"], root=r)
     assert task_list(root=r) == [t1]
     with transient_working_directory(tmp_path):
-        t2 = tc.task_create_shell(r, ["echo", "hello world"])
+        t2 = tc.task_create_shell(["echo", "hello world"], root=r)
     assert set(task_list(root=r)) == {t1, t2}
 
 
@@ -121,7 +121,7 @@ def test_can_list_tasks_by_status(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     with transient_working_directory(tmp_path):
-        ids = [tc.task_create_shell(r, ["true"]) for _ in range(5)]
+        ids = [tc.task_create_shell(["true"], root=r) for _ in range(5)]
     # 0 is CREATED
     set_task_status(ids[1], TaskStatus.RUNNING, r)
     set_task_status(ids[2], TaskStatus.SUCCESS, r)
@@ -146,7 +146,7 @@ def test_can_wait_on_completed_task(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     with transient_working_directory(tmp_path):
-        tid = tc.task_create_shell(r, ["echo", "hello world"])
+        tid = tc.task_create_shell(["echo", "hello world"], root=r)
         task_eval(tid, capture=False, root=r)
     assert task_wait(tid, root=r)
 
@@ -155,7 +155,7 @@ def test_refuse_to_wait_for_created_task(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     with transient_working_directory(tmp_path):
-        tid = tc.task_create_shell(r, ["echo", "hello world"])
+        tid = tc.task_create_shell(["echo", "hello world"], root=r)
     with pytest.raises(Exception, match="Cannot wait .+ not been submitted"):
         task_wait(tid, root=r)
 
@@ -164,7 +164,7 @@ def test_wait_wrapper_can_get_status(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     with transient_working_directory(tmp_path):
-        tid = tc.task_create_shell(r, ["echo", "hello world"])
+        tid = tc.task_create_shell(["echo", "hello world"], root=r)
         wrapper = TaskWaitWrapper(tid, r)
         assert wrapper.status() == "created"
         set_task_status(tid, TaskStatus.SUCCESS, r)
@@ -175,7 +175,7 @@ def test_wait_wrapper_can_get_log(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     with transient_working_directory(tmp_path):
-        tid = tc.task_create_shell(r, ["echo", "hello world"])
+        tid = tc.task_create_shell(["echo", "hello world"], root=r)
         wrapper = TaskWaitWrapper(tid, r)
         assert wrapper.log() is None
         assert wrapper.has_log()
@@ -193,7 +193,7 @@ def test_can_pass_to_task_wait(tmp_path, mocker):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     with transient_working_directory(tmp_path):
-        tid = tc.task_create_shell(r, ["echo", "hello world"])
+        tid = tc.task_create_shell(["echo", "hello world"], root=r)
         assert task_wait(tid, root=r)
 
 
@@ -211,7 +211,8 @@ def test_can_get_recent_tasks(tmp_path):
     r = root.open_root(tmp_path)
     with transient_working_directory(tmp_path):
         ids = [
-            tc.task_create_shell(r, ["echo", "hello world"]) for _ in range(5)
+            tc.task_create_shell(["echo", "hello world"], root=r)
+            for _ in range(5)
         ]
     assert task_last(r) == ids[4]
     assert task_recent(root=r) == ids
@@ -226,7 +227,7 @@ def test_can_detect_corrupt_recent_file(tmp_path):
         for i in range(5):
             if i > 0:
                 time.sleep(0.01)
-            ids.append(tc.task_create_shell(r, ["echo", "hello world"]))
+            ids.append(tc.task_create_shell(["echo", "hello world"], root=r))
     assert task_recent(root=r) == ids
     with r.path_recent().open("w") as f:
         for i in ids[:2] + [ids[2] + ids[3], ids[4]]:

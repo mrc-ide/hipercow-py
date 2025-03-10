@@ -41,7 +41,7 @@ def test_creating_task_triggers_submission(tmp_path, mocker):
     mocker.patch("hipercow.dide.driver.DideWebClient", mock_web_client)
     configure("dide", python_version=None, root=r)
     with transient_working_directory(path):
-        tid = task_create_shell(r, ["echo", "hello world"])
+        tid = task_create_shell(["echo", "hello world"], root=r)
 
     assert mock_web_client.call_count == 1
     assert mock_web_client.call_args == mock.call(mock_creds)

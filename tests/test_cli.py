@@ -339,7 +339,7 @@ def test_can_get_last_task(tmp_path):
         assert res.exit_code == 0
         assert res.stdout == ""
 
-        ids = [task_create_shell(r, ["true"]) for _ in range(5)]
+        ids = [task_create_shell(["true"], root=r) for _ in range(5)]
 
         res = runner.invoke(cli.cli_task_last, [])
         assert res.exit_code == 0
@@ -364,7 +364,7 @@ def test_can_rebuild_recent_list(tmp_path):
         for i in range(5):
             if i > 0:
                 time.sleep(0.01)
-            ids.append(task_create_shell(r, ["echo", "hello world"]))
+            ids.append(task_create_shell(["echo", "hello world"], root=r))
 
         res = runner.invoke(cli.cli_task_recent, [])
         assert res.exit_code == 0

@@ -33,7 +33,7 @@ def test_can_write_batch(tmp_path):
     config = DideConfiguration(r, mounts=[m], python_version=None)
 
     with transient_working_directory(path):
-        tid = tc.task_create_shell(r, ["echo", "hello world"])
+        tid = tc.task_create_shell(["echo", "hello world"], root=r)
 
     unc = batch.write_batch_task_run(tid, config, r)
     path_rel = f"hipercow/py/tasks/{tid[:2]}/{tid[2:]}/task_run.bat"
