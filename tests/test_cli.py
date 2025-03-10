@@ -2,11 +2,14 @@ import time
 from pathlib import Path
 from unittest import mock
 
+import click
+import pytest
 from click.testing import CliRunner
 
 from hipercow import cli, root, task
 from hipercow.task import TaskData, TaskStatus
 from hipercow.task_create import task_create_shell
+from hipercow.util import transient_envvars
 
 
 def test_can_init_repository(tmp_path):
@@ -404,3 +407,62 @@ def test_can_call_cli_dide_bootstrap(mocker):
     assert cli.dide_bootstrap.mock_calls[1] == mock.call(
         "myfile", force=True, verbose=True
     )
+
+
+def test_show_exception(mocker):
+    e = Exception("some error")
+    mock_sys_exit = mock.MagicMock()
+    mocker.patch("sys.exit", mock_sys_exit)
+    with transient_envvars({"HIPERCOW_RAW_ERROR": "1"}):
+        with pytest.raises(Exception, match="some error"):
+            cli._handle_error(e)
+    assert mock_sys_exit.call_count == 0
+
+
+def test_show_small_error_only(capsys, mocker):
+    e = Exception("some error")
+    mock_sys_exit = mock.MagicMock()
+    mock_console = mock.MagicMock()
+    mocker.patch("sys.exit", mock_sys_exit)
+    mocker.patch("hipercow.cli.console", mock_console)
+    with transient_envvars(
+        {"HIPERCOW_RAW_ERROR": None, "HIPERCOW_TRACEBACK": None}
+    ):
+        cli._handle_error(e)
+    assert mock_sys_exit.call_count == 1
+    assert mock_sys_exit.mock_calls[0] == mock.call(1)
+    out = capsys.readouterr().out.splitlines()
+    assert len(out) == 2
+    assert out[0] == "Error: some error"
+    assert out[1] == "For more information, run with 'HIPERCOW_TRACEBACK=1'"
+
+
+def test_show_nice_traceback(capsys, mocker):
+    e = Exception("some error")
+    mock_sys_exit = mock.MagicMock()
+    mock_console = mock.MagicMock()
+    mocker.patch("sys.exit", mock_sys_exit)
+    mocker.patch("hipercow.cli.console", mock_console)
+    with transient_envvars(
+        {"HIPERCOW_RAW_ERROR": None, "HIPERCOW_TRACEBACK": "1"}
+    ):
+        cli._handle_error(e)
+    assert mock_sys_exit.call_count == 1
+    assert mock_sys_exit.mock_calls[0] == mock.call(1)
+    out = capsys.readouterr().out.splitlines()
+    assert len(out) == 1
+    assert out[0] == "Error: some error"
+    assert len(mock_console.method_calls) == 1
+    assert mock_console.method_calls[0] == mock.call.print_exception(
+        show_locals=True, suppress=[click]
+    )
+
+
+def test_cli_wrapper_passes_to_exception_handler_on_error(mocker):
+    e = Exception("some error")
+    mock_handler = mocker.Mock()
+    mocker.patch("hipercow.cli.cli", side_effect=e)
+    mocker.patch("hipercow.cli._handle_error", mock_handler)
+    cli.cli_safe()
+    assert mock_handler.call_count == 1
+    assert mock_handler.mock_calls[0] == mock.call(e)

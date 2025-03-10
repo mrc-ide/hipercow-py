@@ -1,7 +1,10 @@
+import sys
 from functools import reduce
 from operator import ior
 
 import click
+from rich.console import Console
+from typing_extensions import Never  # 3.10 does not have this in typing
 
 from hipercow import root
 from hipercow.configure import configure, show_configuration, unconfigure
@@ -26,6 +29,43 @@ from hipercow.task import (
 )
 from hipercow.task_create import task_create_shell
 from hipercow.task_eval import task_eval
+from hipercow.util import truthy_envvar
+
+# This is how the 'rich' docs drive things:
+console = Console()
+
+
+# I (Rich) am surprised that there's no really nice way of doing
+# something like this out of the box in click.  The idea that we try
+# to implement here:
+#
+# In most cases where an error is thrown we print the immediate
+# exception and set the exit code to 1.
+#
+# Additionally: if the user sets an environment variable, then we show
+# the trace; we can use this for getting additional debug information
+# out.
+#
+# Finally, I've added an option here to just not do anything
+# interesting with the output and follow click's normal exception
+# handling.
+def cli_safe():
+    try:
+        cli()
+    except Exception as e:
+        _handle_error(e)
+
+
+def _handle_error(e: Exception) -> Never:
+    if truthy_envvar("HIPERCOW_RAW_ERROR"):
+        raise e
+    else:
+        click.echo(f"Error: {e}")
+        if truthy_envvar("HIPERCOW_TRACEBACK"):
+            console.print_exception(show_locals=True, suppress=[click])
+        else:
+            click.echo("For more information, run with 'HIPERCOW_TRACEBACK=1'")
+        sys.exit(1)
 
 
 @click.group()
