@@ -463,3 +463,14 @@ def test_cli_wrapper_passes_to_exception_handler_on_error(mocker):
     cli.cli_safe()
     assert mock_handler.call_count == 1
     assert mock_handler.mock_calls[0] == mock.call(e)
+
+
+def test_can_launch_repl(tmp_path, mocker):
+    runner = CliRunner()
+    mock_repl = mock.MagicMock()
+    mocker.patch("hipercow.cli.repl", mock_repl)
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        runner.invoke(cli.init, ".")
+        res = runner.invoke(cli.cli_repl, [])
+        assert res.exit_code == 0
+        assert mock_repl.call_count == 1

@@ -24,6 +24,7 @@ classifiers = [
 ]
 dependencies = [
   "click",
+  "click-repl",
   "defusedxml",
   "keyring",
   "requests",
