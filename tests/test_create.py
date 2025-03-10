@@ -19,7 +19,7 @@ def test_create_simple_task(tmp_path):
         tmp_path / "hipercow" / "py" / "tasks" / tid[:2] / tid[2:] / "data"
     )
     assert path_data.exists()
-    d = TaskData.read(root.open_root(tmp_path), tid)
+    d = TaskData.read(tid, root.open_root(tmp_path))
     assert isinstance(d, TaskData)
     assert d.task_id == tid
     assert d.method == "shell"
@@ -45,4 +45,4 @@ def test_submit_with_driver_if_configured(tmp_path, capsys):
         tid = tc.task_create_shell(r, ["echo", "hello world"])
     str1 = capsys.readouterr().out
     assert str1.startswith(f"submitting '{tid}'")
-    assert task_status(r, tid) == TaskStatus.SUBMITTED
+    assert task_status(tid, r) == TaskStatus.SUBMITTED

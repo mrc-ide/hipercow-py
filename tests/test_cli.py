@@ -30,7 +30,7 @@ def test_can_create_task(tmp_path):
         res = runner.invoke(cli.cli_task_create, ["echo", "hello", "world"])
         assert res.exit_code == 0
         task_id = res.stdout.strip()
-        assert task.task_status(r, task_id) == task.TaskStatus.CREATED
+        assert task.task_status(task_id, r) == task.TaskStatus.CREATED
 
 
 def test_can_run_task(tmp_path):
@@ -53,7 +53,7 @@ def test_can_run_task(tmp_path):
         # it captured in the runner output, though it is swallowed by
         # something.  I've checked with the capsys fixture and that
         # does not seem to have it either.
-        assert task.task_status(r, task_id) == task.TaskStatus.SUCCESS
+        assert task.task_status(task_id, r) == task.TaskStatus.SUCCESS
 
 
 def test_can_save_and_read_log(tmp_path):
@@ -200,7 +200,7 @@ def test_can_create_task_in_environment(tmp_path):
         )
         assert res.exit_code == 0
         task_id = res.stdout.strip()
-        data = TaskData.read(r, task_id)
+        data = TaskData.read(task_id, r)
         assert data.environment == "other"
 
 
@@ -265,8 +265,8 @@ def test_can_wait_on_task(tmp_path, mocker):
         assert res.exit_code == 0
         assert cli.task_wait.call_count == 1
         assert cli.task_wait.mock_calls[0] == mock.call(
-            mock.ANY,
             task_id,
+            root=mock.ANY,
             poll=1,
             timeout=None,
             show_log=True,
@@ -280,8 +280,8 @@ def test_can_wait_on_task(tmp_path, mocker):
         assert res.exit_code == 0
         assert cli.task_wait.call_count == 2
         assert cli.task_wait.mock_calls[1] == mock.call(
-            mock.ANY,
             task_id,
+            root=mock.ANY,
             poll=0.1,
             timeout=200,
             show_log=False,
@@ -319,8 +319,8 @@ def test_can_create_on_task_and_wait(tmp_path, mocker):
         task_id = res.stdout.strip()
         assert cli.task_wait.call_count == 1
         assert cli.task_wait.mock_calls[0] == mock.call(
-            mock.ANY,
             task_id,
+            root=mock.ANY,
         )
 
 

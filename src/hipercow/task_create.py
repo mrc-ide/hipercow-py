@@ -57,4 +57,4 @@ def _new_task_id() -> str:
 def _submit_maybe(task_id: str, driver: str | None, root: Root) -> None:
     if dr := load_driver_optional(root, driver):
         dr.submit(task_id, root)
-        set_task_status(root, task_id, TaskStatus.SUBMITTED)
+        set_task_status(task_id, TaskStatus.SUBMITTED, root)

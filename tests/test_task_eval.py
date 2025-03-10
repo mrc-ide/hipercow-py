@@ -12,9 +12,9 @@ def test_can_set_task_status(tmp_path):
     r = root.open_root(tmp_path)
     with transient_working_directory(tmp_path):
         tid = tc.task_create_shell(r, ["echo", "hello world"])
-    assert task_status(r, tid) == TaskStatus.CREATED
+    assert task_status(tid, r) == TaskStatus.CREATED
     task_eval(r, tid)
-    assert task_status(r, tid) == TaskStatus.SUCCESS
+    assert task_status(tid, r) == TaskStatus.SUCCESS
 
 
 def test_cant_run_complete_task(tmp_path):
@@ -39,7 +39,7 @@ def test_can_capture_output_to_auto_file(tmp_path):
     with path.open("r") as f:
         assert f.read().strip() == "hello world"
 
-    assert task_log(r, tid) == "hello world\n"
+    assert task_log(tid, r) == "hello world\n"
 
 
 def test_return_information_about_failure_to_find_path(tmp_path):
@@ -51,4 +51,4 @@ def test_return_information_about_failure_to_find_path(tmp_path):
 
     path = r.path_task_log(tid)
     assert path.exists()
-    assert task_status(r, tid) == TaskStatus.FAILURE
+    assert task_status(tid, r) == TaskStatus.FAILURE

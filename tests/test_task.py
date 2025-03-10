@@ -41,19 +41,19 @@ def test_can_set_task_status(tmp_path):
     r = root.open_root(tmp_path)
     with transient_working_directory(tmp_path):
         tid = tc.task_create_shell(r, ["echo", "hello world"])
-    assert task_exists(r, tid)
-    assert task_status(r, tid) == TaskStatus.CREATED
-    set_task_status(r, tid, TaskStatus.RUNNING)
-    assert task_status(r, tid) == TaskStatus.RUNNING
-    set_task_status(r, tid, TaskStatus.SUCCESS)
-    assert task_status(r, tid) == TaskStatus.SUCCESS
+    assert task_exists(tid, r)
+    assert task_status(tid, r) == TaskStatus.CREATED
+    set_task_status(tid, TaskStatus.RUNNING, r)
+    assert task_status(tid, r) == TaskStatus.RUNNING
+    set_task_status(tid, TaskStatus.SUCCESS, r)
+    assert task_status(tid, r) == TaskStatus.SUCCESS
 
 
 def test_that_missing_tasks_have_missing_status(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
-    assert task_status(r, "a" * 32) == TaskStatus.MISSING
-    assert not task_exists(r, "a" * 32)
+    assert task_status("a" * 32, r) == TaskStatus.MISSING
+    assert not task_exists("a" * 32, r)
 
 
 def test_that_missing_tasks_error_on_log_read(tmp_path):
@@ -61,7 +61,7 @@ def test_that_missing_tasks_error_on_log_read(tmp_path):
     r = root.open_root(tmp_path)
     task_id = "a" * 32
     with pytest.raises(Exception, match="Task '.+' does not exist"):
-        task_log(r, task_id)
+        task_log(task_id, r)
 
 
 def test_can_convert_to_nice_string():
@@ -73,10 +73,10 @@ def test_read_task_info(tmp_path):
     r = root.open_root(tmp_path)
     with transient_working_directory(tmp_path):
         tid = tc.task_create_shell(r, ["echo", "hello world"])
-    info = task_info(r, tid)
+    info = task_info(tid, r)
     assert info.status == TaskStatus.CREATED
-    assert info.data == TaskData.read(r, tid)
-    assert info.times == TaskTimes.read(r, tid)
+    assert info.data == TaskData.read(tid, r)
+    assert info.times == TaskTimes.read(tid, r)
     assert isinstance(info.times.created, float)
     assert info.times.started is None
     assert info.times.finished is None
@@ -87,7 +87,7 @@ def test_that_missing_tasks_error_on_task_info(tmp_path):
     r = root.open_root(tmp_path)
     task_id = "a" * 32
     with pytest.raises(Exception, match="Task '.+' does not exist"):
-        task_info(r, task_id)
+        task_info(task_id, r)
 
 
 def test_that_can_read_info_for_completed_task(tmp_path):
@@ -96,10 +96,10 @@ def test_that_can_read_info_for_completed_task(tmp_path):
     with transient_working_directory(tmp_path):
         tid = tc.task_create_shell(r, ["echo", "hello world"])
         task_eval(r, tid)
-        info = task_info(r, tid)
+        info = task_info(tid, r)
     assert info.status == TaskStatus.SUCCESS
-    assert info.data == TaskData.read(r, tid)
-    assert info.times == TaskTimes.read(r, tid)
+    assert info.data == TaskData.read(tid, r)
+    assert info.times == TaskTimes.read(tid, r)
     assert isinstance(info.times.created, float)
     assert isinstance(info.times.started, float)
     assert isinstance(info.times.finished, float)
@@ -108,13 +108,13 @@ def test_that_can_read_info_for_completed_task(tmp_path):
 def test_can_list_tasks(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
-    assert task_list(r) == []
+    assert task_list(root=r) == []
     with transient_working_directory(tmp_path):
         t1 = tc.task_create_shell(r, ["echo", "hello world"])
-    assert task_list(r) == [t1]
+    assert task_list(root=r) == [t1]
     with transient_working_directory(tmp_path):
         t2 = tc.task_create_shell(r, ["echo", "hello world"])
-    assert set(task_list(r)) == {t1, t2}
+    assert set(task_list(root=r)) == {t1, t2}
 
 
 def test_can_list_tasks_by_status(tmp_path):
@@ -123,19 +123,22 @@ def test_can_list_tasks_by_status(tmp_path):
     with transient_working_directory(tmp_path):
         ids = [tc.task_create_shell(r, ["true"]) for _ in range(5)]
     # 0 is CREATED
-    set_task_status(r, ids[1], TaskStatus.RUNNING)
-    set_task_status(r, ids[2], TaskStatus.SUCCESS)
-    set_task_status(r, ids[3], TaskStatus.SUCCESS)
-    set_task_status(r, ids[4], TaskStatus.FAILURE)
-    assert set(task_list(r)) == set(ids)
-    assert set(task_list(r, with_status=TaskStatus.SUCCESS)) == {ids[2], ids[3]}
-    assert set(task_list(r, with_status=TaskStatus.TERMINAL)) == {
+    set_task_status(ids[1], TaskStatus.RUNNING, r)
+    set_task_status(ids[2], TaskStatus.SUCCESS, r)
+    set_task_status(ids[3], TaskStatus.SUCCESS, r)
+    set_task_status(ids[4], TaskStatus.FAILURE, r)
+    assert set(task_list(root=r)) == set(ids)
+    assert set(task_list(root=r, with_status=TaskStatus.SUCCESS)) == {
+        ids[2],
+        ids[3],
+    }
+    assert set(task_list(root=r, with_status=TaskStatus.TERMINAL)) == {
         ids[2],
         ids[3],
         ids[4],
     }
     assert set(
-        task_list(r, with_status=TaskStatus.SUCCESS | TaskStatus.RUNNING)
+        task_list(root=r, with_status=TaskStatus.SUCCESS | TaskStatus.RUNNING)
     ) == {ids[1], ids[2], ids[3]}
 
 
@@ -145,7 +148,7 @@ def test_can_wait_on_completed_task(tmp_path):
     with transient_working_directory(tmp_path):
         tid = tc.task_create_shell(r, ["echo", "hello world"])
         task_eval(r, tid)
-    assert task_wait(r, tid)
+    assert task_wait(tid, root=r)
 
 
 def test_refuse_to_wait_for_created_task(tmp_path):
@@ -154,7 +157,7 @@ def test_refuse_to_wait_for_created_task(tmp_path):
     with transient_working_directory(tmp_path):
         tid = tc.task_create_shell(r, ["echo", "hello world"])
     with pytest.raises(Exception, match="Cannot wait .+ not been submitted"):
-        task_wait(r, tid)
+        task_wait(tid, root=r)
 
 
 def test_wait_wrapper_can_get_status(tmp_path):
@@ -162,9 +165,9 @@ def test_wait_wrapper_can_get_status(tmp_path):
     r = root.open_root(tmp_path)
     with transient_working_directory(tmp_path):
         tid = tc.task_create_shell(r, ["echo", "hello world"])
-        wrapper = TaskWaitWrapper(r, tid)
+        wrapper = TaskWaitWrapper(tid, r)
         assert wrapper.status() == "created"
-        set_task_status(r, tid, TaskStatus.SUCCESS)
+        set_task_status(tid, TaskStatus.SUCCESS, r)
         assert wrapper.status() == "success"
 
 
@@ -173,7 +176,7 @@ def test_wait_wrapper_can_get_log(tmp_path):
     r = root.open_root(tmp_path)
     with transient_working_directory(tmp_path):
         tid = tc.task_create_shell(r, ["echo", "hello world"])
-        wrapper = TaskWaitWrapper(r, tid)
+        wrapper = TaskWaitWrapper(tid, r)
         assert wrapper.log() is None
         assert wrapper.has_log()
         task_eval(r, tid, capture=True)
@@ -191,14 +194,14 @@ def test_can_pass_to_task_wait(tmp_path, mocker):
     r = root.open_root(tmp_path)
     with transient_working_directory(tmp_path):
         tid = tc.task_create_shell(r, ["echo", "hello world"])
-        assert task_wait(r, tid)
+        assert task_wait(tid, root=r)
 
 
 def test_can_get_last_task_when_none_are_created(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     assert task_last(r) is None
-    assert task_recent(r) == []
+    assert task_recent(root=r) == []
 
 
 # This might not work wonderfully on windows, because the timing there
@@ -211,8 +214,8 @@ def test_can_get_recent_tasks(tmp_path):
             tc.task_create_shell(r, ["echo", "hello world"]) for _ in range(5)
         ]
     assert task_last(r) == ids[4]
-    assert task_recent(r) == ids
-    assert task_recent(r, limit=3) == ids[2:]
+    assert task_recent(root=r) == ids
+    assert task_recent(root=r, limit=3) == ids[2:]
 
 
 def test_can_detect_corrupt_recent_file(tmp_path):
@@ -224,17 +227,17 @@ def test_can_detect_corrupt_recent_file(tmp_path):
             if i > 0:
                 time.sleep(0.01)
             ids.append(tc.task_create_shell(r, ["echo", "hello world"]))
-    assert task_recent(r) == ids
+    assert task_recent(root=r) == ids
     with r.path_recent().open("w") as f:
         for i in ids[:2] + [ids[2] + ids[3], ids[4]]:
             f.write(f"{i}\n")
     with pytest.raises(Exception, match="Recent data list is corrupt"):
-        task_recent(r)
-    task_recent_rebuild(r)
-    assert task_recent(r) == ids
-    task_recent_rebuild(r, limit=3)
-    assert task_recent(r) == ids[2:]
-    task_recent_rebuild(r, limit=0)
-    assert task_recent(r) == []
-    task_recent_rebuild(r, limit=0)
-    assert task_recent(r) == []
+        task_recent(root=r)
+    task_recent_rebuild(root=r)
+    assert task_recent(root=r) == ids
+    task_recent_rebuild(root=r, limit=3)
+    assert task_recent(root=r) == ids[2:]
+    task_recent_rebuild(root=r, limit=0)
+    assert task_recent(root=r) == []
+    task_recent_rebuild(root=r, limit=0)
+    assert task_recent(root=r) == []

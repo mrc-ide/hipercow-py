@@ -170,7 +170,7 @@ def cli_task_status(task_id: str):
 
     """
     r = root.open_root()
-    click.echo(task_status(r, task_id))
+    click.echo(task_status(task_id, r))
 
 
 @task.command("log")
@@ -188,7 +188,7 @@ def cli_task_log(task_id: str, *, filename=False):
     if filename:
         click.echo(r.path_task_log(task_id))
     else:
-        value = task_log(r, task_id)
+        value = task_log(task_id, r)
         if value is not None:
             click.echo(value)
 
@@ -204,7 +204,7 @@ def cli_task_list(with_status=None):
     """
     r = root.open_root()
     with_status = _process_with_status(with_status)
-    for task_id in task_list(r, with_status=with_status):
+    for task_id in task_list(with_status=with_status, root=r):
         click.echo(task_id)
 
 
@@ -230,8 +230,8 @@ def cli_task_recent(limit: int, *, rebuild: bool):
     """List recent tasks."""
     r = root.open_root()
     if rebuild:
-        task_recent_rebuild(r, limit=limit)
-    for i in task_recent(r, limit=limit):
+        task_recent_rebuild(limit=limit, root=r)
+    for i in task_recent(limit=limit, root=r):
         click.echo(i)
 
 
@@ -274,7 +274,7 @@ def cli_task_create(cmd: tuple[str], environment: str | None, *, wait: bool):
     task_id = task_create_shell(r, list(cmd), environment=environment)
     click.echo(task_id)
     if wait:
-        task_wait(r, task_id)
+        task_wait(task_id, root=r)
 
 
 @task.command("eval", hidden=True)
@@ -317,8 +317,8 @@ def cli_task_wait(
     """Wait for a task to complete."""
     r = root.open_root()
     task_wait(
-        r,
         task_id,
+        root=r,
         poll=poll,
         timeout=timeout,
         show_log=show_log,
