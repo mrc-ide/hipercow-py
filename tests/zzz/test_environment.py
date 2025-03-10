@@ -23,7 +23,7 @@ def test_run_in_environment(tmp_path):
         environment_new("default", "pip", r)
         provision(r, "default", [])
         tid = task_create_shell(r, ["cowsay", "-t", "hello"])
-        task_eval(r, tid, capture=True)
+        task_eval(tid, capture=True, root=r)
 
         assert task_status(tid, r) == TaskStatus.SUCCESS
         assert "| hello |" in task_log(tid, r)

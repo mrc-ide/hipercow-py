@@ -95,7 +95,7 @@ def test_that_can_read_info_for_completed_task(tmp_path):
     r = root.open_root(tmp_path)
     with transient_working_directory(tmp_path):
         tid = tc.task_create_shell(r, ["echo", "hello world"])
-        task_eval(r, tid)
+        task_eval(tid, capture=False, root=r)
         info = task_info(tid, r)
     assert info.status == TaskStatus.SUCCESS
     assert info.data == TaskData.read(tid, r)
@@ -147,7 +147,7 @@ def test_can_wait_on_completed_task(tmp_path):
     r = root.open_root(tmp_path)
     with transient_working_directory(tmp_path):
         tid = tc.task_create_shell(r, ["echo", "hello world"])
-        task_eval(r, tid)
+        task_eval(tid, capture=False, root=r)
     assert task_wait(tid, root=r)
 
 
@@ -179,7 +179,7 @@ def test_wait_wrapper_can_get_log(tmp_path):
         wrapper = TaskWaitWrapper(tid, r)
         assert wrapper.log() is None
         assert wrapper.has_log()
-        task_eval(r, tid, capture=True)
+        task_eval(tid, capture=True, root=r)
         assert wrapper.status() == "success"
         assert wrapper.log() == ["hello world"]
         assert wrapper.has_log()

@@ -282,7 +282,7 @@ def cli_task_create(cmd: tuple[str], environment: str | None, *, wait: bool):
 @click.option("--capture/--no-capture", default=False)
 def cli_task_eval(task_id: str, *, capture: bool):
     r = root.open_root()
-    task_eval(r, task_id, capture=capture)
+    task_eval(task_id, capture=capture, root=r)
 
 
 @task.command("wait")

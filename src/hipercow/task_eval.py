@@ -20,12 +20,12 @@ class TaskResult:
     data: object
 
 
-def task_eval(root: Root, task_id: str, *, capture: bool = False) -> None:
+def task_eval(task_id: str, *, capture: bool, root: Root) -> None:
     data = TaskData.read(task_id, root)
-    task_eval_data(root, data, capture=capture)
+    task_eval_data(data, capture=capture, root=root)
 
 
-def task_eval_data(root: Root, data: TaskData, *, capture: bool) -> None:
+def task_eval_data(data: TaskData, *, capture: bool, root: Root) -> None:
     task_id = data.task_id
     status = task_status(task_id, root)
     if not status.is_runnable():
@@ -38,7 +38,7 @@ def task_eval_data(root: Root, data: TaskData, *, capture: bool) -> None:
     set_task_status(task_id, TaskStatus.RUNNING, root)
 
     assert data.method == "shell"  # noqa: S101
-    res = task_eval_shell(root, data, capture=capture)
+    res = task_eval_shell(data, capture=capture, root=root)
 
     t_end = time.time()
 
@@ -52,7 +52,7 @@ def task_eval_data(root: Root, data: TaskData, *, capture: bool) -> None:
     set_task_status(task_id, status, root)
 
 
-def task_eval_shell(root: Root, data: TaskData, *, capture=False) -> TaskResult:
+def task_eval_shell(data: TaskData, *, capture: bool, root: Root) -> TaskResult:
     cmd = data.data["cmd"]
     env = data.envvars
     path = root.path / data.path
