@@ -24,8 +24,8 @@ For more information, run with 'HIPERCOW_TRACEBACK=1'
 To get more information you can set the `HIPERCOW_TRACEBACK` environment variable, either globally (not recommended except for developing `hipercow`) or locally:
 
 ```console
-$ HIPERCOW_TRACEBACK=1 hipercow environment new --engine othe
-rError: Only the 'pip' and 'empty' engines are supported
+$ HIPERCOW_TRACEBACK=1 hipercow environment new --engine other
+Error: Only the 'pip' and 'empty' engines are supported
 ╭─────────────────────────────── Traceback (most recent call last) ────────────────────────────────╮
 │ /home/rfitzjoh/Documents/src/hipercow-py/src/hipercow/cli.py:54 in cli_safe                      │
 │                                                                                                  │
