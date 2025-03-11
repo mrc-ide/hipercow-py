@@ -94,7 +94,7 @@ which creates the `hipercow/` directory and enables all other commands.
 Because you will want to submit tasks to the DIDE cluster, we need to configure the `dide` driver too:
 
 ```console
-$ hipercow driver configure dide
+$ hipercow driver configure dide-windows
 Configured hipercow to use 'dide-windows'
 ```
 
