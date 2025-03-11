@@ -28,12 +28,12 @@ def init(path: str | Path) -> None:
     dest = path / "hipercow" / "py"
 
     if dest.is_dir():
-        print(f"hipercow already initialised at {path}")
+        print(f"hipercow already initialised at '{path.resolve()}'")
         return
 
     root = find_file_descend("hipercow", path)
     if root is not None:
-        print(f"hipercow already initialised at {root} (found from {path})")
+        print(f"hipercow already initialised at '{root}' (found from '{path}')")
 
     if dest.exists() and not dest.is_dir():
         msg = (
@@ -44,7 +44,7 @@ def init(path: str | Path) -> None:
 
     dest.mkdir(parents=True)
     _add_gitignore(dest.parent)
-    print(f"Initialised hipercow at {path}")
+    print(f"Initialised hipercow at '{path.resolve()}'")
 
 
 class Root:
