@@ -26,4 +26,4 @@ def test_run_in_environment(tmp_path):
         task_eval(tid, capture=True, root=r)
 
         assert task_status(tid, r) == TaskStatus.SUCCESS
-        assert "| hello |" in task_log(tid, r)
+        assert "| hello |" in task_log(tid, root=r)

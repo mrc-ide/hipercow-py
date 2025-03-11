@@ -39,7 +39,7 @@ def test_can_capture_output_to_auto_file(tmp_path):
     with path.open("r") as f:
         assert f.read().strip() == "hello world"
 
-    assert task_log(tid, r) == "hello world\n"
+    assert task_log(tid, root=r) == "hello world\n"
 
 
 def test_return_information_about_failure_to_find_path(tmp_path):

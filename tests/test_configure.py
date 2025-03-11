@@ -9,6 +9,10 @@ from hipercow.configure import (
 )
 from hipercow.driver import list_drivers, load_driver, load_driver_optional
 from hipercow.example import ExampleDriver
+from hipercow.task import TaskStatus, task_log, task_status
+from hipercow.task_create import task_create_shell
+from hipercow.task_eval import task_eval
+from hipercow.util import transient_working_directory
 
 
 def test_no_drivers_are_available_by_default(tmp_path):
@@ -89,3 +93,22 @@ def test_can_show_configuration(tmp_path, capsys):
     show_configuration(None, r)
     out = capsys.readouterr().out
     assert out == "Configuration for 'example'\n(no configuration)\n"
+
+
+def test_can_read_logs_with_example_driver(tmp_path):
+    path = tmp_path / "ex"
+    root.init(path)
+    r = root.open_root(path)
+    configure("example", root=r)
+    with transient_working_directory(path):
+        tid = task_create_shell(["echo", "hello world"], root=r)
+    assert task_status(tid, root=r) == TaskStatus.SUBMITTED
+    dr = load_driver("example", r)
+    assert dr.task_log(tid, root=r) is None
+    assert dr.task_log(tid, outer=True, root=r) is None
+    with transient_working_directory(path):
+        task_eval(tid, capture=True, root=r)
+    assert dr.task_log(tid, root=r) == "hello world\n"
+    assert dr.task_log(tid, outer=True, root=r) is None
+    assert task_log(tid, root=r) == "hello world\n"
+    assert task_log(tid, outer=True, root=r) is None

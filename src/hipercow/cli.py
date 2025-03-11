@@ -171,22 +171,18 @@ def cli_task_status(task_id: str):
 
 @task.command("log")
 @click.option(
-    "--filename", is_flag=True, help="Print the filename containing the log"
+    "--outer", is_flag=True, help="Print the outer logs, from the HPC system"
 )
 @click.argument("task_id")
-def cli_task_log(task_id: str, *, filename=False):
+def cli_task_log(task_id: str, *, outer=False):
     """Get a task log.
 
     If the log does not yet exist, we return nothing.
 
     """
-    if filename:
-        r = root.open_root()
-        click.echo(r.path_task_log(task_id))
-    else:
-        value = task_log(task_id)
-        if value is not None:
-            click.echo(value)
+    value = task_log(task_id, outer=outer)
+    if value is not None:
+        click.echo(value)
 
 
 @task.command("list")

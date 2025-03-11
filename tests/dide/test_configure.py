@@ -8,6 +8,7 @@ from hipercow.dide.web import Credentials, DideWebClient
 from hipercow.driver import list_drivers, load_driver
 from hipercow.environment import environment_new
 from hipercow.provision import provision
+from hipercow.task import task_log
 from hipercow.task_create import task_create_shell
 from hipercow.util import transient_working_directory
 
@@ -34,11 +35,14 @@ def test_creating_task_triggers_submission(tmp_path, mocker):
     mock_mounts = [Mount("projects", "other", tmp_path)]
     mock_creds = Credentials("bob", "secret")
     mock_web_client = mock.MagicMock(spec=DideWebClient)
+
     mocker.patch("hipercow.dide.driver.detect_mounts", return_value=mock_mounts)
     mocker.patch(
         "hipercow.dide.driver.fetch_credentials", return_value=mock_creds
     )
     mocker.patch("hipercow.dide.driver.DideWebClient", mock_web_client)
+    mock_web_client.return_value.submit.return_value = "1234"
+
     configure("dide-windows", python_version=None, root=r)
     with transient_working_directory(path):
         tid = task_create_shell(["echo", "hello world"], root=r)
@@ -90,3 +94,31 @@ path mapping:
 python version: 3.12
 """
     )
+
+
+def test_get_outer_logs_from_web_client(tmp_path, mocker):
+    path = tmp_path / "a" / "b"
+    root.init(path)
+    r = root.open_root(path)
+    mock_mounts = [Mount("projects", "other", tmp_path)]
+    mock_creds = Credentials("bob", "secret")
+    mock_web_client = mock.MagicMock(spec=DideWebClient)
+    mocker.patch("hipercow.dide.driver.detect_mounts", return_value=mock_mounts)
+    mocker.patch(
+        "hipercow.dide.driver.fetch_credentials", return_value=mock_creds
+    )
+    mocker.patch(
+        "hipercow.dide.driver.DideWebClient", return_value=mock_web_client
+    )
+    mock_web_client.submit.return_value = "1234"
+    configure("dide-windows", python_version=None, root=r)
+    with transient_working_directory(path):
+        tid = task_create_shell(["echo", "hello world"], root=r)
+
+    assert task_log(tid, root=r) is None
+    assert mock_web_client.log.call_count == 0
+
+    res = task_log(tid, outer=True, root=r)
+    assert res == mock_web_client.log.return_value
+    assert mock_web_client.log.call_count == 1
+    assert mock_web_client.log.mock_calls[0] == mock.call("1234")

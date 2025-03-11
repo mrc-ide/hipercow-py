@@ -112,3 +112,10 @@ def check_python_version(
 def truthy_envvar(name: str) -> bool:
     value = os.environ.get(name)
     return value is not None and (value.lower() in {"1", "true"})
+
+
+def read_file_if_exists(path: Path) -> str | None:
+    if not path.exists():
+        return None
+    with path.open() as f:
+        return f.read()
