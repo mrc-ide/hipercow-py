@@ -1,5 +1,6 @@
 import datetime
 import platform
+import re
 from pathlib import Path
 from string import Template
 
@@ -150,8 +151,13 @@ def write_batch_provision(
 
 def _template_data_core(config: DideConfiguration) -> dict[str, str]:
     path_map = config.path_map
+<<<<<<< HEAD
     host = path_map.mount.host
     unc_path = _backward_slash(f"//{host}/{path_map.mount.remote}")
+=======
+    host = _clean_host(path_map.mount.host)
+    unc_path = f"//{host}/{path_map.mount.remote}".replace("/", "\\")
+>>>>>>> 207e7fe (HPC tweaks)
     root_drive = path_map.remote
     root_path = _backward_slash("/" + path_map.relative)
 
@@ -193,5 +199,10 @@ def _unc_path(path_map: PathMap, path: Path) -> str:
     path_str = _forward_slash(str(path))
     rel = path_map.relative
     rel = "" if rel == "." else rel + "/"
+    host = _clean_host(path_map.mount.host)
     ret = f"//{path_map.mount.host}/{path_map.mount.remote}/{rel}{path_str}"
     return _backward_slash(ret)
+
+
+def _clean_host(host: str) -> str:
+    return re.sub("\\.hpc$", "", host)
