@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from taskwait import Task, taskwait
 
 from hipercow.dide.auth import fetch_credentials
@@ -27,10 +29,25 @@ class DideWindowsDriver(HipercowDriver):
     def submit(self, task_id: str, root: Root) -> None:
         cl = _web_client()
         unc = write_batch_task_run(task_id, self.config, root)
-        cl.submit(unc, task_id)
+        dide_id = cl.submit(unc, task_id)
+        with self._path_dide_id(task_id, root).open("w") as f:
+            f.write(dide_id)
 
     def provision(self, name: str, id: str, root: Root) -> None:
         _dide_provision(name, id, self.config, root)
+
+    def task_log(
+        self, task_id: str, *, outer: bool = False, root: Root
+    ) -> str | None:
+        if outer:
+            with self._path_dide_id(task_id, root).open() as f:
+                dide_id = f.read().strip()
+            cl = _web_client()
+            return cl.log(dide_id.strip())
+        return super().task_log(task_id, outer=False, root=root)
+
+    def _path_dide_id(self, task_id: str, root: Root) -> Path:
+        return root.path_task(task_id) / "dide_id"
 
 
 class ProvisionWaitWrapper(Task):

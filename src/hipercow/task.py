@@ -6,8 +6,9 @@ from enum import Flag, auto
 
 import taskwait
 
+from hipercow.driver import load_driver
 from hipercow.root import OptionalRoot, Root, open_root
-from hipercow.util import file_create
+from hipercow.util import file_create, read_file_if_exists
 
 
 class TaskStatus(Flag):
@@ -124,7 +125,9 @@ def task_status(task_id: str, root: OptionalRoot = None) -> TaskStatus:
     return TaskStatus.CREATED
 
 
-def task_log(task_id: str, root: OptionalRoot = None) -> str | None:
+def task_log(
+    task_id: str, *, outer: bool = False, root: OptionalRoot = None
+) -> str | None:
     """Read the task log.
 
     Not all tasks have logs; tasks that have not yet started (status
@@ -136,6 +139,8 @@ def task_log(task_id: str, root: OptionalRoot = None) -> str | None:
     Args:
         task_id: The task identifier to fetch the log for, a
             32-character hex string.
+        outer: Fetch the "outer" logs; these are logs from the
+            underlying HPC software before it hands off to hipercow.
         root: The root, or if not given search from the current directory.
 
     Returns:
@@ -146,11 +151,16 @@ def task_log(task_id: str, root: OptionalRoot = None) -> str | None:
     if not task_exists(task_id, root):
         msg = f"Task '{task_id}' does not exist"
         raise Exception(msg)
-    path = root.path_task_log(task_id)
-    if not path.exists():
-        return None
-    with path.open() as f:
-        return f.read()
+
+    driver = task_driver(task_id, root)
+    if not driver:
+        if outer:
+            msg = "outer logs are only available for tasks with drivers"
+            raise Exception(msg)
+        return read_file_if_exists(root.path_task_log(task_id))
+
+    dr = load_driver(driver, root)
+    return dr.task_log(task_id, outer=outer, root=root)
 
 
 def set_task_status(
@@ -251,7 +261,7 @@ class TaskWaitWrapper(taskwait.Task):
         return str(task_status(self.task_id, self.root))
 
     def log(self) -> list[str] | None:
-        value = task_log(self.task_id, self.root)
+        value = task_log(self.task_id, root=self.root)
         return value.splitlines() if value else None
 
     def has_log(self):
