@@ -136,8 +136,8 @@ Then we need to install our packages on the cluster, so that tasks that we submi
 $ hipercow environment provision
 Waiting...OK
 Actual environment location may have moved due to redirects, links or junctions.
-  Requested location: "Q:\cluster\testing\hipercow\env\default\contents\venv-windows\Scripts\python.exe"
-  Actual location:    "\\qdrive\homes\rfitzjoh\cluster\testing\hipercow\env\default\contents\venv-windows\Scripts\python.exe"
+  Requested location: "Q:\cluster\testing\hipercow\py\env\default\contents\venv-windows\Scripts\python.exe"
+  Actual location:    "\\qdrive\homes\rfitzjoh\cluster\testing\hipercow\py\env\default\contents\venv-windows\Scripts\python.exe"
 
 
   Obtaining dependency information for cowsay from https://files.pythonhosted.org/packages/f1/13/63c0a02c44024ee16f664e0b36eefeb22d54e93531630bd99e237986f534/cowsay-6.1-py3-none-any.whl.metadata
@@ -146,9 +146,12 @@ Downloading cowsay-6.1-py3-none-any.whl (25 kB)
 Installing collected packages: cowsay
 
 
+[notice] A new release of pip is available: 24.3.1 -> 25.0.1
+[notice] To update, run: python.exe -m pip install --upgrade pip
+
 ```
 
-This can take a little while, and we're not really sure why.
+This can take a little while, and we're not really sure why.  And of course a new version of pip is **always** available.
 
 * You will see `Waiting` followed by dots until `OK` while the provisioning task queues.
 * The next lines of text are python creating a new empty virtual environment and complaining about paths (this can be ignored)
@@ -156,8 +159,8 @@ This can take a little while, and we're not really sure why.
 
 Now, we can submit tasks that use the `cowsay` package:
 
-```
-$ hipercow task create --wait -- cowsay -t hello hipercow
+```console
+$ hipercow task create --wait -- cowsay -t "hello hipercow"
 fdfaa803fc22c9f4e05fd93247358671
 Waiting....OK
   ______________
@@ -173,3 +176,27 @@ Waiting....OK
 ```
 
 The `--` here in the command is (at least currently) required to separate the command between the bits that relate to `hipercow` and the bits for your command (here, the `-t` would make the tool complain).
+
+You may not see logs produced with this command due to the gap in time between when the task reports as completed and when it finishes writing to disk (or something like that, we're not sure yet).  But you can get the logs
+
+```console
+$ hipercow task log fdfaa803fc22c9f4e05fd93247358671
+  ______________
+| hello hipercow |
+  ==============
+              \
+               \
+                 ^__^
+                 (oo)\_______
+                 (__)\       )\/\
+                     ||----w |
+                     ||     ||
+
+```
+
+and also get the status of the task:
+
+```console
+$ hipercow task status fdfaa803fc22c9f4e05fd93247358671
+success
+```
