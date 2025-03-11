@@ -175,7 +175,7 @@ Waiting....OK
                      ||     ||
 ```
 
-The `--` here in the command is (at least currently) required to separate the command between the bits that relate to `hipercow` and the bits for your command (here, the `-t` would make the tool complain).
+The `--` here in the command is (at least currently) required to separate the command between the bits that relate to `hipercow` and the bits for your command (here, the `-t` would make the tool complain).  You also need to use the quotes here around the string to pass to `cowsay` otherwise this will be interpreted as two arguments and not as the argument to `-t`.
 
 You may not see logs produced with this command due to the gap in time between when the task reports as completed and when it finishes writing to disk (or something like that, we're not sure yet).  But you can get the logs
 
