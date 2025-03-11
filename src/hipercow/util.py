@@ -5,6 +5,7 @@ import subprocess
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
+from typing import Callable
 
 
 def find_file_descend(filename: str, path: str | Path) -> Path | None:
@@ -119,3 +120,9 @@ def read_file_if_exists(path: Path) -> str | None:
         return None
     with path.open() as f:
         return f.read()
+
+
+def loop_while(fn: Callable[[], bool]) -> None:
+    while True:
+        if not fn():
+            break

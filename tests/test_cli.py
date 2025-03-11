@@ -514,3 +514,22 @@ def test_can_launch_repl(tmp_path, mocker):
                 "history": AnyInstanceOf(cli.FileHistory),
             },
         )
+
+
+def test_can_handle_exception_in_repl(mocker, capsys):
+    ctx = mock.Mock()
+    args = mock.Mock()
+    mock_repl = mock.MagicMock(side_effect = [Exception("some error"), None])
+    mocker.patch("hipercow.cli.repl", mock_repl)
+
+    assert cli._repl_call(ctx, args)
+    out = capsys.readouterr().out
+    assert "Error: some error" in out
+    assert mock_repl.call_count == 1
+    assert mock_repl.mock_calls[0] == mock.call(ctx, prompt_kwargs=args)
+
+    assert not cli._repl_call(ctx, args)
+    out = capsys.readouterr().out
+    assert out == ""
+    assert mock_repl.call_count == 2
+    assert mock_repl.mock_calls[1] == mock.call(ctx, prompt_kwargs=args)

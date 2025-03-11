@@ -1,6 +1,7 @@
 import os
 import platform
 from pathlib import Path
+from unittest import mock
 
 import pytest
 
@@ -11,6 +12,7 @@ from hipercow.util import (
     transient_envvars,
     transient_working_directory,
     truthy_envvar,
+    loop_while,
 )
 
 
@@ -105,3 +107,13 @@ def test_can_convert_envvar_to_bool():
         assert not truthy_envvar("hc_a")
         assert not truthy_envvar("hc_b")
         assert not truthy_envvar("hc_c")
+
+
+def test_loop_while_loops():
+    fn = mock.Mock(side_effect = [True, True, False, False])
+    loop_while(fn)
+    assert fn.call_count == 3
+
+    fn = mock.Mock(side_effect = [False, True, True, False, False])
+    loop_while(fn)
+    assert fn.call_count == 1

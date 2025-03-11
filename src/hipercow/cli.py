@@ -31,7 +31,7 @@ from hipercow.task import (
 )
 from hipercow.task_create import task_create_shell
 from hipercow.task_eval import task_eval
-from hipercow.util import truthy_envvar
+from hipercow.util import loop_while, truthy_envvar
 
 # This is how the 'rich' docs drive things:
 console = Console()
@@ -107,23 +107,29 @@ def cli_repl(ctx):
     need "git-bash" or similar; please let us know what works for
     you).
 
-    To quit the REPL, use Ctrl-D.
-
-    Warning: Currently any exception thrown in the application will
-    cause the REPL to exit.  This is generally unwanted, please let us
-    know how annoying this is in practice.
+    Type `:help` for help within the REPL.  To quit, type `:exit` or
+    Ctrl-D.
 
     """
+    prompt_kwargs = {"message": "hipercow> ", "history": _repl_history()}
+    loop_while(lambda: _repl_call(ctx, prompt_kwargs))
+
+
+def _repl_history():
     try:
         r = root.open_root()
-        history = FileHistory(r.path_repl_history())
+        return FileHistory(r.path_repl_history())
     except Exception:
-        history = None
-    prompt_kwargs = {
-        "message": "hipercow> ",
-        "history": history,
-    }
-    repl(ctx, prompt_kwargs=prompt_kwargs)
+        return None
+
+
+def _repl_call(ctx, prompt_kwargs) -> bool:
+    try:
+        repl(ctx, prompt_kwargs=prompt_kwargs)
+        return False
+    except Exception as e:
+        click.echo(f"Error: {e}")
+        return True
 
 
 @cli.group()
