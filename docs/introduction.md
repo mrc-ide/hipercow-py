@@ -3,8 +3,8 @@
 This section will describe running a simple task on the cluster, using `hipercow`.  We make some assumptions, common to the [R version](https://mrc-ide.github.io/hipercow/):
 
 * You are a member of DIDE at Imperial College London
-* You have an account on our cluster; you can check this by logging into [the web portal](https://mrcdata.dide.ic.ac.uk/hpc) with your [DIDE credentials](https://mrc-ide.github.io/hipercow/articles/windows.html#about-our-usernames-and-passwords).  If you cannot log in, please email Wes.
-* You are working in a network share that the cluster can see. Ideally this is a **project share** and not your network home directory, as project shares are much faster and more reliable.  See the [R documentation](https://mrc-ide.github.io/hipercow/articles/windows.html#filesystems-and-paths) for more on this topic, including how to configure this on your machine
+* You have an account on our cluster; you can check this by logging into [the web portal](https://mrcdata.dide.ic.ac.uk/hpc) with your [DIDE credentials](dide.md#about-our-usernames-and-passwords).  If you cannot log in, please email Wes.
+* You are working in a network share that the cluster can see. Ideally this is a **project share** and not your network home directory, as project shares are much faster and more reliable.  See the [DIDE documentation](dide.md#filesystems-and-paths) for more on this topic, including how to configure this on your machine
 * You have some Python code that you would like to run on the cluster, which currently works for you locally.
 * You are confident executing commands at the command line (bash or similar). If you are not, please do talk with us as we'd be interested in your workflows.
 
@@ -36,7 +36,7 @@ Commands:
 
 ## Authentication
 
-Before starting anything, we should sort out your DIDE credentials.  You need your DIDE username and password - the password might differ from your ICT password, see [our guide to passwords](https://mrc-ide.github.io/hipercow/articles/windows.html#about-our-usernames-and-passwords).  If unsure, you can check by logging into [the web portal](https://mrcdata.dide.ic.ac.uk/hpc).
+Before starting anything, we should sort out your DIDE credentials.  You need your DIDE username and password - the password might differ from your ICT password, see [our guide to passwords](dide.md#about-our-usernames-and-passwords).  If unsure, you can check by logging into [the web portal](https://mrcdata.dide.ic.ac.uk/hpc).
 
 You can run `hipercow dide authenticate` to store credentials in your system keychain.
 
