@@ -6,7 +6,7 @@ from string import Template
 from taskwait import Task, taskwait
 
 from hipercow.dide.driver import _web_client
-from hipercow.dide.mounts import Mount, detect_mounts
+from hipercow.dide.mounts import Mount, detect_mounts, _backward_slash
 from hipercow.dide.web import DideWebClient
 
 BOOTSTRAP = Template(
@@ -137,5 +137,5 @@ def _batch_bootstrap(version: str, target: str, args: str) -> str:
 
 
 def _bootstrap_unc(path: Path):
-    path_str = str(path).replace("/", "\\")
+    path_str = _backward_slash(str(path))
     return f"\\\\wpia-hn\\hipercow\\{path_str}"
