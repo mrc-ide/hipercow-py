@@ -11,6 +11,7 @@ from hipercow.task import (
     TaskTimes,
     TaskWaitWrapper,
     set_task_status,
+    task_driver,
     task_exists,
     task_info,
     task_last,
@@ -43,9 +44,9 @@ def test_can_set_task_status(tmp_path):
         tid = tc.task_create_shell(["echo", "hello world"], root=r)
     assert task_exists(tid, r)
     assert task_status(tid, r) == TaskStatus.CREATED
-    set_task_status(tid, TaskStatus.RUNNING, r)
+    set_task_status(tid, TaskStatus.RUNNING, None, r)
     assert task_status(tid, r) == TaskStatus.RUNNING
-    set_task_status(tid, TaskStatus.SUCCESS, r)
+    set_task_status(tid, TaskStatus.SUCCESS, None, r)
     assert task_status(tid, r) == TaskStatus.SUCCESS
 
 
@@ -123,10 +124,10 @@ def test_can_list_tasks_by_status(tmp_path):
     with transient_working_directory(tmp_path):
         ids = [tc.task_create_shell(["true"], root=r) for _ in range(5)]
     # 0 is CREATED
-    set_task_status(ids[1], TaskStatus.RUNNING, r)
-    set_task_status(ids[2], TaskStatus.SUCCESS, r)
-    set_task_status(ids[3], TaskStatus.SUCCESS, r)
-    set_task_status(ids[4], TaskStatus.FAILURE, r)
+    set_task_status(ids[1], TaskStatus.RUNNING, None, r)
+    set_task_status(ids[2], TaskStatus.SUCCESS, None, r)
+    set_task_status(ids[3], TaskStatus.SUCCESS, None, r)
+    set_task_status(ids[4], TaskStatus.FAILURE, None, r)
     assert set(task_list(root=r)) == set(ids)
     assert set(task_list(root=r, with_status=TaskStatus.SUCCESS)) == {
         ids[2],
@@ -167,7 +168,7 @@ def test_wait_wrapper_can_get_status(tmp_path):
         tid = tc.task_create_shell(["echo", "hello world"], root=r)
         wrapper = TaskWaitWrapper(tid, r)
         assert wrapper.status() == "created"
-        set_task_status(tid, TaskStatus.SUCCESS, r)
+        set_task_status(tid, TaskStatus.SUCCESS, None, r)
         assert wrapper.status() == "success"
 
 
@@ -242,3 +243,19 @@ def test_can_detect_corrupt_recent_file(tmp_path):
     assert task_recent(root=r) == []
     task_recent_rebuild(root=r, limit=0)
     assert task_recent(root=r) == []
+
+
+def test_can_read_driver_for_submitted_task(tmp_path):
+    root.init(tmp_path)
+    r = root.open_root(tmp_path)
+    with transient_working_directory(tmp_path):
+        tid = tc.task_create_shell(["echo", "hello world"], root=r)
+    assert task_exists(tid, r)
+    assert task_status(tid, r) == TaskStatus.CREATED
+    assert task_driver(tid, r) is None
+    set_task_status(tid, TaskStatus.SUBMITTED, None, r)
+    assert task_driver(tid, r) is None
+    set_task_status(tid, TaskStatus.SUBMITTED, "example", r)
+    assert task_driver(tid, r) == "example"
+    set_task_status(tid, TaskStatus.SUCCESS, None, r)
+    assert task_driver(tid, r) == "example"

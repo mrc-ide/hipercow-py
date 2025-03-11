@@ -38,7 +38,7 @@ def task_eval_data(data: TaskData, *, capture: bool, root: Root) -> None:
     t_created = root.path_task_data(task_id).stat().st_ctime
     t_start = time.time()
 
-    set_task_status(task_id, TaskStatus.RUNNING, root)
+    set_task_status(task_id, TaskStatus.RUNNING, None, root)
 
     assert data.method == "shell"  # noqa: S101
     res = task_eval_shell(data, capture=capture, root=root)
@@ -52,7 +52,7 @@ def task_eval_data(data: TaskData, *, capture: bool, root: Root) -> None:
     times = TaskTimes(t_created, t_start, t_end)
     times.write(task_id, root)
 
-    set_task_status(task_id, status, root)
+    set_task_status(task_id, status, None, root)
 
 
 def task_eval_shell(data: TaskData, *, capture: bool, root: Root) -> TaskResult:

@@ -153,8 +153,15 @@ def task_log(task_id: str, root: OptionalRoot = None) -> str | None:
         return f.read()
 
 
-def set_task_status(task_id: str, status: TaskStatus, root: Root):
-    file_create(root.path_task(task_id) / STATUS_FILE_MAP[status])
+def set_task_status(
+    task_id: str, status: TaskStatus, value: str | None, root: Root
+):
+    path = root.path_task(task_id) / STATUS_FILE_MAP[status]
+    if value is None:
+        file_create(path)
+    else:
+        with path.open("w") as f:
+            f.write(value)
 
 
 @dataclass
@@ -378,3 +385,25 @@ def task_last(root: OptionalRoot = None) -> str | None:
     root = open_root(root)
     task_id = task_recent(limit=1, root=root)
     return task_id[0] if task_id else None
+
+
+def task_driver(task_id: str, root: Root) -> str | None:
+    """Get the driver used to submit a task.
+
+    This may not always be set (e.g., a task was created before a
+    driver was configured), in which case we return `None`.
+
+    Args:
+        task_id: The task identifier to look up.
+        root: The root, or if not given search from the current directory.
+
+    Returns:
+        The driver name, if known.  Otherwise `None`.
+
+    """
+    path = root.path_task(task_id) / STATUS_FILE_MAP[TaskStatus.SUBMITTED]
+    if not path.exists():
+        return None
+    with path.open() as f:
+        value = f.read()
+    return value.strip() if value else None
