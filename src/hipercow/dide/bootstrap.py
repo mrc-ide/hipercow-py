@@ -6,7 +6,7 @@ from string import Template
 from taskwait import Task, taskwait
 
 from hipercow.dide.driver import _web_client
-from hipercow.dide.mounts import Mount, detect_mounts, _backward_slash
+from hipercow.dide.mounts import Mount, _backward_slash, detect_mounts
 from hipercow.dide.web import DideWebClient
 
 BOOTSTRAP = Template(
