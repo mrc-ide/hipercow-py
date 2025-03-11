@@ -28,7 +28,7 @@ which will update the bootstrap libraries for all supported versions.
 If you want to use the current development sources (this will be more useful once we have the development bootstrap up and running: `mrc-6288`) you can do
 
 ```command
-hatch run build
+hatch build
 hipercow dide bootstrap --force dist/hipercow-0.0.3-py3-none-any.whl
 ```
 
