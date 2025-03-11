@@ -169,6 +169,18 @@ sudo mount ~/net/home
 
 ### Working on a network share
 
+The virtual environment you create on your share is different to the one that your jobs will use.  You can install `hipercow` into this virtual environment:
+
+```console
+python -m venv env
+. env/bin/activate # or similar on Windows
+pip install hipercow
+```
+
+This might be quite slow in practice, as loading python modules from the network filesystem is a bit painful.
+
+Alternatively you could install globally (e.g., with `pipx`).
+
 Sometimes creating a virtual environment on a network share will fail
 
 ```console
