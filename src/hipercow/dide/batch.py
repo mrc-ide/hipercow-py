@@ -18,6 +18,8 @@ ECHO running on: %COMPUTERNAME%
 
 net use I: \\wpia-hn\hipercow /y
 
+call setGit.bat
+
 ${network_shares_create}
 
 ${hipercow_root_drive}
