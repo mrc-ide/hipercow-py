@@ -519,7 +519,7 @@ def test_can_launch_repl(tmp_path, mocker):
 def test_can_handle_exception_in_repl(mocker, capsys):
     ctx = mock.Mock()
     args = mock.Mock()
-    mock_repl = mock.MagicMock(side_effect = [Exception("some error"), None])
+    mock_repl = mock.MagicMock(side_effect=[Exception("some error"), None])
     mocker.patch("hipercow.cli.repl", mock_repl)
 
     assert cli._repl_call(ctx, args)

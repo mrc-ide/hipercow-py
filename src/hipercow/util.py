@@ -2,10 +2,9 @@ import os
 import platform
 import re
 import subprocess
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Callable
 
 
 def find_file_descend(filename: str, path: str | Path) -> Path | None:
