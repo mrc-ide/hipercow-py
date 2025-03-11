@@ -91,6 +91,10 @@ def _web_client() -> DideWebClient:
 def _dide_provision(name: str, id: str, config: DideConfiguration, root: Root):
     cl = _web_client()
     unc = write_batch_provision(name, id, config, root)
-    dide_id = cl.submit(unc, f"{name}/{id}", template="BuildQueue")
+    # This should be "BuildQueue" but wpia-hn does not have python
+    # installed at C:\Python\3.13_64\python.exe (and similar for other
+    # versions) as do the worker nodes (mrc-6319)
+    template = "AllNodes"
+    dide_id = cl.submit(unc, f"{name}/{id}", template=template)
     task = ProvisionWaitWrapper(root, name, id, cl, dide_id)
     taskwait(task)

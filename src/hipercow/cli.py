@@ -76,7 +76,7 @@ def cli():
 
 
 @cli.command()
-@click.argument("path")
+@click.argument("path", default=".")
 def init(path: str):
     """Initialise a new `hipercow` root.
 
@@ -86,6 +86,10 @@ def init(path: str):
     directory.
 
     Once initialised, you should configure a driver and environment.
+
+    The default is to initialise at the current directory, like `git`
+    would.
+
     """
     root.init(path)
 
@@ -331,7 +335,9 @@ def cli_dide_authenticate(action: str):
     The action can be
 
     * `set`: Set your username and password (the default)
+
     * `check`: Check the stored credentials
+
     * `clear`: Clear any stored credentials
 
     """

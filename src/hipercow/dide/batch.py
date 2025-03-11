@@ -36,7 +36,7 @@ I:\bootstrap-py-windows\python-${python_version}\bin\hipercow task eval --captur
 set ErrorCode=%ERRORLEVEL%
 
 @REM We could use hipercow here, I think
-if exist hipercow\tasks\${task_id_1}\${task_id_2}\status-success (
+if exist hipercow\py\tasks\${task_id_1}\${task_id_2}\status-success (
   set TaskStatus=0
 ) else (
   set TaskStatus=1
@@ -159,7 +159,7 @@ def _template_data_core(config: DideConfiguration) -> dict[str, str]:
     return {
         "hostname": platform.node(),
         "date": str(datetime.datetime.now(tz=datetime.timezone.utc)),
-        "python_version": config.python_version.replace(".", ""),
+        "python_version": config.python_version,
         "hipercow_version": version,
         "hipercow_root_drive": root_drive,
         "hipercow_root_path": root_path,

@@ -34,7 +34,7 @@ def test_can_provision_with_dide(tmp_path, mocker):
     assert mock_client.mock_calls[0] == mock.call.submit(
         "//host//hostmount/path/to/dir/hipercow/py/env/myenv/provision/abcdef/run.bat",
         "myenv/abcdef",
-        template="BuildQueue",
+        template="AllNodes",  # Soon to be "BuildQueue"
     )
 
     assert hipercow.dide.driver.taskwait.call_count == 1
