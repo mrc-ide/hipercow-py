@@ -75,9 +75,9 @@ def test_can_save_and_read_log(tmp_path):
         assert res.exit_code == 0
         assert res.output == "hello world\n\n"
 
-        res = runner.invoke(cli.cli_task_log, [task_id, "--filename"])
-        assert res.exit_code == 0
-        assert res.output.strip() == str(r.path_task_log(task_id))
+        res = runner.invoke(cli.cli_task_log, [task_id, "--outer"])
+        assert res.exit_code == 1
+        assert "outer logs are only available" in str(res.exception)
 
 
 def test_can_process_with_status_args():
