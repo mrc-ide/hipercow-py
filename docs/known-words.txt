@@ -5,6 +5,7 @@ ctrl
 dide
 entrypoint
 eval
+filesystem
 filesystems
 hipercow
 infographic
@@ -15,5 +16,6 @@ roadmap
 smbcredentials
 stacktrace
 subcommands
+symlinks
 unconfigure
 wes
