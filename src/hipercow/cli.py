@@ -102,10 +102,8 @@ def cli_repl(ctx):
     """Launch the interactive REPL.
 
     Running this creates an interactive session where you can send a
-    series of commands to `hipercow`, with nice autocompletion. It
-    requires a reasonable terminal to run in (Windows users probably
-    need "git-bash" or similar; please let us know what works for
-    you).
+    series of commands to `hipercow`, with nice autocompletion. 
+    Please let us know how you find this.
 
     Type `:help` for help within the REPL.  To quit, type `:exit` or
     Ctrl-D.
