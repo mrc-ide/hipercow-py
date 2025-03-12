@@ -102,7 +102,7 @@ def cli_repl(ctx):
     """Launch the interactive REPL.
 
     Running this creates an interactive session where you can send a
-    series of commands to `hipercow`, with nice autocompletion. 
+    series of commands to `hipercow`, with nice autocompletion.
     Please let us know how you find this.
 
     Type `:help` for help within the REPL.  To quit, type `:exit` or
