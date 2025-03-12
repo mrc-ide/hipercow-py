@@ -191,4 +191,5 @@ def _unc_path(path_map: PathMap, path: Path) -> str:
     path_str = _forward_slash(str(path))
     rel = path_map.relative
     rel = "" if rel == "." else rel + "/"
-    return f"//{path_map.mount.host}/{path_map.mount.remote}/{rel}{path_str}"
+    ret = f"//{path_map.mount.host}/{path_map.mount.remote}/{rel}{path_str}"
+    return _backward_slash(ret)
