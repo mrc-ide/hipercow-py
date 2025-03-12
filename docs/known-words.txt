@@ -11,6 +11,7 @@ hipercow
 infographic
 installable
 keychain
+programmatically
 pythonic
 roadmap
 smbcredentials
