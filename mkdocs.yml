@@ -40,6 +40,17 @@ theme:
         icon: material/brightness-4
         name: Switch to light mode
 
+nav:
+- "Home": index.md
+- "Introduction": introduction.md
+- "DIDE cluster": dide.md
+- "Environments": environments.md
+- "The CLI": cli.md
+- "Details":
+   - "Reference": reference.md
+   - "Roadmap": roadmap.md
+   - "Administration": administration.md
+
 plugins:
 - search
 - autorefs
