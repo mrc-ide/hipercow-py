@@ -8,6 +8,7 @@ from hipercow.dide.configuration import DideConfiguration
 from hipercow.dide.mounts import detect_mounts
 from hipercow.dide.web import DideWebClient
 from hipercow.driver import HipercowDriver
+from hipercow.resources import ClusterResources, Queues
 from hipercow.root import Root
 
 
@@ -35,6 +36,19 @@ class DideWindowsDriver(HipercowDriver):
 
     def provision(self, name: str, id: str, root: Root) -> None:
         _dide_provision(name, id, self.config, root)
+
+    def resources(self) -> ClusterResources:
+        # We should get this from the cluster itself but with caching
+        # not yet configured this seems unwise as we'll hit the
+        # cluster an additional time for every job submission rather
+        # than just once a session.
+        queues = Queues(
+            {"AllNodes", "BuildQueue", "Testing"},
+            default="AllNodes",
+            test="Testing",
+            build="BuildQueue",
+        )
+        return ClusterResources(queues=queues, max_cores=32, max_memory=512)
 
     def task_log(
         self, task_id: str, *, outer: bool = False, root: Root

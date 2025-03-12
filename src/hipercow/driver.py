@@ -1,6 +1,7 @@
 import pickle
 from abc import ABC, abstractmethod
 
+from hipercow.resources import ClusterResources
 from hipercow.root import Root
 from hipercow.util import read_file_if_exists
 
@@ -22,6 +23,10 @@ class HipercowDriver(ABC):
 
     @abstractmethod
     def provision(self, name: str, id: str, root: Root) -> None:
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def resources(self) -> ClusterResources:
         pass  # pragma: no cover
 
     def task_log(
