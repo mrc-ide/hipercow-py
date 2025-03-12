@@ -17,7 +17,12 @@ class TaskResources:
             can provide `.default` for the default queue or `.test`
             for the test queue.
 
-        cores: The number of cores to request.
+        cores: The number of cores to request.  Adding more cores does
+            not necessarily make your task any faster; your task must
+            have some mechanism to exploit this parallelism (e.g.,
+            using the
+            [`multiprocessing`](https://docs.python.org/3/library/multiprocessing.html)
+            package).
 
         exclusive: Request exclusive access to a node.
 
