@@ -22,9 +22,14 @@ class Empty(EnvironmentEngine):
         msg = "Can't create the empty environment!"
         raise Exception(msg)
 
-    def provision(
-        self, cmd: list[str] | None, **kwargs  # noqa: ARG002
-    ) -> None:
+    def check_args(self, cmd: list[str] | None) -> list[str]:
+        if not cmd:
+            return []
+        else:
+            msg = "No arguments are allowed to the empty environment"
+            raise Exception(msg)
+
+    def provision(self, cmd: list[str], **kwargs) -> None:  # noqa: ARG002
         msg = "Can't provision the empty environment!"
         raise Exception(msg)
 

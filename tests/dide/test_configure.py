@@ -11,7 +11,7 @@ from hipercow.provision import provision
 from hipercow.resources import TaskResources
 from hipercow.task import task_log
 from hipercow.task_create import task_create_shell
-from hipercow.util import transient_working_directory
+from hipercow.util import file_create, transient_working_directory
 
 
 def test_can_configure_dide_mount(tmp_path, mocker):
@@ -101,6 +101,7 @@ def test_provision_using_driver(tmp_path, mocker):
     mocker.patch("hipercow.dide.driver._dide_provision", mock_provision)
     configure("dide-windows", python_version=None, root=r)
     environment_new("default", "pip", r)
+    file_create(r.path / "requirements.txt")
     provision("default", [], root=r)
     cfg = load_driver(None, r).config
     assert mock_provision.call_count == 1

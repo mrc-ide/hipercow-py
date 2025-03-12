@@ -24,8 +24,16 @@ class Pip(EnvironmentEngine):
         cmd = ["python", "-m", "venv", str(self.path())]
         subprocess_run(cmd, check=True, **kwargs)
 
-    def provision(self, cmd: list[str] | None, **kwargs) -> None:
-        self.run(self._check_args(cmd), check=True, **kwargs)
+    def check_args(self, cmd: list[str] | None) -> list[str]:
+        if not cmd:
+            return self._auto()
+        if cmd[0] != "pip":
+            msg = "Expected first element of 'cmd' to be 'pip'"
+            raise Exception(msg)
+        return cmd
+
+    def provision(self, cmd: list[str], **kwargs) -> None:
+        self.run(cmd, check=True, **kwargs)
 
     def run(
         self,
@@ -70,14 +78,6 @@ class Pip(EnvironmentEngine):
             return ["pip", "install", "--verbose", "-r", "requirements.txt"]
         msg = "Can't determine install command"
         raise Exception(msg)
-
-    def _check_args(self, cmd: list[str] | None) -> list[str]:
-        if not cmd:
-            return self._auto()
-        if cmd[0] != "pip":
-            msg = "Expected first element of 'cmd' to be 'pip'"
-            raise Exception(msg)
-        return cmd
 
     def _venv_bin_dir(self) -> str:
         return "Scripts" if self.platform.system == "windows" else "bin"

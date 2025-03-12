@@ -39,10 +39,12 @@ def test_pip_environment_can_be_created(tmp_path, mocker):
     )
 
     with transient_working_directory(tmp_path):
-        env.provision(None)
+        cmd = env.check_args(None)
+        assert cmd == ["pip", "install", "--verbose", "-r", "requirements.txt"]
+        env.provision(cmd)
         assert mock_run.call_count == 2
         assert mock_run.mock_calls[1] == mock.call(
-            ["pip", "install", "--verbose", "-r", "requirements.txt"],
+            cmd,
             env=os.environ | envvars,
             check=True,
         )
@@ -68,12 +70,12 @@ def test_pip_can_determine_sensible_default_cmd(tmp_path):
         file_create(tmp_path / "pyproject.toml")
         assert env._auto() == ["pip", "install", "--verbose", "."]
 
-        assert env._check_args(None) == ["pip", "install", "--verbose", "."]
-        assert env._check_args([]) == ["pip", "install", "--verbose", "."]
-        assert env._check_args(["pip", "install", "x"]) == [
+        assert env.check_args(None) == ["pip", "install", "--verbose", "."]
+        assert env.check_args([]) == ["pip", "install", "--verbose", "."]
+        assert env.check_args(["pip", "install", "x"]) == [
             "pip",
             "install",
             "x",
         ]
         with pytest.raises(Exception, match="Expected first element"):
-            assert env._check_args(["pwd"])
+            assert env.check_args(["pwd"])
