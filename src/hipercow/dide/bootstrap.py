@@ -8,6 +8,7 @@ from taskwait import Task, taskwait
 from hipercow.dide.driver import _web_client
 from hipercow.dide.mounts import Mount, _backward_slash, detect_mounts
 from hipercow.dide.web import DideWebClient
+from hipercow.resources import TaskResources
 
 BOOTSTRAP = Template(
     r"""call set_python_${version2}_64
@@ -78,7 +79,8 @@ def _bootstrap_submit(
     with path_local.open("w") as f:
         f.write(_batch_bootstrap(version, target, args))
 
-    dide_id = client.submit(_bootstrap_unc(path), name)
+    resources = TaskResources(queue="BuildQueue")
+    dide_id = client.submit(_bootstrap_unc(path), name, resources)
     return BootstrapTask(client, dide_id, version)
 
 

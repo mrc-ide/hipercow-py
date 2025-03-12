@@ -32,6 +32,8 @@ class DideWindowsDriver(HipercowDriver):
     ) -> None:
         cl = _web_client()
         unc = write_batch_task_run(task_id, self.config, root)
+        if not resources:
+            resources = self.resources().validate_resources(TaskResources())
         dide_id = cl.submit(unc, task_id, resources=resources)
         with self._path_dide_id(task_id, root).open("w") as f:
             f.write(dide_id)
@@ -107,7 +109,7 @@ def _web_client() -> DideWebClient:
 def _dide_provision(name: str, id: str, config: DideConfiguration, root: Root):
     cl = _web_client()
     unc = write_batch_provision(name, id, config, root)
-    template = "BuildQueue"
-    dide_id = cl.submit(unc, f"{name}/{id}", template=template)
+    resources = TaskResources(queue="BuildQueue")
+    dide_id = cl.submit(unc, f"{name}/{id}", resources=resources)
     task = ProvisionWaitWrapper(root, name, id, cl, dide_id)
     taskwait(task)

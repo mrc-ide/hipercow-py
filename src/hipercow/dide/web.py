@@ -121,13 +121,12 @@ class DideWebClient:
         self,
         path: str,
         name: str,
+        resources: TaskResources,
         *,
-        resources: TaskResources | None = None,
-        template: str | None = None,
         workdir: str | None = None,
     ) -> str:
         data = _client_body_submit(
-            path, name, self._cluster, template=template, workdir=workdir
+            path, name, self._cluster, resources=resources, workdir=workdir
         )
         response = self._client.request("POST", "submit_1.php", data=data)
         return _client_parse_submit(response.text)
@@ -187,12 +186,15 @@ def _client_body_submit(
     name: str,
     cluster: str,
     *,
-    template: str | None,
+    resources: TaskResources,
     workdir: str | None,
 ) -> dict:
+    # The str here keeps mypy happy, this will be a string by this
+    # point.
+    template = str(resources.queue)
     data = {
         "cluster": encode64(cluster),
-        "template": encode64(template or "AllNodes"),
+        "template": encode64(template),
         "jn": encode64(name or ""),  # job name
         "wd": encode64(workdir or ""),  # work dir
         "se": encode64(""),  # stderr
@@ -203,11 +205,27 @@ def _client_body_submit(
         "ver": encode64("hipercow-py"),
     }
 
-    # There's quite a bit more here to do with processing resource
-    # options (but these need to exist!).  For now, just set 1 core
-    # unconditionally and keep going:
-    data["rc"] = encode64("1")
+    data["rc"] = encode64(str(resources.cores))
     data["rt"] = encode64("Cores")
+
+    if resources.exclusive:
+        data["exc"] = encode64("1")
+
+    if resources.memory_per_task is not None:
+        data["epm"] = encode64(str(1000 * resources.memory_per_task))
+
+    if resources.memory_per_node is not None:
+        data["mpn"] = encode64(str(1000 * resources.memory_per_node))
+
+    if resources.max_runtime is not None:
+        data["rnt"] = encode64(str(resources.max_runtime))
+
+    # Still missing:
+    #
+    # infinite cores is a node (rc = 1, rt = Nodes)
+    # hold until (hu)
+    # requested nodes (rn)
+    # priority (pri)
 
     return data
 

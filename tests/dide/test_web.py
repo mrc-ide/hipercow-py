@@ -5,6 +5,7 @@ import pytest
 import responses
 
 from hipercow.dide import web
+from hipercow.resources import TaskResources
 from hipercow.task import TaskStatus
 
 
@@ -153,7 +154,8 @@ def test_can_submit_task():
         status=200,
     )
     cl = create_client()
-    res = cl.submit("1234", "myname")
+    resources = TaskResources(queue="AllNodes")
+    res = cl.submit("1234", "myname", resources)
     assert res == "497979"
     assert submit.call_count == 1
 
@@ -293,8 +295,9 @@ def test_no_error_if_access_is_ok(mocker):
 
 def test_create_basic_submit_data():
     path = r"\\server\share\script.bat"
+    resources = TaskResources(queue="AllNodes")
     data = web._client_body_submit(
-        path, "job", "windows", template=None, workdir=None
+        path, "job", "windows", resources=resources, workdir=None
     )
     assert data == {
         "cluster": web.encode64("windows"),
@@ -314,22 +317,41 @@ def test_create_basic_submit_data():
 
 def test_can_set_template():
     path = r"\\server\share\script.bat"
+    r = TaskResources(queue="BuildQueue")
+    r_cmp = TaskResources(queue="AllNodes")
     data = web._client_body_submit(
-        path, "job", "windows", template="BuildQueue", workdir=None
+        path, "job", "windows", resources=r, workdir=None
     )
     data_cmp = web._client_body_submit(
-        path, "job", "windows", template=None, workdir=None
+        path, "job", "windows", resources=r_cmp, workdir=None
     )
     assert data == data_cmp | {"template": web.encode64("BuildQueue")}
+
+
+def test_can_set_resources():
+    def build(**kwargs):
+        path = r"\\server\share\script.bat"
+        resources = TaskResources(queue="AllNodes", **kwargs)
+        return web._client_body_submit(
+            path, "job", "windows", resources=resources, workdir=None
+        )
+
+    default = build()
+    assert build(cores=2) == default | {"rc": web.encode64("2")}
+    assert build(exclusive=True) == default | {"exc": web.encode64("1")}
+    assert build(max_runtime=1000) == default | {"rnt": web.encode64("1000")}
+    assert build(memory_per_node=1) == default | {"mpn": web.encode64("1000")}
+    assert build(memory_per_task=2) == default | {"epm": web.encode64("2000")}
 
 
 def test_can_set_workdir():
     path = r"\\server\share\script.bat"
     workdir = r"r\\server\share\some\path"
+    resources = TaskResources(queue="AllNodes")
     data = web._client_body_submit(
-        path, "job", "windows", template=None, workdir=workdir
+        path, "job", "windows", resources=resources, workdir=workdir
     )
     data_cmp = web._client_body_submit(
-        path, "job", "windows", template=None, workdir=None
+        path, "job", "windows", resources=resources, workdir=None
     )
     assert data == data_cmp | {"wd": web.encode64(workdir)}
