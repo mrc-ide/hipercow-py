@@ -30,6 +30,8 @@ def bootstrap(
     python_versions = ["3.10", "3.11", "3.12", "3.13"]
     bootstrap_id = secrets.token_hex(4)
 
+    print(f"Bootstrap id: {bootstrap_id}")
+
     target = _bootstrap_target(target, mount, bootstrap_id)
     args = _bootstrap_args(force=force, verbose=verbose)
 
@@ -38,6 +40,8 @@ def bootstrap(
         for v in python_versions
     ]
     _bootstrap_wait(tasks)
+    print("Successful, so cleaning up")
+    shutil.rmtree(mount.local / _bootstrap_path(bootstrap_id))
 
 
 class BootstrapTask(Task):
@@ -72,7 +76,7 @@ def _bootstrap_submit(
     args: str,
 ) -> BootstrapTask:
     name = f"bootstrap/{bootstrap_id}/{version}"
-    path = Path("bootstrap-py-windows") / "in" / bootstrap_id / f"{version}.bat"
+    path = _bootstrap_path(bootstrap_id) / f"{version}.bat"
 
     path_local = mount.local / path
     path_local.parent.mkdir(parents=True, exist_ok=True)
@@ -92,7 +96,7 @@ def _bootstrap_target(
     if not Path(target).exists():
         msg = f"File '{target}' does not exist"
         raise FileNotFoundError(msg)
-    dest = Path("bootstrap-py-windows") / "in" / bootstrap_id
+    dest = _bootstrap_path(bootstrap_id)
     dest_local = mount.local / dest
     dest_local.mkdir(parents=True, exist_ok=True)
     shutil.copy(target, dest_local)
@@ -141,3 +145,7 @@ def _batch_bootstrap(version: str, target: str, args: str) -> str:
 def _bootstrap_unc(path: Path):
     path_str = _backward_slash(str(path))
     return f"\\\\wpia-hn\\hipercow\\{path_str}"
+
+
+def _bootstrap_path(bootstrap_id: str) -> Path:
+    return Path("bootstrap-py-windows") / "in" / bootstrap_id

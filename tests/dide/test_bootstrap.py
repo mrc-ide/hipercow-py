@@ -129,11 +129,13 @@ def test_can_launch_bootstrap(mocker):
     mock_mount = mock.MagicMock()
     mock_submit = mock.MagicMock()
     mock_wait = mock.MagicMock()
+    mock_rmtree = mock.MagicMock()
 
     mocker.patch("hipercow.dide.bootstrap._web_client", mock_client)
     mocker.patch("hipercow.dide.bootstrap._bootstrap_mount", mock_mount)
     mocker.patch("hipercow.dide.bootstrap._bootstrap_submit", mock_submit)
     mocker.patch("hipercow.dide.bootstrap._bootstrap_wait", mock_wait)
+    mocker.patch("shutil.rmtree", mock_rmtree)
     bootstrap(None)
 
     assert mock_client.call_count == 1
@@ -149,3 +151,4 @@ def test_can_launch_bootstrap(mocker):
     assert mock_wait.call_count == 1
     assert len(mock_wait.mock_calls[0].args[0]) == 4
     assert mock_wait.mock_calls[0].args[0][3] == mock_submit.return_value
+    assert mock_rmtree.call_count == 1
