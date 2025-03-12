@@ -98,7 +98,7 @@ username and password, but I can't remember what that looks like.
 
 This directory will be mounted at `/Volumes/<username>` (so the last bit of the filename will be used as the mount point within `Volumes`).  There may be a better way of doing this, and the connection will not be reestablished automatically so if anyone has a better way let me know.
 
-### Linux
+#### Linux
 
 This is what Rich has done on his computer and it seems to work,
 though it's not incredibly fast.  Full instructions are [on the Ubuntu community wiki](https://help.ubuntu.com/community/MountWindowsSharesPermanently).
@@ -112,7 +112,7 @@ sudo apt-get install cifs-utils
 In your `/etc/fstab` file, add
 
 ```
-//qdrive.dide.ic.ac.uk/homes/<dide-username> <home-mount-point> cifs uid=<local-userid>,gid=<local-groupid>,credentials=/home/<local-username>/.smbcredentials,domain=DIDE,sec=ntlmssp,iocharset=utf8 0  0
+//qdrive.dide.ic.ac.uk/homes/<dide-username> <home-mount-point> cifs uid=<local-userid>,gid=<local-groupid>,credentials=/home/<local-username>/.smbcredentials,domain=DIDE,sec=ntlmssp,iocharset=utf8,mfsymlinks 0  0
 ```
 
 where:
@@ -158,7 +158,7 @@ don't have to do this until you get a new computer.
 If you are on a laptop that will not regularly be connected to the internal network, you might want to add the option `noauto` to the above
 
 ```
-//qdrive.dide.ic.ac.uk/homes/rfitzjoh /home/rich/net/home cifs uid=1000,gid=1000,credentials=/home/rich/.smbcredentials,domain=DIDE,sec=ntlmssp,iocharset=utf8,noauto 0  0
+//qdrive.dide.ic.ac.uk/homes/rfitzjoh /home/rich/net/home cifs uid=1000,gid=1000,credentials=/home/rich/.smbcredentials,domain=DIDE,sec=ntlmssp,iocharset=utf8,noauto,mfsymlinks 0  0
 ```
 
 and then explicitly mount the drive as required with
@@ -166,6 +166,37 @@ and then explicitly mount the drive as required with
 ```
 sudo mount ~/net/home
 ```
+
+### Working on a network share
+
+The virtual environment you create on your share is different to the one that your jobs will use.  You can install `hipercow` into this virtual environment:
+
+```console
+python -m venv env
+. env/bin/activate # or env\Scripts\activate on Windows
+pip install hipercow
+```
+
+This might be quite slow in practice, as loading python modules from the network filesystem is a bit painful.
+
+Alternatively you could install globally (e.g., with `pipx`).
+
+Sometimes creating a virtual environment on a network share will fail
+
+```console
+python -m venv env
+Error: [Errno 5] Input/output error: 'lib' -> '/home/you/net/home/path/env/lib64
+```
+
+This should not happen, and does not always, but you can resolve it by disabling use of symlinks:
+
+```console
+virtualenv --copies env
+```
+
+It looks like this approach does not work with `venv` even with `--copies`.
+
+Alternatively (if on Linux), check to see if the `mfsymlinks` option is in your `/etc/fstab` entry; this was not included in previous versions of our instructions.  Remount your home directory and try again.
 
 ## Python versions
 

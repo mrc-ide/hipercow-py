@@ -300,7 +300,7 @@ def task_wait(
     status = task_status(task_id, root)
 
     if status == TaskStatus.CREATED and not allow_created:
-        msg = "Cannot wait on task '{task_id}' which has not been submitted"
+        msg = f"Cannot wait on task '{task_id}' which has not been submitted"
         raise Exception(msg)
 
     if status.is_terminal():

@@ -1,5 +1,6 @@
 import datetime
 import platform
+import re
 from pathlib import Path
 from string import Template
 
@@ -17,6 +18,8 @@ ECHO hipercow(py) version: ${hipercow_version}
 ECHO running on: %COMPUTERNAME%
 
 net use I: \\wpia-hn\hipercow /y
+
+call setGit.bat
 
 ${network_shares_create}
 
@@ -148,7 +151,7 @@ def write_batch_provision(
 
 def _template_data_core(config: DideConfiguration) -> dict[str, str]:
     path_map = config.path_map
-    host = path_map.mount.host
+    host = _clean_host(path_map.mount.host)
     unc_path = _backward_slash(f"//{host}/{path_map.mount.remote}")
     root_drive = path_map.remote
     root_path = _backward_slash("/" + path_map.relative)
@@ -191,5 +194,10 @@ def _unc_path(path_map: PathMap, path: Path) -> str:
     path_str = _forward_slash(str(path))
     rel = path_map.relative
     rel = "" if rel == "." else rel + "/"
-    ret = f"//{path_map.mount.host}/{path_map.mount.remote}/{rel}{path_str}"
+    host = _clean_host(path_map.mount.host)
+    ret = f"//{host}/{path_map.mount.remote}/{rel}{path_str}"
     return _backward_slash(ret)
+
+
+def _clean_host(host: str) -> str:
+    return re.sub("\\.hpc$", "", host)
