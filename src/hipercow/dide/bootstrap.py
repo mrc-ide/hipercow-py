@@ -29,8 +29,9 @@ def bootstrap(
     # later too.
     python_versions = ["3.10", "3.11", "3.12", "3.13"]
     bootstrap_id = secrets.token_hex(4)
+    path = mount.local / _bootstrap_path(bootstrap_id)
 
-    _bootstrap_check_pipx_pyz(mount.local / "in")
+    _bootstrap_check_pipx_pyz(path.parent)
 
     print(f"Bootstrap id: {bootstrap_id}")
 
@@ -43,7 +44,7 @@ def bootstrap(
     ]
     _bootstrap_wait(tasks)
     print("Successful, so cleaning up")
-    shutil.rmtree(mount.local / _bootstrap_path(bootstrap_id))
+    shutil.rmtree(path)
 
 
 class BootstrapTask(Task):
