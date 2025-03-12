@@ -37,7 +37,11 @@ class EnvironmentEngine(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
-    def provision(self, cmd: list[str] | None, **kwargs) -> None:
+    def check_args(self, cmd: list[str] | None) -> list[str]:
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def provision(self, cmd: list[str], **kwargs) -> None:
         pass  # pragma: no cover
 
     @abstractmethod

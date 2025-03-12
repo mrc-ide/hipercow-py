@@ -1,6 +1,9 @@
 from pathlib import Path
 from unittest import mock
 
+import pytest
+from taskwait import Result
+
 import hipercow.dide.driver
 from hipercow import root
 from hipercow.dide import mounts
@@ -70,3 +73,38 @@ def test_wait_wrapper_can_get_log(tmp_path):
             f.write("a\nb\n")
         assert task.log() == ["a", "b"]
         assert task.has_log()
+
+
+def test_throw_after_failed_provision_with_dide(tmp_path, mocker, capsys):
+    root.init(tmp_path)
+    r = root.open_root(tmp_path)
+    with (r.path / "requirements.txt").open("w") as f:
+        f.write("cowsay\n")
+
+    m = mounts.Mount("host", "hostmount", Path("/local"))
+    path_map = mounts.PathMap(tmp_path, m, "Q:", relative="path/to/dir")
+
+    mock_client = mock.MagicMock(spec=DideWebClient)
+    mock_client.log.return_value = "more logs"
+    result = Result("failure", 100, 123)
+    mocker.patch("hipercow.dide.driver._web_client", return_value=mock_client)
+    mocker.patch("hipercow.dide.driver.taskwait", return_value=result)
+    mocker.patch(
+        "hipercow.dide.configuration.remap_path", return_value=path_map
+    )
+    config = DideConfiguration(r, mounts=[m], python_version=None)
+
+    capsys.readouterr()
+    with pytest.raises(Exception, match="Provisioning failed"):
+        _dide_provision("myenv", "abcdef", config, r)
+    out = capsys.readouterr().out
+
+    assert "Provisioning failed after 23s!\n" in out
+    assert "\nmore logs\n" in out
+
+    assert mock_client.submit.call_count == 1
+    assert mock_client.log.call_count == 1
+    assert mock_client.log.mock_calls[0] == mock.call(
+        mock_client.submit.return_value
+    )
+    assert hipercow.dide.driver.taskwait.call_count == 1

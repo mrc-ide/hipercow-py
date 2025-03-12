@@ -13,7 +13,7 @@ from hipercow.util import transient_working_directory
 class ProvisioningData:
     name: str
     id: str
-    cmd: list[str] | None
+    cmd: list[str]
     time: float = field(default_factory=time.time, init=False)
 
     def write(self, root: Root) -> None:
@@ -102,8 +102,13 @@ def provision(
         msg = f"Environment '{name}' does not exist"
         raise Exception(msg)
     dr = load_driver(driver, root)
-
+    # This is a bit gross because we are loading the local platform
+    # and not the platform of the target.  We could know that if the
+    # driver tells us it (which it could).
+    env = environment_engine(name, root)
     id = secrets.token_hex(8)
+    with transient_working_directory(root.path):
+        cmd = env.check_args(cmd)
     ProvisioningData(name, id, cmd).write(root)
     dr.provision(name, id, root)
 

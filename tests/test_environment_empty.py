@@ -52,3 +52,13 @@ def test_can_run_command_in_empty_env(tmp_path, mocker):
     assert mock_run.mock_calls[0] == mock.call(
         ["some", "command"], env=os.environ, check=False
     )
+
+
+def test_can_validate_empty_args(tmp_path):
+    root.init(tmp_path)
+    r = root.open_root(tmp_path)
+    env = environment_engine("empty", r)
+    assert env.check_args(None) == []
+    assert env.check_args([]) == []
+    with pytest.raises(Exception, match="No arguments are allowed"):
+        env.check_args(["other"])

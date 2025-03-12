@@ -112,4 +112,22 @@ def _dide_provision(name: str, id: str, config: DideConfiguration, root: Root):
     resources = TaskResources(queue="BuildQueue")
     dide_id = cl.submit(unc, f"{name}/{id}", resources=resources)
     task = ProvisionWaitWrapper(root, name, id, cl, dide_id)
-    taskwait(task)
+    res = taskwait(task)
+    dt = round(res.end - res.start, 2)
+    if res.status == "failure":
+        path_log = root.path_provision_log(name, id, relative=True)
+        print(f"Provisioning failed after {dt}s!")
+        print("")
+        print("Logs, if produced, may be visible above")
+        print("A copy of all logs is available at:")
+        print(f"    {path_log}")
+        print("")
+        print("Additionally, logs available from the cluster follow:")
+        print("-" * 70)
+        dide_log = cl.log(dide_id)
+        print(dide_log)
+        print("-" * 70)
+        msg = "Provisioning failed"
+        raise Exception(msg)
+    else:
+        print(f"Provisioning completed in {dt}s")
