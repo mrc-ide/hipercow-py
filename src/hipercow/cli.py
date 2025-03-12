@@ -145,13 +145,12 @@ def cli_driver_configure(name: str, python_version: str | None):
 
     This command will initialise a driver.  Most likely you will call
 
-    ```
-    hipercow driver configure dide
-    ```
+        hipercow driver configure dide-windows
 
-    because `dide` is the only real driver at the moment.  In future
-    there will be options that you might pass here, or some other way
-    to control its behaviour.
+    because `dide-windows` is the only real driver at the moment.  If
+    you provide the `--python-version` flag you can specify the Python
+    version to use, if you want a version that is different to the
+    version of Python that you are using locally.
 
     """
     configure(name, python_version=python_version)
