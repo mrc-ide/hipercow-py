@@ -151,13 +151,8 @@ def write_batch_provision(
 
 def _template_data_core(config: DideConfiguration) -> dict[str, str]:
     path_map = config.path_map
-<<<<<<< HEAD
-    host = path_map.mount.host
-    unc_path = _backward_slash(f"//{host}/{path_map.mount.remote}")
-=======
     host = _clean_host(path_map.mount.host)
-    unc_path = f"//{host}/{path_map.mount.remote}".replace("/", "\\")
->>>>>>> 207e7fe (HPC tweaks)
+    unc_path = _backward_slash(f"//{host}/{path_map.mount.remote}")
     root_drive = path_map.remote
     root_path = _backward_slash("/" + path_map.relative)
 
@@ -200,7 +195,7 @@ def _unc_path(path_map: PathMap, path: Path) -> str:
     rel = path_map.relative
     rel = "" if rel == "." else rel + "/"
     host = _clean_host(path_map.mount.host)
-    ret = f"//{path_map.mount.host}/{path_map.mount.remote}/{rel}{path_str}"
+    ret = f"//{host}/{path_map.mount.remote}/{rel}{path_str}"
     return _backward_slash(ret)
 
 
