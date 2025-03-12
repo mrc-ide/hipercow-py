@@ -126,9 +126,9 @@ class ClusterResources:
     max_memory: int
 
     def validate_resources(self, resources: TaskResources) -> TaskResources:
-        """Validate resources are valid on this cluster.
+        """Check resources are valid on this cluster.
 
-        Takes a set of resources and checks that the requested node,
+        Takes a set of resources and checks that the requested queue,
         number of cores and ram are valid for the cluster.  If the
         queue is not provided, then we will take the default.
 
