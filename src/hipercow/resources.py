@@ -1,3 +1,5 @@
+"""Specify and interact with resources."""
+
 from dataclasses import dataclass
 
 
@@ -6,8 +8,8 @@ class TaskResources:
     """Resources required for a task.
 
     We don't support everything that the R version does yet; in
-    particular we've not set up `hold_until`, `priority`,
-    equested_nodes` or `nodes`, as these are not widely used.
+    particular we've not set up `hold_until`, `priority` or
+    `requested_nodes`, as these are not widely used.
 
     Attributes:
         queue: The queue to run on.  If not given (or `None`), we use
@@ -19,7 +21,7 @@ class TaskResources:
 
         exclusive: Request exclusive access to a node.
 
-        max_runtime: The maximum runtime, in seconds.
+        max_runtime: The maximum run time (wall clock), in seconds.
 
         memory_per_node: Specify that your task can only run on a node
             with at least this much memory, in GB (e.g, 128 is 128GB).

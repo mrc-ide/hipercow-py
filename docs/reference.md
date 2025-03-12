@@ -11,3 +11,5 @@
 ::: hipercow.environment
 
 ::: hipercow.provision
+
+::: hipercow.resources
