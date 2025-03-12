@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "hipercow"
-description = ''
+description = "The High Performance Computing Workbench, for Python. Set up cluster environments and jobs. Moos not yet included."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
@@ -35,9 +35,9 @@ dependencies = [
 dynamic = ["version"]
 
 [project.urls]
-Documentation = "https://github.com/unknown/hipercow#readme"
-Issues = "https://github.com/unknown/hipercow/issues"
-Source = "https://github.com/unknown/hipercow"
+Documentation = "https://mrc-ide.github.io/hipercow-py"
+Issues = "https://github.com/mrc-ide/hipercow-py/issues"
+Source = "https://github.com/mrc-ide/hipercow-py"
 
 [project.scripts]
 hipercow = "hipercow.cli:cli_safe"
