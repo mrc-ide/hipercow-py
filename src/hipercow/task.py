@@ -428,6 +428,7 @@ def task_driver(task_id: str, root: Root) -> str | None:
 
 RE_TASK_ID = re.compile("^[0-9a-f]{32}$")
 
+
 def is_valid_task_id(task_id: str) -> bool:
     return bool(RE_TASK_ID.match(task_id))
 
