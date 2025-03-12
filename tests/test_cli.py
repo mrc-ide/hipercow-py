@@ -1,3 +1,4 @@
+import platform
 import time
 from pathlib import Path
 from unittest import mock
@@ -7,6 +8,7 @@ import pytest
 from click.testing import CliRunner
 
 from hipercow import cli, root, task
+from hipercow.driver import list_drivers
 from hipercow.task import TaskData, TaskStatus
 from hipercow.task_create import task_create_shell
 from hipercow.util import transient_envvars
@@ -462,3 +464,26 @@ def test_cli_wrapper_passes_to_exception_handler_on_error(mocker):
     cli.cli_safe()
     assert mock_handler.call_count == 1
     assert mock_handler.mock_calls[0] == mock.call(e)
+
+
+def test_can_set_python_version(tmp_path):
+    runner = CliRunner()
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        res = runner.invoke(cli.init, ".")
+
+        r = root.open_root()
+        v_ok = ".".join(platform.python_version_tuple()[:2])
+        v_err = "3.11" if v_ok == "3.10" else "3.10"
+
+        res = runner.invoke(
+            cli.cli_driver_configure, ["example", "--python-version", v_err]
+        )
+        assert res.exit_code == 1
+        assert "not the same as the local version" in str(res.exception)
+        assert list_drivers(r) == []
+
+        res = runner.invoke(
+            cli.cli_driver_configure, ["example", "--python-version", v_ok]
+        )
+        assert res.exit_code == 0
+        assert list_drivers(r) == ["example"]

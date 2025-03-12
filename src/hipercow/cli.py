@@ -102,7 +102,8 @@ def driver():
 
 @driver.command("configure")
 @click.argument("name")
-def cli_driver_configure(name: str):
+@click.option("--python-version", help="Python version to use on the cluster")
+def cli_driver_configure(name: str, python_version: str | None):
     """Add a driver.
 
     This command will initialise a driver.  Most likely you will call
@@ -116,17 +117,7 @@ def cli_driver_configure(name: str):
     to control its behaviour.
 
     """
-    # For now, there are no arguments to drivers so this is easy.
-    # However, we will want to be able to pass in generic key/value
-    # pairs eventually, and ideally the driver will tell us what these
-    # are.
-    #
-    # Some options to support this might be:
-    # https://www.zonca.dev/posts/2022-10-26-click-commandline-class-arguments
-    # https://stackoverflow.com/q/36513706 (old)
-    #
-    # For now, let's just have it on/off.
-    configure(name)
+    configure(name, python_version=python_version)
 
 
 @driver.command("unconfigure")

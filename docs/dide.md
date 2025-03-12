@@ -166,3 +166,15 @@ and then explicitly mount the drive as required with
 ```
 sudo mount ~/net/home
 ```
+
+## Python versions
+
+By default, we try and run the version of python on the cluster that you are running locally, to the minor version level.  So if you are running any version of 3.13 (e.g., 3.13.2) we will use a version of 3.13 for your jobs.  It is not possible to set the patch version and usually it does not matter.  We'll try and keep the versions on the cluster up to date.
+
+You can select the python version that will be run on the cluster by passing `--python-version` through to `hipercow driver configure`, for example:
+
+```console
+hipercow driver configure dide-windows --python-version=3.11
+```
+
+will use python version 3.11 regardless of what your local version of python is.  This might be useful if you need to run software that depends on an older version of python.
