@@ -9,6 +9,7 @@ from click.testing import CliRunner
 
 from hipercow import cli, root, task
 from hipercow.driver import list_drivers
+from hipercow.resources import TaskResources
 from hipercow.task import TaskData, TaskStatus
 from hipercow.task_create import task_create_shell
 from hipercow.util import transient_envvars
@@ -533,3 +534,27 @@ def test_can_handle_exception_in_repl(mocker, capsys):
     assert out == ""
     assert mock_repl.call_count == 2
     assert mock_repl.mock_calls[1] == mock.call(ctx, prompt_kwargs=args)
+
+
+def test_can_control_queue_used_in_task_creation(tmp_path):
+    runner = CliRunner()
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        root.init(".")
+        r = root.open_root()
+        res = runner.invoke(cli.cli_driver_configure, ["example"])
+
+        res = runner.invoke(
+            cli.cli_task_create,
+            ["echo", "hello", "world", "--queue", "default"],
+        )
+        assert res.exit_code == 0
+        task_id = res.stdout.splitlines()[1]
+        data = TaskData.read(task_id, r)
+        assert data.resources == TaskResources(queue="default")
+
+        res = runner.invoke(
+            cli.cli_task_create,
+            ["echo", "hello", "world", "--queue", "other"],
+        )
+        assert res.exit_code == 1
+        assert "Queue 'other' is not in valid queue list" in str(res.exception)
