@@ -8,6 +8,7 @@ from urllib.parse import urljoin
 import requests
 from defusedxml import ElementTree
 
+from hipercow.resources import TaskResources
 from hipercow.task import TaskStatus
 
 
@@ -121,6 +122,7 @@ class DideWebClient:
         path: str,
         name: str,
         *,
+        resources: TaskResources | None = None,
         template: str | None = None,
         workdir: str | None = None,
     ) -> str:

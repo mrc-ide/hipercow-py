@@ -85,7 +85,7 @@ def _task_create(
         if not dr:
             msg = "Can't specify resources, as driver is not given"
             raise Exception(msg)
-        dr.resources().validate_resources(resources)
+        resources = dr.resources().validate_resources(resources)
     task_data = TaskData(
         task_id=task_id,
         method=method,
@@ -99,7 +99,7 @@ def _task_create(
     with root.path_recent().open("a") as f:
         f.write(f"{task_id}\n")
     if dr:
-        dr.submit(task_id, root)
+        dr.submit(task_id, resources, root)
         set_task_status(task_id, TaskStatus.SUBMITTED, dr.name, root)
     return task_id
 

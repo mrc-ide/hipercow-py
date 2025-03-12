@@ -8,7 +8,7 @@ from hipercow.dide.configuration import DideConfiguration
 from hipercow.dide.mounts import detect_mounts
 from hipercow.dide.web import DideWebClient
 from hipercow.driver import HipercowDriver
-from hipercow.resources import ClusterResources, Queues
+from hipercow.resources import ClusterResources, Queues, TaskResources
 from hipercow.root import Root
 
 
@@ -27,10 +27,12 @@ class DideWindowsDriver(HipercowDriver):
         print(f"  share: \\\\{path_map.mount.host}\\{path_map.mount.remote}")
         print(f"python version: {self.config.python_version}")
 
-    def submit(self, task_id: str, root: Root) -> None:
+    def submit(
+        self, task_id: str, resources: TaskResources | None, root: Root
+    ) -> None:
         cl = _web_client()
         unc = write_batch_task_run(task_id, self.config, root)
-        dide_id = cl.submit(unc, task_id)
+        dide_id = cl.submit(unc, task_id, resources=resources)
         with self._path_dide_id(task_id, root).open("w") as f:
             f.write(dide_id)
 
