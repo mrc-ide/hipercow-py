@@ -150,8 +150,8 @@ def _template_data_core(config: DideConfiguration) -> dict[str, str]:
     path_map = config.path_map
     host = path_map.mount.host
     unc_path = _backward_slash(f"//{host}/{path_map.mount.remote}")
-    root_drive = _backward_slash(path_map.remote)
-    root_path = "/" + path_map.relative
+    root_drive = path_map.remote
+    root_path = _backward_slash("/" + path_map.relative)
 
     network_shares_create = f"net use {root_drive} {unc_path} /y"
     network_shares_delete = f"net use {root_drive} /delete /y"
