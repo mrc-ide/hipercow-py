@@ -2,7 +2,7 @@ import os
 import platform
 import re
 import subprocess
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from pathlib import Path
 
@@ -119,3 +119,9 @@ def read_file_if_exists(path: Path) -> str | None:
         return None
     with path.open() as f:
         return f.read()
+
+
+def loop_while(fn: Callable[[], bool]) -> None:
+    while True:
+        if not fn():
+            break

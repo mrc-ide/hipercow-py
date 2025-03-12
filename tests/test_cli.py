@@ -12,6 +12,7 @@ from hipercow.driver import list_drivers
 from hipercow.task import TaskData, TaskStatus
 from hipercow.task_create import task_create_shell
 from hipercow.util import transient_envvars
+from tests.helpers import AnyInstanceOf
 
 
 def test_can_init_repository(tmp_path):
@@ -487,3 +488,48 @@ def test_can_set_python_version(tmp_path):
         )
         assert res.exit_code == 0
         assert list_drivers(r) == ["example"]
+
+
+def test_can_launch_repl(tmp_path, mocker):
+    runner = CliRunner()
+    mock_repl = mock.MagicMock()
+    mocker.patch("hipercow.cli.repl", mock_repl)
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        res = runner.invoke(cli.cli_repl, [])
+        assert res.exit_code == 0
+        assert mock_repl.call_count == 1
+        assert mock_repl.mock_calls[0] == mock.call(
+            AnyInstanceOf(click.Context),
+            prompt_kwargs={"message": "hipercow> ", "history": None},
+        )
+
+        runner.invoke(cli.init, ".")
+        res = runner.invoke(cli.cli_repl, [])
+        assert res.exit_code == 0
+        assert mock_repl.call_count == 2
+        assert mock_repl.mock_calls[1] == mock.call(
+            AnyInstanceOf(click.Context),
+            prompt_kwargs={
+                "message": "hipercow> ",
+                "history": AnyInstanceOf(cli.FileHistory),
+            },
+        )
+
+
+def test_can_handle_exception_in_repl(mocker, capsys):
+    ctx = mock.Mock()
+    args = mock.Mock()
+    mock_repl = mock.MagicMock(side_effect=[Exception("some error"), None])
+    mocker.patch("hipercow.cli.repl", mock_repl)
+
+    assert cli._repl_call(ctx, args)
+    out = capsys.readouterr().out
+    assert "Error: some error" in out
+    assert mock_repl.call_count == 1
+    assert mock_repl.mock_calls[0] == mock.call(ctx, prompt_kwargs=args)
+
+    assert not cli._repl_call(ctx, args)
+    out = capsys.readouterr().out
+    assert out == ""
+    assert mock_repl.call_count == 2
+    assert mock_repl.mock_calls[1] == mock.call(ctx, prompt_kwargs=args)

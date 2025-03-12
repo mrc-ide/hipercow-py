@@ -24,6 +24,7 @@ classifiers = [
 ]
 dependencies = [
   "click",
+  "click-repl",
   "defusedxml",
   "keyring",
   "requests",
@@ -97,6 +98,7 @@ branch = true
 parallel = true
 omit = [
   "src/hipercow/__about__.py",
+  "tests/helpers.py",
 ]
 
 [tool.coverage.paths]

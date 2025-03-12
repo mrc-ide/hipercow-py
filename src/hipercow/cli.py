@@ -3,6 +3,8 @@ from functools import reduce
 from operator import ior
 
 import click
+from click_repl import repl  # type: ignore
+from prompt_toolkit.history import FileHistory
 from rich.console import Console
 from typing_extensions import Never  # 3.10 does not have this in typing
 
@@ -29,7 +31,7 @@ from hipercow.task import (
 )
 from hipercow.task_create import task_create_shell
 from hipercow.task_eval import task_eval
-from hipercow.util import truthy_envvar
+from hipercow.util import loop_while, truthy_envvar
 
 # This is how the 'rich' docs drive things:
 console = Console()
@@ -92,6 +94,40 @@ def init(path: str):
 
     """
     root.init(path)
+
+
+@cli.command("repl")
+@click.pass_context
+def cli_repl(ctx):
+    """Launch the interactive REPL.
+
+    Running this creates an interactive session where you can send a
+    series of commands to `hipercow`, with nice autocompletion.
+    Please let us know how you find this.
+
+    Type `:help` for help within the REPL.  To quit, type `:exit` or
+    Ctrl-D.
+
+    """
+    prompt_kwargs = {"message": "hipercow> ", "history": _repl_history()}
+    loop_while(lambda: _repl_call(ctx, prompt_kwargs))
+
+
+def _repl_history():
+    try:
+        r = root.open_root()
+        return FileHistory(r.path_repl_history())
+    except Exception:
+        return None
+
+
+def _repl_call(ctx, prompt_kwargs) -> bool:
+    try:
+        repl(ctx, prompt_kwargs=prompt_kwargs)
+        return False
+    except Exception as e:
+        click.echo(f"Error: {e}")
+        return True
 
 
 @cli.group()

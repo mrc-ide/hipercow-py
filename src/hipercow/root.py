@@ -119,6 +119,9 @@ class Root:
     ) -> Path:
         return self.path_provision(name, id, relative=relative) / "log"
 
+    def path_repl_history(self) -> Path:
+        return self.path_base() / "repl_history"
+
 
 OptionalRoot: TypeAlias = None | str | Path | Root
 """Optional root type, for user-facing functions.
