@@ -30,6 +30,8 @@ def bootstrap(
     python_versions = ["3.10", "3.11", "3.12", "3.13"]
     bootstrap_id = secrets.token_hex(4)
 
+    _bootstrap_check_pipx_pyz(mount.local / "in")
+
     print(f"Bootstrap id: {bootstrap_id}")
 
     target = _bootstrap_target(target, mount, bootstrap_id)
@@ -149,3 +151,12 @@ def _bootstrap_unc(path: Path):
 
 def _bootstrap_path(bootstrap_id: str) -> Path:
     return Path("bootstrap-py-windows") / "in" / bootstrap_id
+
+
+def _bootstrap_check_pipx_pyz(path: Path) -> None:
+    if not (path / "pipx.pyz").exists():
+        url = "https://github.com/pypa/pipx/releases"
+        msg = (
+            f"Expected 'pipx.pyz' to be found at '{path}'; download from {url}"
+        )
+        raise Exception(msg)

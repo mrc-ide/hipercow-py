@@ -6,6 +6,7 @@ import pytest
 from hipercow.dide.bootstrap import (
     BootstrapTask,
     _bootstrap_args,
+    _bootstrap_check_pipx_pyz,
     _bootstrap_mount,
     _bootstrap_submit,
     _bootstrap_target,
@@ -16,6 +17,7 @@ from hipercow.dide.bootstrap import (
 from hipercow.dide.mounts import Mount
 from hipercow.dide.web import DideWebClient
 from hipercow.resources import TaskResources
+from hipercow.util import file_create
 
 
 def test_can_construct_unc_paths():
@@ -152,3 +154,10 @@ def test_can_launch_bootstrap(mocker):
     assert len(mock_wait.mock_calls[0].args[0]) == 4
     assert mock_wait.mock_calls[0].args[0][3] == mock_submit.return_value
     assert mock_rmtree.call_count == 1
+
+
+def test_error_if_no_pipx_pyz(tmp_path):
+    with pytest.raises(Exception, match="Expected 'pipx.pyz' to be found"):
+        _bootstrap_check_pipx_pyz(tmp_path)
+    file_create(tmp_path / "pipx.pyz")
+    assert _bootstrap_check_pipx_pyz(tmp_path) is None
