@@ -112,3 +112,11 @@ def test_can_read_logs_with_example_driver(tmp_path):
     assert dr.task_log(tid, outer=True, root=r) is None
     assert task_log(tid, root=r) == "hello world\n"
     assert task_log(tid, outer=True, root=r) is None
+
+
+def test_that_example_driver_has_reasonable_resources(tmp_path):
+    dr = ExampleDriver(root.init(tmp_path))
+    resources = dr.resources()
+    assert resources.queues.valid == {"default"}
+    assert resources.max_cores == 1
+    assert resources.max_memory == 32

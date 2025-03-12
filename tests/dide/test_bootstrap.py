@@ -15,6 +15,7 @@ from hipercow.dide.bootstrap import (
 )
 from hipercow.dide.mounts import Mount
 from hipercow.dide.web import DideWebClient
+from hipercow.resources import TaskResources
 
 
 def test_can_construct_unc_paths():
@@ -66,12 +67,13 @@ def test_can_submit_bootstrap_task(tmp_path):
     target = "hipercow"
     args = ""
     t = _bootstrap_submit(client, mount, bootstrap_id, version, target, args)
-
+    resources = TaskResources(queue="BuildQueue")
     assert t.client == client
     assert client.submit.call_count == 1
     assert client.submit.mock_calls[0] == mock.call(
         r"\\wpia-hn\hipercow\bootstrap-py-windows\in\abcdef\3.11.bat",
         "bootstrap/abcdef/3.11",
+        resources,
     )
     assert t.dide_id == client.submit.return_value
     dest = tmp_path / "bootstrap-py-windows/in/abcdef/3.11.bat"

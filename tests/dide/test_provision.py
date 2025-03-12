@@ -7,6 +7,7 @@ from hipercow.dide import mounts
 from hipercow.dide.configuration import DideConfiguration
 from hipercow.dide.driver import ProvisionWaitWrapper, _dide_provision
 from hipercow.dide.web import DideWebClient
+from hipercow.resources import TaskResources
 from hipercow.task import TaskStatus
 from hipercow.util import transient_working_directory
 
@@ -29,12 +30,13 @@ def test_can_provision_with_dide(tmp_path, mocker):
     config = DideConfiguration(r, mounts=[m], python_version=None)
 
     _dide_provision("myenv", "abcdef", config, r)
+    resources = TaskResources(queue="BuildQueue")
 
     assert mock_client.submit.call_count == 1
     assert mock_client.mock_calls[0] == mock.call.submit(
         r"\\host\hostmount\path\to\dir\hipercow\py\env\myenv\provision\abcdef\run.bat",
         "myenv/abcdef",
-        template="BuildQueue",
+        resources=resources,
     )
 
     assert hipercow.dide.driver.taskwait.call_count == 1

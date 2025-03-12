@@ -8,6 +8,7 @@ from hipercow.dide.web import Credentials, DideWebClient
 from hipercow.driver import list_drivers, load_driver
 from hipercow.environment import environment_new
 from hipercow.provision import provision
+from hipercow.resources import TaskResources
 from hipercow.task import task_log
 from hipercow.task_create import task_create_shell
 from hipercow.util import transient_working_directory
@@ -57,6 +58,39 @@ def test_creating_task_triggers_submission(tmp_path, mocker):
     assert (r.path_task(tid) / "task_run.bat").exists()
 
 
+def test_creating_task_with_resources(tmp_path, mocker):
+    path = tmp_path / "a" / "b"
+    root.init(path)
+    r = root.open_root(path)
+    mock_mounts = [Mount("projects", "other", tmp_path)]
+    mock_creds = Credentials("bob", "secret")
+    mock_web_client = mock.MagicMock(spec=DideWebClient)
+
+    mocker.patch("hipercow.dide.driver.detect_mounts", return_value=mock_mounts)
+    mocker.patch(
+        "hipercow.dide.driver.fetch_credentials", return_value=mock_creds
+    )
+    mocker.patch("hipercow.dide.driver.DideWebClient", mock_web_client)
+    mock_web_client.return_value.submit.return_value = "1234"
+
+    configure("dide-windows", python_version=None, root=r)
+    resources = TaskResources(cores=4)
+    with transient_working_directory(path):
+        tid = task_create_shell(
+            ["echo", "hello world"], resources=resources, root=r
+        )
+
+    assert mock_web_client.call_count == 1
+    assert mock_web_client.call_args == mock.call(mock_creds)
+    cl = mock_web_client.return_value
+    assert cl.login.call_count == 1
+    assert cl.submit.call_count == 1
+    assert cl.submit.mock_calls[0][2]["resources"] == TaskResources(
+        queue="AllNodes", cores=4
+    )
+    assert (r.path_task(tid) / "task_run.bat").exists()
+
+
 def test_provision_using_driver(tmp_path, mocker):
     path = tmp_path / "a" / "b"
     root.init(path)
@@ -73,6 +107,22 @@ def test_provision_using_driver(tmp_path, mocker):
     assert mock_provision.mock_calls[0] == mock.call(
         "default", mock.ANY, cfg, r
     )
+
+
+def test_resources_using_driver(tmp_path, mocker):
+    path = tmp_path / "a" / "b"
+    root.init(path)
+    r = root.open_root(path)
+    mock_mounts = [Mount("projects", "other", tmp_path)]
+    mock_provision = mock.MagicMock()
+    mocker.patch("hipercow.dide.driver.detect_mounts", return_value=mock_mounts)
+    mocker.patch("hipercow.dide.driver._dide_provision", mock_provision)
+    configure("dide-windows", python_version=None, root=r)
+    dr = load_driver(None, r)
+    resources = dr.resources()
+    assert resources.queues.default == "AllNodes"
+    assert resources.max_cores == 32
+    assert resources.max_memory == 512
 
 
 def test_configure_python_version(tmp_path, mocker, capsys):

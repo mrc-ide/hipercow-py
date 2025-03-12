@@ -8,6 +8,7 @@ from hipercow.dide.configuration import DideConfiguration
 from hipercow.dide.mounts import detect_mounts
 from hipercow.dide.web import DideWebClient
 from hipercow.driver import HipercowDriver
+from hipercow.resources import ClusterResources, Queues, TaskResources
 from hipercow.root import Root
 
 
@@ -26,15 +27,32 @@ class DideWindowsDriver(HipercowDriver):
         print(f"  share: \\\\{path_map.mount.host}\\{path_map.mount.remote}")
         print(f"python version: {self.config.python_version}")
 
-    def submit(self, task_id: str, root: Root) -> None:
+    def submit(
+        self, task_id: str, resources: TaskResources | None, root: Root
+    ) -> None:
         cl = _web_client()
         unc = write_batch_task_run(task_id, self.config, root)
-        dide_id = cl.submit(unc, task_id)
+        if not resources:
+            resources = self.resources().validate_resources(TaskResources())
+        dide_id = cl.submit(unc, task_id, resources=resources)
         with self._path_dide_id(task_id, root).open("w") as f:
             f.write(dide_id)
 
     def provision(self, name: str, id: str, root: Root) -> None:
         _dide_provision(name, id, self.config, root)
+
+    def resources(self) -> ClusterResources:
+        # We should get this from the cluster itself but with caching
+        # not yet configured this seems unwise as we'll hit the
+        # cluster an additional time for every job submission rather
+        # than just once a session.
+        queues = Queues(
+            {"AllNodes", "BuildQueue", "Testing"},
+            default="AllNodes",
+            test="Testing",
+            build="BuildQueue",
+        )
+        return ClusterResources(queues=queues, max_cores=32, max_memory=512)
 
     def task_log(
         self, task_id: str, *, outer: bool = False, root: Root
@@ -91,7 +109,7 @@ def _web_client() -> DideWebClient:
 def _dide_provision(name: str, id: str, config: DideConfiguration, root: Root):
     cl = _web_client()
     unc = write_batch_provision(name, id, config, root)
-    template = "BuildQueue"
-    dide_id = cl.submit(unc, f"{name}/{id}", template=template)
+    resources = TaskResources(queue="BuildQueue")
+    dide_id = cl.submit(unc, f"{name}/{id}", resources=resources)
     task = ProvisionWaitWrapper(root, name, id, cl, dide_id)
     taskwait(task)

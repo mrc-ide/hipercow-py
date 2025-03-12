@@ -1,5 +1,6 @@
 from hipercow.driver import HipercowDriver
 from hipercow.provision import provision_run
+from hipercow.resources import ClusterResources, Queues, TaskResources
 from hipercow.root import Root
 from hipercow.util import check_python_version
 
@@ -22,8 +23,20 @@ class ExampleDriver(HipercowDriver):
     def show_configuration(self) -> None:
         print("(no configuration)")
 
-    def submit(self, task_id, root: Root) -> None:  # noqa: ARG002
+    def submit(
+        self,
+        task_id: str,
+        resources: TaskResources | None,  # noqa: ARG002
+        root: Root,  # noqa: ARG002
+    ) -> None:
         print(f"submitting '{task_id}'")
 
     def provision(self, name: str, id: str, root: Root) -> None:
         provision_run(name, id, root)
+
+    def resources(self) -> ClusterResources:
+        return ClusterResources(
+            queues=Queues.simple("default"),
+            max_cores=1,
+            max_memory=32,
+        )

@@ -7,6 +7,7 @@ from enum import Flag, auto
 import taskwait
 
 from hipercow.driver import load_driver
+from hipercow.resources import TaskResources
 from hipercow.root import OptionalRoot, Root, open_root
 from hipercow.util import file_create, read_file_if_exists
 
@@ -174,13 +175,14 @@ def set_task_status(
             f.write(value)
 
 
-@dataclass
+@dataclass(kw_only=True)
 class TaskData:
     task_id: str
     method: str  # shell etc
     data: dict
     path: str
     environment: str
+    resources: TaskResources | None
     envvars: dict[str, str]
 
     def write(self, root: Root):
