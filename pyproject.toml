@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "hipercow"
-description = ''
+description = "The High Performance Computing Workbench, for Python. Set up cluster environments and jobs. Moos not yet included."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
