@@ -5,7 +5,7 @@ from string import Template
 
 from hipercow.__about__ import __version__ as version
 from hipercow.dide.configuration import DideConfiguration
-from hipercow.dide.mounts import PathMap
+from hipercow.dide.mounts import PathMap, _backward_slash, _forward_slash
 from hipercow.root import Root
 
 TASK_RUN = Template(
@@ -149,9 +149,9 @@ def write_batch_provision(
 def _template_data_core(config: DideConfiguration) -> dict[str, str]:
     path_map = config.path_map
     host = path_map.mount.host
-    unc_path = f"//{host}/{path_map.mount.remote}".replace("/", "\\")
+    unc_path = _backward_slash(f"//{host}/{path_map.mount.remote}")
     root_drive = path_map.remote
-    root_path = "/" + path_map.relative
+    root_path = _backward_slash("/" + path_map.relative)
 
     network_shares_create = f"net use {root_drive} {unc_path} /y"
     network_shares_delete = f"net use {root_drive} /delete /y"
@@ -187,8 +187,9 @@ def _template_data_provision(
     }
 
 
-def _unc_path(path_map: PathMap, path: Path):
-    path_str = str(path).replace("\\", "/")
+def _unc_path(path_map: PathMap, path: Path) -> str:
+    path_str = _forward_slash(str(path))
     rel = path_map.relative
     rel = "" if rel == "." else rel + "/"
-    return f"//{path_map.mount.host}/{path_map.mount.remote}/{rel}{path_str}"
+    ret = f"//{path_map.mount.host}/{path_map.mount.remote}/{rel}{path_str}"
+    return _backward_slash(ret)

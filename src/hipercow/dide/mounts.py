@@ -145,5 +145,9 @@ def _forward_slash(x: str) -> str:
     return x.replace("\\", "/")
 
 
+def _backward_slash(x: str) -> str:
+    return x.replace("/", "\\")
+
+
 def _drop_leading_slash(x: str) -> str:
     return re.sub("^[/\\\\]", "", x)

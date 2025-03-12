@@ -17,7 +17,7 @@ def test_can_provision_with_dide(tmp_path, mocker):
     with (r.path / "requirements.txt").open("w") as f:
         f.write("cowsay\n")
 
-    m = mounts.Mount("host", "/hostmount", Path("/local"))
+    m = mounts.Mount("host", "hostmount", Path("/local"))
     path_map = mounts.PathMap(tmp_path, m, "Q:", relative="path/to/dir")
 
     mock_client = mock.MagicMock(spec=DideWebClient)
@@ -32,7 +32,7 @@ def test_can_provision_with_dide(tmp_path, mocker):
 
     assert mock_client.submit.call_count == 1
     assert mock_client.mock_calls[0] == mock.call.submit(
-        "//host//hostmount/path/to/dir/hipercow/py/env/myenv/provision/abcdef/run.bat",
+        r"\\host\hostmount\path\to\dir\hipercow\py\env\myenv\provision\abcdef\run.bat",
         "myenv/abcdef",
         template="AllNodes",  # Soon to be "BuildQueue"
     )
