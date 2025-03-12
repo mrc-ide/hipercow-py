@@ -86,7 +86,7 @@ def _bootstrap_submit(
     with path_local.open("w") as f:
         f.write(_batch_bootstrap(version, target, args))
 
-    resources = TaskResources(queue="BuildQueue")
+    resources = TaskResources(queue="AllNodes") # not BuildQueue, for now
     dide_id = client.submit(_bootstrap_unc(path), name, resources)
     return BootstrapTask(client, dide_id, version)
 
