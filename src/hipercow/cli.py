@@ -19,6 +19,7 @@ from hipercow.environment import (
     environment_new,
 )
 from hipercow.provision import provision, provision_run
+from hipercow.resources import TaskResources
 from hipercow.task import (
     TaskStatus,
     task_last,
@@ -260,8 +261,11 @@ def cli_task_recent(limit: int, *, rebuild: bool):
 @click.option(
     "--environment", type=str, help="The environment in which to run the task"
 )
+@click.option("--queue", help="Queue to submit the task to")
 @click.option("--wait", is_flag=True, help="Wait for the task to complete")
-def cli_task_create(cmd: tuple[str], environment: str | None, *, wait: bool):
+def cli_task_create(
+    cmd: tuple[str], environment: str | None, *, queue: str | None, wait: bool
+):
     """Create a task.
 
     Submits a command line task to the cluster (if you have a driver
@@ -290,7 +294,10 @@ def cli_task_create(cmd: tuple[str], environment: str | None, *, wait: bool):
     wait for a very long time if the cluster is busy.
 
     """
-    task_id = task_create_shell(list(cmd), environment=environment)
+    resources = None if queue is None else TaskResources(queue=queue)
+    task_id = task_create_shell(
+        list(cmd), environment=environment, resources=resources
+    )
     click.echo(task_id)
     if wait:
         task_wait(task_id)
