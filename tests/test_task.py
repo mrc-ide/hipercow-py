@@ -10,6 +10,8 @@ from hipercow.task import (
     TaskStatus,
     TaskTimes,
     TaskWaitWrapper,
+    check_task_id,
+    is_valid_task_id,
     set_task_status,
     task_driver,
     task_exists,
@@ -268,3 +270,13 @@ def test_no_outer_log_without_submission(tmp_path):
         tid = tc.task_create_shell(["echo", "hello world"], root=r)
     with pytest.raises(Exception, match="outer logs are only available"):
         task_log(tid, outer=True, root=r)
+
+
+def test_can_validate_task_id():
+    assert is_valid_task_id("3852ea7fe8adab595cc5084d29be0bf7")
+    assert not is_valid_task_id("3852ea7fe8adab595cc5084d29be0bf")
+    assert not is_valid_task_id("3852ea7fe8adab59ri5cc5084d29be0bf7")
+    assert not is_valid_task_id(" 3852ea7fe8adab59ri5cc5084d29be0bf7")
+    assert check_task_id("3852ea7fe8adab595cc5084d29be0bf7") is None
+    with pytest.raises(Exception, match="does not look like a valid task"):
+        check_task_id("3852ea7fe8adab595cc5084d29be")

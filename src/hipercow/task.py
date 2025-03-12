@@ -1,6 +1,7 @@
 """Functions for interacting with tasks."""
 
 import pickle
+import re
 from dataclasses import dataclass
 from enum import Flag, auto
 
@@ -101,6 +102,7 @@ def task_exists(task_id: str, root: OptionalRoot = None) -> bool:
     Returns:
         `True` if the task exists.
     """
+    check_task_id(task_id)
     root = open_root(root)
     return root.path_task(task_id).exists()
 
@@ -115,8 +117,8 @@ def task_status(task_id: str, root: OptionalRoot = None) -> TaskStatus:
     Returns:
         The status of the task.
     """
+    check_task_id(task_id)
     root = open_root(root)
-    # check_task_id(task_id)
     path = root.path_task(task_id)
     if not path.exists():
         return TaskStatus.MISSING
@@ -148,6 +150,7 @@ def task_log(
         The log as a single string, if present.
 
     """
+    check_task_id(task_id)
     root = open_root(root)
     if not task_exists(task_id, root):
         msg = f"Task '{task_id}' does not exist"
@@ -214,6 +217,7 @@ class TaskInfo:
 
 
 def task_info(task_id: str, root: OptionalRoot = None) -> TaskInfo:
+    check_task_id(task_id)
     root = open_root(root)
     status = task_status(task_id, root)
     if status == TaskStatus.MISSING:
@@ -296,6 +300,7 @@ def task_wait(
         multiple tasks.
 
     """
+    check_task_id(task_id)
     root = open_root(root)
     task = TaskWaitWrapper(task_id, root)
 
@@ -419,3 +424,16 @@ def task_driver(task_id: str, root: Root) -> str | None:
     with path.open() as f:
         value = f.read()
     return value.strip() if value else None
+
+
+RE_TASK_ID = re.compile("^[0-9a-f]{32}$")
+
+
+def is_valid_task_id(task_id: str) -> bool:
+    return bool(RE_TASK_ID.match(task_id))
+
+
+def check_task_id(task_id: str) -> None:
+    if not is_valid_task_id(task_id):
+        msg = f"'{task_id}' does not look like a valid task identifier"
+        raise Exception(msg)
