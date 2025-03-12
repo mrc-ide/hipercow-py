@@ -173,7 +173,7 @@ The virtual environment you create on your share is different to the one that yo
 
 ```console
 python -m venv env
-. env/bin/activate # or similar on Windows
+. env/bin/activate # or env\Scripts\activate on Windows
 pip install hipercow
 ```
 

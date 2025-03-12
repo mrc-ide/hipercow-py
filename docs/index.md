@@ -38,7 +38,7 @@ We assume that you have created a virtual environment with something along the l
 
 ```console
 python -m venv env
-. env/bin/activate # or similar on Windows
+. env/bin/activate # or env/Scripts/activate on Windows
 ```
 
 However, if using the DIDE windows cluster you will be on a network share and this might hit some [issues with Python's virtual environment support](dide.md#working-on-a-network-share).
@@ -55,7 +55,7 @@ This is the **required method** if using hipercow programmatically; i.e., if you
 
 ### With `pipx`
 
-[`pipx`](https://pipx.pypa.io/stable/) is a tool for installing a Python package that provide a command line interface in a way that is globally accessible to a user, but without interfering with your system python packages or your project python packages.
+[`pipx`](https://pipx.pypa.io/stable/) is a tool for installing a Python package that provides a command line interface in a way that is globally accessible to a user, but without interfering with your system python packages or your project python packages.
 
 If you have `pipx` installed you can run
 
