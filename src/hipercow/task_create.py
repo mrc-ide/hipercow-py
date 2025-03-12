@@ -84,7 +84,7 @@ def _task_create(
     if resources:
         if not dr:
             msg = "Can't specify resources, as driver is not given"
-            raise ValueError(msg)
+            raise Exception(msg)
         dr.resources().validate_resources(resources)
     task_data = TaskData(
         task_id=task_id,

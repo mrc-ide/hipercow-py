@@ -75,6 +75,22 @@ def test_provision_using_driver(tmp_path, mocker):
     )
 
 
+def test_resources_using_driver(tmp_path, mocker):
+    path = tmp_path / "a" / "b"
+    root.init(path)
+    r = root.open_root(path)
+    mock_mounts = [Mount("projects", "other", tmp_path)]
+    mock_provision = mock.MagicMock()
+    mocker.patch("hipercow.dide.driver.detect_mounts", return_value=mock_mounts)
+    mocker.patch("hipercow.dide.driver._dide_provision", mock_provision)
+    configure("dide-windows", python_version=None, root=r)
+    dr = load_driver(None, r)
+    resources = dr.resources()
+    assert resources.queues.default == "AllNodes"
+    assert resources.max_cores == 32
+    assert resources.max_memory == 512
+
+
 def test_configure_python_version(tmp_path, mocker, capsys):
     path = tmp_path / "a" / "b"
     root.init(path)
