@@ -15,11 +15,11 @@ BOOTSTRAP = Template(
     r"""@ECHO on
 ECHO working directory: %CD%
 call set_python_${version2}_64
-set PIPX_HOME=\\wpia-hn\hipercow\bootstrap-py-windows\python-${version}\pipx
-set PIPX_BIN_DIR=\\wpia-hn\hipercow\bootstrap-py-windows\python-${version}\bin
+set PIPX_HOME=\\wpia-hn-app\hipercow\bootstrap-py-windows\python-${version}\pipx
+set PIPX_BIN_DIR=\\wpia-hn-app\hipercow\bootstrap-py-windows\python-${version}\bin
 
 call "Running pipx to install hipercow"
-python \\wpia-hn\hipercow\bootstrap-py-windows\in\pipx.pyz install ${args} ${target} > \\wpia-hn\hipercow\bootstrap-py-windows\in\${bootstrap_id}\${version}.log 2>&1
+python \\wpia-hn-app\hipercow\bootstrap-py-windows\in\pipx.pyz install ${args} ${target} > \\wpia-hn-app\hipercow\bootstrap-py-windows\in\${bootstrap_id}\${version}.log 2>&1
 set ErrorCode=%ERRORLEVEL%
 @ECHO ERRORLEVEL was %ErrorCode%
 if %ErrorCode% == 0 (

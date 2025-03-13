@@ -17,7 +17,7 @@ ECHO generated on date: ${date}
 ECHO hipercow(py) version: ${hipercow_version}
 ECHO running on: %COMPUTERNAME%
 
-net use I: \\wpia-hn\hipercow /y
+net use I: \\wpia-hn-app\hipercow /y
 
 call setGit.bat
 
@@ -76,7 +76,7 @@ ECHO generated on date: ${date}
 ECHO hipercow(py) version: ${hipercow_version}
 ECHO running on: %COMPUTERNAME%
 
-net use I: \\wpia-hn\hipercow /y
+net use I: \\wpia-hn-app\hipercow /y
 
 call setGit.bat
 
