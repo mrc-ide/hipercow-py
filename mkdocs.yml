@@ -49,6 +49,7 @@ nav:
 - "Details":
    - "Reference": reference.md
    - "Roadmap": roadmap.md
+   - "TLO model": tlo.md
    - "Administration": administration.md
 
 plugins:

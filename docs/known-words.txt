@@ -12,6 +12,7 @@ hipercow
 infographic
 installable
 keychain
+onse
 programmatically
 pythonic
 repl
@@ -20,5 +21,6 @@ smbcredentials
 stacktrace
 subcommands
 symlinks
+thanzi
 unconfigure
 wes
