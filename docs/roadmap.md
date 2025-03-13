@@ -26,4 +26,4 @@ There are also many rough edges:
 * The way that progress and messages are printed out is spartan at best, and a far cry from our standard use of the [`cli` R package](https://github.com/r-lib/cli)
 * If an error is thrown, you will see a gory stacktrace
 * The provisioning is pretty basic
-* Not all error output make it from the cluster back to your screen
+* Not all error output makes it from the cluster back to your screen
