@@ -76,9 +76,7 @@ class BootstrapTask(Task):
         self.status_waiting = {"created", "submitted"}
         self.status_running = {"running"}
         self.path_log = Path(
-            mount.local /
-            _bootstrap_path(bootstrap_id) /
-            f"{version}.log"
+            mount.local / _bootstrap_path(bootstrap_id) / f"{version}.log"
         )
 
     def log(self) -> None:
