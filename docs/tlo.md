@@ -22,8 +22,7 @@ hipercow environment provision -- pip install --verbose -r requirements/dev.txt
 hipercow environment provision -- pip install --verbose .
 ```
 
-On the home drive, installation takes 218s for the development requirements and and 66s for the package itself.
-
+On the home drive, installation takes 200-300s for the development requirements and and 66s for the package itself.  The requirements installation will appear to pause with no output for quite a while.
 
 Optionally, confirm that things work:
 
