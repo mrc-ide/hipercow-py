@@ -70,19 +70,15 @@ class BootstrapTask(Task):
         dide_id: str,
         version: str,
     ):
-        self.mount = mount
-        self.bootstrap_id = bootstrap_id
         self.client = client
         self.dide_id = dide_id
         self.version = version
         self.status_waiting = {"created", "submitted"}
         self.status_running = {"running"}
-
-    def path_log(self) -> Path:
-        return (
-            self.mount.local
-            / _bootstrap_path(self.bootstrap_id)
-            / f"{self.version}.log"
+        self.path_log = Path(
+            mount.local /
+            _bootstrap_path(bootstrap_id) /
+            f"{version}.log"
         )
 
     def log(self) -> None:
@@ -152,7 +148,7 @@ def _bootstrap_wait(tasks: list[BootstrapTask]) -> None:
         print(f"  - {t.version}: {res.status}")
 
         print("Logs from pipx:")
-        print(read_file_if_exists(t.path_log()))
+        print(read_file_if_exists(t.path_log))
 
         if res.status != "success":
             print(f"Additional logs from cluster for task '{t.dide_id}':")

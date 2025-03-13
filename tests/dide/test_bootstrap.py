@@ -119,8 +119,8 @@ def test_can_error_on_failed_tasks(tmp_path, capsys):
         BootstrapTask(mount, bootstrap_id, client, "1011", "3.11"),
         BootstrapTask(mount, bootstrap_id, client, "1012", "3.12"),
     ]
-    tasks[1].path_log().parent.mkdir(parents=True)
-    with tasks[1].path_log().open("w") as f:
+    tasks[1].path_log.parent.mkdir(parents=True)
+    with tasks[1].path_log.open("w") as f:
         f.write("log1\nlog2\n")
     with pytest.raises(Exception, match="1/2 bootstrap tasks failed"):
         _bootstrap_wait(tasks)
