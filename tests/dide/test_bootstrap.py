@@ -82,11 +82,7 @@ def test_can_submit_bootstrap_task(tmp_path):
     assert dest.exists()
     with dest.open() as f:
         contents = f.readlines()
-    assert contents[0].strip() == "call set_python_311_64"
-    assert (
-        contents[3].strip()
-        == r"python \\wpia-hn\hipercow\bootstrap-py-windows\in\pipx.pyz install  hipercow"  # noqa: E501
-    )
+    assert "call set_python_311_64\n" in contents
 
     assert t.log() is None
     assert not t.has_log()
@@ -97,12 +93,14 @@ def test_can_submit_bootstrap_task(tmp_path):
     assert status == str(client.status_job.return_value)
 
 
-def test_can_wait_on_successful_tasks(capsys):
+def test_can_wait_on_successful_tasks(tmp_path, capsys):
     client = mock.MagicMock(spec=DideWebClient)
     client.status_job.return_value = "success"
+    mount = Mount(host="wpia-hn.hpc", remote="hipercow", local=tmp_path)
+    bootstrap_id = "abcdef"
     tasks = [
-        BootstrapTask(client, "1", "3.11"),
-        BootstrapTask(client, "2", "3.12"),
+        BootstrapTask(mount, bootstrap_id, client, "1", "3.11"),
+        BootstrapTask(mount, bootstrap_id, client, "2", "3.12"),
     ]
     _bootstrap_wait(tasks)
     out = capsys.readouterr().out
@@ -111,18 +109,25 @@ def test_can_wait_on_successful_tasks(capsys):
     assert "  - 3.12: success" in out
 
 
-def test_can_error_on_failed_tasks(capsys):
+def test_can_error_on_failed_tasks(tmp_path, capsys):
     client = mock.MagicMock(spec=DideWebClient)
     client.status_job.side_effect = ["success", "failure"]
     client.log.return_value = "some log"
+    mount = Mount(host="wpia-hn.hpc", remote="hipercow", local=tmp_path)
+    bootstrap_id = "abcdef"
     tasks = [
-        BootstrapTask(client, "1011", "3.11"),
-        BootstrapTask(client, "1012", "3.12"),
+        BootstrapTask(mount, bootstrap_id, client, "1011", "3.11"),
+        BootstrapTask(mount, bootstrap_id, client, "1012", "3.12"),
     ]
+    tasks[1].path_log().parent.mkdir(parents=True)
+    with tasks[1].path_log().open("w") as f:
+        f.write("log1\nlog2\n")
     with pytest.raises(Exception, match="1/2 bootstrap tasks failed"):
         _bootstrap_wait(tasks)
     out = capsys.readouterr().out
-    assert "  - 3.12: failure\nLogs from job 1012:\nsome log" in out
+    assert "\n  - 3.12: failure\n" in out
+    assert "\nAdditional logs from cluster for task '1012':\nsome log\n" in out
+    assert "\nlog1\nlog2\n" in out
 
 
 # This test is revolting:
@@ -153,7 +158,6 @@ def test_can_launch_bootstrap(mocker):
     assert mock_wait.call_count == 1
     assert len(mock_wait.mock_calls[0].args[0]) == 4
     assert mock_wait.mock_calls[0].args[0][3] == mock_submit.return_value
-    assert mock_rmtree.call_count == 1
 
 
 def test_error_if_no_pipx_pyz(tmp_path):

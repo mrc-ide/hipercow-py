@@ -155,7 +155,7 @@ def _bootstrap_wait(tasks: list[BootstrapTask]) -> None:
         print(read_file_if_exists(t.path_log()))
 
         if res.status != "success":
-            print(f"Additional logs from cluster for {t.dide_id}:")
+            print(f"Additional logs from cluster for task '{t.dide_id}':")
             print(t.client.log(t.dide_id))
             fail += 1
 
