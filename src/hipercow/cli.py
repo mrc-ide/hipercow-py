@@ -387,9 +387,30 @@ def cli_dide_authenticate(action: str):
 
 @dide.command("bootstrap", hidden=True)
 @click.argument("target", required=False)
-@click.option("--force/--no-force", default=False)
-@click.option("--verbose/--no-verbose", default=False)
+@click.option(
+    "--force/--no-force",
+    default=False,
+    help="Force reinstallation; passed through to pip",
+)
+@click.option(
+    "--verbose/--no-verbose",
+    default=True,
+    help="Verbose output from pip; default is verbose output",
+)
 def cli_dide_bootstrap(target: str, *, force: bool, verbose: bool):
+    r"""Update the bootstrap.
+
+    You will need `--force` much more often than expcted at present,
+    because pip won't always reinstall if only the patch version has
+    changed.
+
+    This only works if you have write access to
+    `\\wpia-hn\hipercow`.  See the administration guide on the
+    hipercow website for details:
+
+    https://mrc-ide.github.io/hipercow-py/administration/
+
+    """
     dide_bootstrap(target, force=force, verbose=verbose)
 
 

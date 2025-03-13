@@ -9,12 +9,25 @@ from hipercow.dide.driver import _web_client
 from hipercow.dide.mounts import Mount, _backward_slash, detect_mounts
 from hipercow.dide.web import DideWebClient
 from hipercow.resources import TaskResources
+from hipercow.util import read_file_if_exists
 
 BOOTSTRAP = Template(
-    r"""call set_python_${version2}_64
+    r"""@ECHO on
+ECHO working directory: %CD%
+call set_python_${version2}_64
 set PIPX_HOME=\\wpia-hn\hipercow\bootstrap-py-windows\python-${version}\pipx
 set PIPX_BIN_DIR=\\wpia-hn\hipercow\bootstrap-py-windows\python-${version}\bin
-python \\wpia-hn\hipercow\bootstrap-py-windows\in\pipx.pyz install ${args} ${target}
+
+call "Running pipx to install hipercow"
+python \\wpia-hn\hipercow\bootstrap-py-windows\in\pipx.pyz install ${args} ${target} > \\wpia-hn\hipercow\bootstrap-py-windows\in\${bootstrap_id}\${version}.log 2>&1
+set ErrorCode=%ERRORLEVEL%
+@ECHO ERRORLEVEL was %ErrorCode%
+if %ErrorCode% == 0 (
+  @ECHO Installation appears to have been successful
+) else (
+  @ECHO Installation failed
+  EXIT /b %ErrorCode%
+)
 """  # noqa: E501
 )
 
@@ -43,22 +56,34 @@ def bootstrap(
         for v in python_versions
     ]
     _bootstrap_wait(tasks)
-    print("Successful, so cleaning up")
-    shutil.rmtree(path)
+    # We could clean up here with 'shutil.rmtree(path)' but wait until
+    # things setle down first, as this removes any hope of debugging,
+    # really.
 
 
 class BootstrapTask(Task):
     def __init__(
         self,
+        mount: Mount,
+        bootstrap_id: str,
         client: DideWebClient,
         dide_id: str,
         version: str,
     ):
+        self.mount = mount
+        self.bootstrap_id = bootstrap_id
         self.client = client
         self.dide_id = dide_id
         self.version = version
         self.status_waiting = {"created", "submitted"}
         self.status_running = {"running"}
+
+    def path_log(self) -> Path:
+        return (
+            self.mount.local
+            / _bootstrap_path(self.bootstrap_id)
+            / f"{self.version}.log"
+        )
 
     def log(self) -> None:
         pass
@@ -84,11 +109,11 @@ def _bootstrap_submit(
     path_local = mount.local / path
     path_local.parent.mkdir(parents=True, exist_ok=True)
     with path_local.open("w") as f:
-        f.write(_batch_bootstrap(version, target, args))
+        f.write(_batch_bootstrap(bootstrap_id, version, target, args))
 
-    resources = TaskResources(queue="AllNodes") # not BuildQueue, for now
+    resources = TaskResources(queue="AllNodes")  # not BuildQueue, for now
     dide_id = client.submit(_bootstrap_unc(path), name, resources)
-    return BootstrapTask(client, dide_id, version)
+    return BootstrapTask(mount, bootstrap_id, client, dide_id, version)
 
 
 def _bootstrap_target(
@@ -125,8 +150,12 @@ def _bootstrap_wait(tasks: list[BootstrapTask]) -> None:
     for t in tasks:
         res = taskwait(t)
         print(f"  - {t.version}: {res.status}")
+
+        print("Logs from pipx:")
+        print(read_file_if_exists(t.path_log()))
+
         if res.status != "success":
-            print(f"Logs from job {t.dide_id}:")
+            print(f"Additional logs from cluster for {t.dide_id}:")
             print(t.client.log(t.dide_id))
             fail += 1
 
@@ -135,8 +164,11 @@ def _bootstrap_wait(tasks: list[BootstrapTask]) -> None:
         raise Exception(msg)
 
 
-def _batch_bootstrap(version: str, target: str, args: str) -> str:
+def _batch_bootstrap(
+    bootstrap_id: str, version: str, target: str, args: str
+) -> str:
     data = {
+        "bootstrap_id": bootstrap_id,
         "version": version,
         "version2": version.replace(".", ""),  # Wes: update the batch filenames
         "args": args,
