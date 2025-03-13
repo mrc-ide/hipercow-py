@@ -98,7 +98,7 @@ class Pip(EnvironmentEngine):
             env: Environment variables, passed into `subprocess_run`.
                 We will add additional environment variables to
                 control the virtual environment activation.  Note that
-                `PATH` cannot be safely be set through `env` yet,
+                `PATH` cannot be safely set through `env` yet,
                 because we have to modify that to activate the virtual
                 environment, and because `subprocess.Popen` requires
                 the `PATH` to be set **before** finding the program to
