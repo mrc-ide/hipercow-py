@@ -8,6 +8,7 @@ from hipercow.dide.bootstrap import (
     _bootstrap_args,
     _bootstrap_check_pipx_pyz,
     _bootstrap_mount,
+    _bootstrap_python_versions,
     _bootstrap_submit,
     _bootstrap_target,
     _bootstrap_unc,
@@ -165,3 +166,8 @@ def test_error_if_no_pipx_pyz(tmp_path):
         _bootstrap_check_pipx_pyz(tmp_path)
     file_create(tmp_path / "pipx.pyz")
     assert _bootstrap_check_pipx_pyz(tmp_path) is None
+
+
+def test_can_set_versions_to_install():
+    assert _bootstrap_python_versions(["3.13"]) == ["3.13"]
+    assert _bootstrap_python_versions(None) == ["3.10", "3.11", "3.12", "3.13"]

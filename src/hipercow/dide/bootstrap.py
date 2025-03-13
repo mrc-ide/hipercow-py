@@ -18,7 +18,7 @@ call set_python_${version2}_64
 set PIPX_HOME=\\wpia-hn-app\hipercow\bootstrap-py-windows\python-${version}\pipx
 set PIPX_BIN_DIR=\\wpia-hn-app\hipercow\bootstrap-py-windows\python-${version}\bin
 
-call "Running pipx to install hipercow"
+echo "Running pipx to install hipercow"
 python \\wpia-hn-app\hipercow\bootstrap-py-windows\in\pipx.pyz install ${args} ${target} > \\wpia-hn-app\hipercow\bootstrap-py-windows\in\${bootstrap_id}\${version}.log 2>&1
 set ErrorCode=%ERRORLEVEL%
 @ECHO ERRORLEVEL was %ErrorCode%
@@ -33,14 +33,16 @@ if %ErrorCode% == 0 (
 
 
 def bootstrap(
-    target: str | None, *, force: bool = False, verbose: bool = False
+    target: str | None,
+    *,
+    force: bool = False,
+    verbose: bool = False,
+    python_versions: list[str] | None = None,
 ) -> None:
     client = _web_client()
     mount = _bootstrap_mount()
 
-    # NOTE: duplicates list in hipercow/util.py, we'll tidy this up
-    # later too.
-    python_versions = ["3.10", "3.11", "3.12", "3.13"]
+    python_versions = _bootstrap_python_versions(python_versions)
     bootstrap_id = secrets.token_hex(4)
     path = mount.local / _bootstrap_path(bootstrap_id)
 
@@ -187,3 +189,11 @@ def _bootstrap_check_pipx_pyz(path: Path) -> None:
             f"Expected 'pipx.pyz' to be found at '{path}'; download from {url}"
         )
         raise Exception(msg)
+
+
+def _bootstrap_python_versions(versions: list[str] | None) -> list[str]:
+    if not versions:
+        # NOTE: duplicates list in hipercow/util.py, we'll tidy this up
+        # later too.
+        versions = ["3.10", "3.11", "3.12", "3.13"]
+    return versions

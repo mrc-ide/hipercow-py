@@ -397,7 +397,14 @@ def cli_dide_authenticate(action: str):
     default=True,
     help="Verbose output from pip; default is verbose output",
 )
-def cli_dide_bootstrap(target: str, *, force: bool, verbose: bool):
+@click.option(
+    "--python-version",
+    multiple=True,
+    help="Python version to update. Multiple copies of this flag allowed",
+)
+def cli_dide_bootstrap(
+    target: str, *, force: bool, verbose: bool, python_version: list[str]
+):
     r"""Update the bootstrap.
 
     You will need `--force` much more often than expcted at present,
@@ -411,7 +418,12 @@ def cli_dide_bootstrap(target: str, *, force: bool, verbose: bool):
     https://mrc-ide.github.io/hipercow-py/administration/
 
     """
-    dide_bootstrap(target, force=force, verbose=verbose)
+    dide_bootstrap(
+        target,
+        force=force,
+        verbose=verbose,
+        python_versions=list(python_version),
+    )
 
 
 @cli.group()
