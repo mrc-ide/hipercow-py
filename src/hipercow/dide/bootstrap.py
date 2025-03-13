@@ -9,26 +9,46 @@ from hipercow.dide.driver import _web_client
 from hipercow.dide.mounts import Mount, _backward_slash, detect_mounts
 from hipercow.dide.web import DideWebClient
 from hipercow.resources import TaskResources
+from hipercow.util import read_file_if_exists
 
 BOOTSTRAP = Template(
-    r"""call set_python_${version2}_64
-set PIPX_HOME=\\wpia-hn\hipercow\bootstrap-py-windows\python-${version}\pipx
-set PIPX_BIN_DIR=\\wpia-hn\hipercow\bootstrap-py-windows\python-${version}\bin
-python \\wpia-hn\hipercow\bootstrap-py-windows\in\pipx.pyz install ${args} ${target}
+    r"""@ECHO on
+ECHO working directory: %CD%
+call set_python_${version2}_64
+set PIPX_HOME=\\wpia-hn-app\hipercow\bootstrap-py-windows\python-${version}\pipx
+set PIPX_BIN_DIR=\\wpia-hn-app\hipercow\bootstrap-py-windows\python-${version}\bin
+
+echo "Running pipx to install hipercow"
+python \\wpia-hn-app\hipercow\bootstrap-py-windows\in\pipx.pyz install ${args} ${target} > \\wpia-hn-app\hipercow\bootstrap-py-windows\in\${bootstrap_id}\${version}.log 2>&1
+set ErrorCode=%ERRORLEVEL%
+@ECHO ERRORLEVEL was %ErrorCode%
+if %ErrorCode% == 0 (
+  @ECHO Installation appears to have been successful
+) else (
+  @ECHO Installation failed
+  EXIT /b %ErrorCode%
+)
 """  # noqa: E501
 )
 
 
 def bootstrap(
-    target: str | None, *, force: bool = False, verbose: bool = False
+    target: str | None,
+    *,
+    force: bool = False,
+    verbose: bool = False,
+    python_versions: list[str] | None = None,
 ) -> None:
     client = _web_client()
     mount = _bootstrap_mount()
 
-    # NOTE: duplicates list in hipercow/util.py, we'll tidy this up
-    # later too.
-    python_versions = ["3.10", "3.11", "3.12", "3.13"]
+    python_versions = _bootstrap_python_versions(python_versions)
     bootstrap_id = secrets.token_hex(4)
+    path = mount.local / _bootstrap_path(bootstrap_id)
+
+    _bootstrap_check_pipx_pyz(path.parent)
+
+    print(f"Bootstrap id: {bootstrap_id}")
 
     target = _bootstrap_target(target, mount, bootstrap_id)
     args = _bootstrap_args(force=force, verbose=verbose)
@@ -38,11 +58,16 @@ def bootstrap(
         for v in python_versions
     ]
     _bootstrap_wait(tasks)
+    # We could clean up here with 'shutil.rmtree(path)' but wait until
+    # things setle down first, as this removes any hope of debugging,
+    # really.
 
 
 class BootstrapTask(Task):
     def __init__(
         self,
+        mount: Mount,
+        bootstrap_id: str,
         client: DideWebClient,
         dide_id: str,
         version: str,
@@ -52,6 +77,9 @@ class BootstrapTask(Task):
         self.version = version
         self.status_waiting = {"created", "submitted"}
         self.status_running = {"running"}
+        self.path_log = Path(
+            mount.local / _bootstrap_path(bootstrap_id) / f"{version}.log"
+        )
 
     def log(self) -> None:
         pass
@@ -72,16 +100,16 @@ def _bootstrap_submit(
     args: str,
 ) -> BootstrapTask:
     name = f"bootstrap/{bootstrap_id}/{version}"
-    path = Path("bootstrap-py-windows") / "in" / bootstrap_id / f"{version}.bat"
+    path = _bootstrap_path(bootstrap_id) / f"{version}.bat"
 
     path_local = mount.local / path
     path_local.parent.mkdir(parents=True, exist_ok=True)
     with path_local.open("w") as f:
-        f.write(_batch_bootstrap(version, target, args))
+        f.write(_batch_bootstrap(bootstrap_id, version, target, args))
 
-    resources = TaskResources(queue="BuildQueue")
+    resources = TaskResources(queue="AllNodes")  # not BuildQueue, for now
     dide_id = client.submit(_bootstrap_unc(path), name, resources)
-    return BootstrapTask(client, dide_id, version)
+    return BootstrapTask(mount, bootstrap_id, client, dide_id, version)
 
 
 def _bootstrap_target(
@@ -92,7 +120,7 @@ def _bootstrap_target(
     if not Path(target).exists():
         msg = f"File '{target}' does not exist"
         raise FileNotFoundError(msg)
-    dest = Path("bootstrap-py-windows") / "in" / bootstrap_id
+    dest = _bootstrap_path(bootstrap_id)
     dest_local = mount.local / dest
     dest_local.mkdir(parents=True, exist_ok=True)
     shutil.copy(target, dest_local)
@@ -118,8 +146,12 @@ def _bootstrap_wait(tasks: list[BootstrapTask]) -> None:
     for t in tasks:
         res = taskwait(t)
         print(f"  - {t.version}: {res.status}")
+
+        print("Logs from pipx:")
+        print(read_file_if_exists(t.path_log))
+
         if res.status != "success":
-            print(f"Logs from job {t.dide_id}:")
+            print(f"Additional logs from cluster for task '{t.dide_id}':")
             print(t.client.log(t.dide_id))
             fail += 1
 
@@ -128,8 +160,11 @@ def _bootstrap_wait(tasks: list[BootstrapTask]) -> None:
         raise Exception(msg)
 
 
-def _batch_bootstrap(version: str, target: str, args: str) -> str:
+def _batch_bootstrap(
+    bootstrap_id: str, version: str, target: str, args: str
+) -> str:
     data = {
+        "bootstrap_id": bootstrap_id,
         "version": version,
         "version2": version.replace(".", ""),  # Wes: update the batch filenames
         "args": args,
@@ -141,3 +176,24 @@ def _batch_bootstrap(version: str, target: str, args: str) -> str:
 def _bootstrap_unc(path: Path):
     path_str = _backward_slash(str(path))
     return f"\\\\wpia-hn\\hipercow\\{path_str}"
+
+
+def _bootstrap_path(bootstrap_id: str) -> Path:
+    return Path("bootstrap-py-windows") / "in" / bootstrap_id
+
+
+def _bootstrap_check_pipx_pyz(path: Path) -> None:
+    if not (path / "pipx.pyz").exists():
+        url = "https://github.com/pypa/pipx/releases"
+        msg = (
+            f"Expected 'pipx.pyz' to be found at '{path}'; download from {url}"
+        )
+        raise Exception(msg)
+
+
+def _bootstrap_python_versions(versions: list[str] | None) -> list[str]:
+    if not versions:
+        # NOTE: duplicates list in hipercow/util.py, we'll tidy this up
+        # later too.
+        versions = ["3.10", "3.11", "3.12", "3.13"]
+    return versions
