@@ -1,3 +1,5 @@
+"""Create Python virtual environments using pip."""
+
 import os
 import subprocess
 from pathlib import Path
@@ -8,23 +10,59 @@ from hipercow.util import subprocess_run, transient_envvars
 
 
 class Pip(EnvironmentEngine):
+    """Python virtual environments, installed by pip."""
+
     def __init__(self, root: Root, name: str, platform: Platform | None = None):
         super().__init__(root, name, platform)
 
     def path(self) -> Path:
-        return (
-            self.root.path_environment_contents(self.name)
-            / f"venv-{self.platform.system}"
-        )
+        return super().path() / f"venv-{self.platform.system}"
 
     def create(self, **kwargs) -> None:
-        # do we need to specify the actual python version here, or do
-        # we assume that we have the correct version?  If we check
-        # that the version here matches that in self.platform we're ok.
+        """Create the virtual environment.
+
+        Calls
+
+        ```
+        python -m venv <path>
+        ```
+
+        with the result of `path()`.
+
+        Args:
+            **kwargs (Any): Additional arguments to `subprocess_run`
+
+        Returns:
+            Nothing, called for side effects only.
+        """
         cmd = ["python", "-m", "venv", str(self.path())]
         subprocess_run(cmd, check=True, **kwargs)
 
     def check_args(self, cmd: list[str] | None) -> list[str]:
+        """Validate pip installation command.
+
+        Checks if `cmd` is a valid `pip` command.
+
+        If `cmd` is `None` or the empty list, we try and guess a
+        default command, based on files found in your project root.
+
+        * if you have a `pyproject.toml` file, then we will try and
+          run `pip install --verbose .`
+
+        * if you have a `requirements.txt`, then we will try and run
+          `pip install --verbose -r requirements.txt`
+
+        (In both cases these are returned as a list of arguments.)
+
+        If there are other reasonable conventions that we might
+        follow, please let us know.
+
+        Args:
+            cmd: The command to validate
+
+        Returns:
+            A validated list of arguments.
+        """
         if not cmd:
             return self._auto()
         if cmd[0] != "pip":
@@ -33,6 +71,16 @@ class Pip(EnvironmentEngine):
         return cmd
 
     def provision(self, cmd: list[str], **kwargs) -> None:
+        """Provision a virtual environment using pip.
+
+        Args:
+            cmd: The command to run
+
+            **kwargs (Any): Additional arguments to `Pip.run`
+
+        Returns: Nothing, called for its side effect only.
+
+        """
         self.run(cmd, check=True, **kwargs)
 
     def run(
@@ -42,6 +90,25 @@ class Pip(EnvironmentEngine):
         env: dict[str, str] | None = None,
         **kwargs,
     ) -> subprocess.CompletedProcess:
+        """Run a command within the pip virtual environment.
+
+        Args:
+            cmd: The command to run
+
+            env: Environment variables, passed into `subprocess_run`.
+                We will add additional environment variables to
+                control the virtual environment activation.  Note that
+                `PATH` cannot be safely set through `env` yet,
+                because we have to modify that to activate the virtual
+                environment, and because `subprocess.Popen` requires
+                the `PATH` to be set **before** finding the program to
+                call on Windows.  We may improve this in future.
+
+            **kwargs (Any): Keyword arguments to `subprocess_run`.
+
+        Returns: Details about the process, if `check=True` is not
+           present in `kwargs`
+        """
         # If the user sets a PATH, within 'env' then we will clobber
         # that when we add our envvars to the dictionary.  Later we
         # can inspect 'env' for PATH and join them together, but it's
