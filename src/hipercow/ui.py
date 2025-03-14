@@ -13,14 +13,25 @@ def h1(text: str) -> None:
     )
 
 
-def h2(text: str) -> None:
-    before = "─" * 2
-    after = "─" * 2
-    console.print(f"[bold]{before} {text} {after}")
-
-
 def text(text: str, **kwargs) -> None:
     console.print(text, **kwargs)
+
+
+def logs(title: str, text: str | None, *, indent: int = 0) -> None:
+    indent_str = " " * indent
+    alert_arrow(title, indent=indent)
+    if text is None:
+        console.print(f"{indent_str}(no logs found)", style="dim")
+    else:
+        console.rule(style="dim")
+        console.print(text, emoji=False, markup=False, crop=False)
+        console.rule(style="dim")
+
+
+def li(text: str, indent: int = 0, symbol: str = "*", title: str = ""):
+    indent_str = " " * indent
+    title = f"[bold]{title}[/bold] " if title else ""
+    console.print(f"{indent_str}{symbol} {title}{text}")
 
 
 def blank_line(n: int = 1) -> None:

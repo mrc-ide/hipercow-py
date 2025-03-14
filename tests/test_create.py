@@ -46,7 +46,7 @@ def test_submit_with_driver_if_configured(tmp_path, capsys):
     with transient_working_directory(tmp_path):
         tid = tc.task_create_shell(["echo", "hello world"], root=r)
     str1 = capsys.readouterr().out
-    assert str1.startswith(f"submitting '{tid}'")
+    assert f"submitting '{tid}'" in str1
     assert task_status(tid, r) == TaskStatus.SUBMITTED
 
 

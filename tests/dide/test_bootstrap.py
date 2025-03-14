@@ -106,8 +106,8 @@ def test_can_wait_on_successful_tasks(tmp_path, capsys):
     _bootstrap_wait(tasks)
     out = capsys.readouterr().out
     assert "Waiting on 2 tasks" in out
-    assert "  - 3.11: success" in out
-    assert "  - 3.12: success" in out
+    assert "3.11: success" in out
+    assert "3.12: success" in out
 
 
 def test_can_error_on_failed_tasks(tmp_path, capsys):
@@ -126,8 +126,11 @@ def test_can_error_on_failed_tasks(tmp_path, capsys):
     with pytest.raises(Exception, match="1/2 bootstrap tasks failed"):
         _bootstrap_wait(tasks)
     out = capsys.readouterr().out
-    assert "\n  - 3.12: failure\n" in out
-    assert "\nAdditional logs from cluster for task '1012':\nsome log\n" in out
+    assert "3.11: success" in out
+    assert "3.12: failure" in out
+    assert "Additional logs from cluster for task '1012':" in out
+    assert "\nsome log\n" in out
+    assert "Logs from pipx:" in out
     assert "\nlog1\nlog2\n" in out
 
 

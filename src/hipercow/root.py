@@ -4,6 +4,7 @@ import platform
 from pathlib import Path
 from typing import TypeAlias
 
+from hipercow import ui
 from hipercow.util import find_file_descend
 
 
@@ -28,12 +29,14 @@ def init(path: str | Path) -> None:
     dest = path / "hipercow" / "py"
 
     if dest.is_dir():
-        print(f"hipercow already initialised at '{path.resolve()}'")
+        ui.alert_warning(f"hipercow already initialised at '{path.resolve()}'")
         return
 
     root = find_file_descend("hipercow", path)
     if root is not None:
-        print(f"hipercow already initialised at '{root}' (found from '{path}')")
+        ui.alert_warning(
+            f"hipercow already initialised at '{root}' (found from '{path}')"
+        )
 
     if dest.exists() and not dest.is_dir():
         msg = (
@@ -44,7 +47,7 @@ def init(path: str | Path) -> None:
 
     dest.mkdir(parents=True)
     _add_gitignore(dest.parent)
-    print(f"Initialised hipercow at '{path.resolve()}'")
+    ui.alert_success(f"Initialised hipercow at '{path.resolve()}'")
 
 
 class Root:

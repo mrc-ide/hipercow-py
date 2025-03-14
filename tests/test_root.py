@@ -22,7 +22,7 @@ def test_notify_if_root_exists(tmp_path, capsys):
     capsys.readouterr()
     root.init(path)
     captured = capsys.readouterr()
-    assert captured.out.startswith("hipercow already initialised at")
+    assert "hipercow already initialised at" in captured.out
 
 
 def test_notify_if_root_exists_below_requested(tmp_path, capsys):
@@ -31,7 +31,7 @@ def test_notify_if_root_exists_below_requested(tmp_path, capsys):
     capsys.readouterr()
     root.init(path)
     captured = capsys.readouterr()
-    assert captured.out.startswith("hipercow already initialised at")
+    assert "hipercow already initialised at" in captured.out
 
 
 def test_error_if_root_invalid(tmp_path):

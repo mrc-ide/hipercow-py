@@ -1,5 +1,6 @@
 import pickle
 
+from hipercow import ui
 from hipercow.dide.driver import DideWindowsDriver
 from hipercow.driver import HipercowDriver, load_driver
 from hipercow.example import ExampleDriver
@@ -48,9 +49,9 @@ def unconfigure(name: str, root: OptionalRoot = None) -> None:
     path = root.path_configuration(name)
     if path.exists():
         path.unlink()
-        print(f"Removed configuration for '{name}'")
+        ui.alert_success(f"Removed configuration for '{name}'")
     else:
-        print(
+        ui.alert_warning(
             f"Did not remove configuration for '{name}' as it was not enabled"
         )
 
@@ -70,7 +71,7 @@ def show_configuration(
     """
     root = open_root(root)
     dr = load_driver(name, root)
-    print(f"Configuration for '{dr.name}'")
+    ui.h1(f"Configuration for '{dr.name}'")
     dr.show_configuration()
 
 
@@ -94,6 +95,6 @@ def _write_configuration(driver: HipercowDriver, root: Root) -> None:
     with path.open("wb") as f:
         pickle.dump(driver, f)
     if exists:
-        print(f"Updated configuration for '{name}'")
+        ui.alert_success(f"Updated configuration for '{name}'")
     else:
-        print(f"Configured hipercow to use '{name}'")
+        ui.alert_success(f"Configured hipercow to use '{name}'")
