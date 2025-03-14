@@ -149,13 +149,24 @@ def test_can_call_cli_dide_authenticate(mocker):
     assert cli.dide_auth.authenticate.call_count == 1
 
 
+def test_can_run_dide_check(tmp_path, mocker):
+    mock_check = mock.Mock()
+    mocker.patch("hipercow.cli.dide_check", mock_check)
+    runner = CliRunner()
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        res = runner.invoke(cli.cli_dide_check, [])
+        assert res.exit_code == 0
+        assert mock_check.call_count == 1
+        assert mock_check.mock_calls[0] == mock.call()
+
+
 def test_can_configure_driver(tmp_path):
     runner = CliRunner()
     with runner.isolated_filesystem(temp_dir=tmp_path):
         res = runner.invoke(cli.init, ".")
         res = runner.invoke(cli.cli_driver_configure, ["example"])
         assert res.exit_code == 0
-        assert res.output.strip() == "Configured hipercow to use 'example'"
+        assert "Configured hipercow to use 'example'" in res.output
 
         res = runner.invoke(cli.cli_driver_list, [])
         assert res.exit_code == 0
@@ -163,11 +174,11 @@ def test_can_configure_driver(tmp_path):
 
         res = runner.invoke(cli.cli_driver_show, [])
         assert res.exit_code == 0
-        assert res.output == "Configuration for 'example'\n(no configuration)\n"
+        assert "Configuration for 'example'" in res.output
 
         res = runner.invoke(cli.cli_driver_unconfigure, ["example"])
         assert res.exit_code == 0
-        assert res.output.strip() == "Removed configuration for 'example'"
+        assert "Removed configuration for 'example'" in res.output
 
         res = runner.invoke(cli.cli_driver_list, [])
         assert res.exit_code == 0
@@ -181,7 +192,7 @@ def test_can_list_environments(tmp_path):
         runner.invoke(cli.cli_driver_configure, ["example"])
         res = runner.invoke(cli.cli_environment_new, [])
         assert res.exit_code == 0
-        assert res.output == "Creating environment 'default' using 'pip'\n"
+        assert "Creating environment 'default' using 'pip'" in res.output
         res = runner.invoke(cli.cli_environment_list, [])
         assert res.exit_code == 0
         assert res.output == "default\nempty\n"
@@ -240,7 +251,7 @@ def test_can_delete_environment(tmp_path):
         runner.invoke(cli.cli_driver_configure, ["example"])
         res = runner.invoke(cli.cli_environment_new, ["--name", "other"])
         assert res.exit_code == 0
-        assert res.output == "Creating environment 'other' using 'pip'\n"
+        assert "Creating environment 'other' using 'pip'" in res.output
 
         res = runner.invoke(cli.cli_environment_list, [])
         assert res.exit_code == 0

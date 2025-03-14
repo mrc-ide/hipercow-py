@@ -4,6 +4,7 @@ import re
 import subprocess
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
+from dataclasses import dataclass
 from pathlib import Path
 
 
@@ -125,3 +126,19 @@ def loop_while(fn: Callable[[], bool]) -> None:
     while True:
         if not fn():
             break
+
+
+@dataclass
+class Result:
+    exception: Exception | None = None
+
+    def __bool__(self) -> bool:
+        return self.exception is None
+
+    @staticmethod
+    def ok() -> "Result":
+        return Result()
+
+    @staticmethod
+    def err(exception: Exception) -> "Result":
+        return Result(exception)
