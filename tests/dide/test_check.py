@@ -1,4 +1,5 @@
 from pathlib import Path
+from unittest import mock
 
 import pytest
 
@@ -10,6 +11,7 @@ from hipercow.dide.check import (
     _dide_check_credentials,
     _dide_check_path,
     _dide_check_root,
+    _dide_check_root_configured,
     dide_check,
 )
 from hipercow.util import Result
@@ -121,15 +123,42 @@ def test_failed_path_mapping(mocker, capsys):
     assert "Failed to map path to a network share" in out
 
 
-def test_successful_initialisation(tmp_path, capsys):
+def test_successful_initialisation(tmp_path, capsys, mocker):
+    mock_check_configured = mocker.Mock()
+    mocker.patch(
+        "hipercow.dide.check._dide_check_root_configured", mock_check_configured
+    )
     root.init(tmp_path)
     capsys.readouterr()
     assert _dide_check_root(tmp_path)
     out = capsys.readouterr().out
     assert "hipercow is initialised at" in out
+    assert mock_check_configured.call_count == 1
 
 
 def test_unsuccessful_initialisation(tmp_path, capsys):
     assert not _dide_check_root(tmp_path)
     out = capsys.readouterr().out
     assert "hipercow is not initialised" in out
+
+
+def test_can_test_that_dide_windows_is_configured(capsys, mocker):
+    mock_load_driver = mocker.Mock()
+    mocker.patch("hipercow.dide.check.load_driver", mock_load_driver)
+    root = mock.Mock()
+    assert _dide_check_root_configured(root)
+    out = capsys.readouterr().out
+    assert "hipercow is configured to use 'dide-windows'" in out
+    assert mock_load_driver.call_count == 1
+    assert mock_load_driver.mock_calls[0] == mock.call("dide-windows", root)
+
+
+def test_can_report_that_dide_windows_is_not_configured(capsys, mocker):
+    mocker.patch(
+        "hipercow.dide.check.load_driver",
+        side_effect=Exception("not configured"),
+    )
+    root = mock.Mock()
+    assert not _dide_check_root_configured(root)
+    out = capsys.readouterr().out
+    assert "hipercow is not configured to use 'dide-windows'" in out

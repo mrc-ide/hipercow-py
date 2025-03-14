@@ -6,7 +6,8 @@ import requests
 from hipercow import ui
 from hipercow.dide.auth import Credentials, check_access, fetch_credentials
 from hipercow.dide.mounts import detect_mounts, remap_path
-from hipercow.root import open_root
+from hipercow.driver import load_driver
+from hipercow.root import Root, open_root
 from hipercow.util import Result
 
 _DOCS = "https://mrc-ide.github.io/hipercow-py"
@@ -106,12 +107,30 @@ def _dide_check_root(path: Path) -> Result:
     try:
         root = open_root(path)
         ui.alert_success(f"hipercow is initialised at '{root.path}'", indent=4)
-        # TODO: check that we are configured too...
-        return Result.ok()
+        return _dide_check_root_configured(root)
     except Exception as e:
         ui.alert_danger("hipercow is not initialised", indent=4)
         ui.alert_info(
             "You can run 'hipercow init' to initialise the root", indent=4
+        )
+        ui.alert_see_also(f"{_DOCS}/introduction/#initialisation", indent=4)
+        return Result.err(e)
+
+
+def _dide_check_root_configured(root: Root) -> Result:
+    try:
+        load_driver("dide-windows", root)
+        ui.alert_success(
+            "hipercow is configured to use 'dide-windows'", indent=4
+        )
+        return Result.ok()
+    except Exception as e:
+        ui.alert_danger(
+            "hipercow is not configured to use 'dide-windows'", indent=4
+        )
+        ui.alert_info(
+            "You can run 'hipercow driver configure dide-windows' to configure the root",  # noqa: E501
+            indent=4,
         )
         ui.alert_see_also(f"{_DOCS}/introduction/#initialisation", indent=4)
         return Result.err(e)
