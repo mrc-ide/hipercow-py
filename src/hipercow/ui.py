@@ -5,13 +5,26 @@ from rich.console import Console
 console = Console()
 
 
-# for h1/h2 we can use "Rule" I think
-# https://rich.readthedocs.io/en/latest/console.html#rules
-#
-# Nested lists are harder, but bullets won't be that hard to get
-# sorted.
-#
-# Pluralisation is the other thing we might want.
+def h1(text: str) -> None:
+    before = "─" * 3
+    after = "─" * (max(console.width - len(before) - 3 - len(text), 0))
+    console.print(
+        f"[cyan]{before}[/cyan] [bold]{text}[/bold] [cyan]{after}[/cyan]"
+    )
+
+
+def h2(text: str) -> None:
+    before = "─" * 2
+    after = "─" * 2
+    console.print(f"[bold]{before} {text} {after}")
+
+
+def text(text: str, **kwargs) -> None:
+    console.print(text, **kwargs)
+
+
+def blank_line(n: int = 1) -> None:
+    console.print("\n" * (n - 1))
 
 
 def alert_danger(text: str, indent: int = 0) -> None:

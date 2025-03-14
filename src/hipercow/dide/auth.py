@@ -3,47 +3,62 @@ import re
 
 import keyring
 
+from hipercow import ui
 from hipercow.dide.web import Credentials, check_access
-
-## Throughout this file we need to update to use a nice printing
-## library, and to throw errors that the cli can nicely catch.
 
 ## We follow hipercow in storing the username *as* a password, because
 ## it's largely a computer-specific things.
 
 
 def authenticate():
-    intro = """# Please enter your DIDE credentials
-
+    ui.h1("Please enter your DIDE credentials")
+    ui.text(
+        """
 We need to know your DIDE username and password in order to log you into
 the cluster. This will be shared across all projects on this machine, with
 the username and password stored securely in your system keychain. You will
-have to run this command again on other computers
+have to run this command again on other computers."""
+    )
 
+    ui.text(
+        """
 Your DIDE password may differ from your Imperial password, and in some
 cases your username may also differ. If in doubt, perhaps try logging in
 at https://mrcdata.dide.ic.ac.uk/hpc" and use the combination that works
-for you there.
-"""
-    print(intro)
+for you there."""
+    )
 
+    ui.text(
+        """
+If you are unsure, please see our documentation about passwords:
+https://mrc-ide.github.io/hipercow-py/dide/#about-our-usernames-and-passwords\
+"""
+    )
+
+    ui.blank_line()
     username = _get_username(_default_username())
 
-    print(f"Using username '{username}'\n")
+    ui.alert_info(f"Using username '{username}'")
 
+    ui.blank_line()
     password = _get_password()
 
-    check = """I am going to to try and log in with your password now.
-If this fails we can always try again"""
-    print(check)
+    ui.text(
+        """
+I am going to to try and log in with your password now.
+If this fails we can always try again."""
+    )
 
     credentials = Credentials(username, password)
     check_access(credentials)
 
-    outro = """
-Success! I'm saving these into your keyring now so that we can reuse these
-when we need to log into the cluster."""
-    print(outro)
+    ui.blank_line()
+    ui.alert_success("Username and password are correct")
+    ui.alert_info("I am saving these into your keyring now")
+    ui.alert_info(
+        "You can delete your credentials with "
+        "'hipercow dide authenticate clear'"
+    )
 
     keyring.set_password("hipercow/dide/username", "", username)
     keyring.set_password("hipercow/dide/password", username, password)
@@ -66,16 +81,17 @@ def fetch_credentials() -> Credentials:
 
 
 def check() -> None:
-    print("Fetching credentials")
+    ui.alert_info("Fetching credentials")
     credentials = fetch_credentials()
-    print("Testing credentials")
+    ui.alert_info("Testing credentials")
     check_access(credentials)
-    print("Success!")
+    ui.alert_info("Success!")
 
 
 def clear():
     username = keyring.get_password("hipercow/dide/username", "")
     if username:
+        ui.alert_warning(f"Deleting credentials for '{username}'")
         _delete_password_silently("hipercow/dide/username", "")
         _delete_password_silently("hipercow/dide/password", username)
 
@@ -99,6 +115,12 @@ def _get_input(text):
 
 
 def _get_username(default: str) -> str:
+    # I did look at the rich.prompt.Prompt() way of doing this but it
+    # does not seem to add much:
+    #
+    #   value = Prompt.ask("DIDE username", default=default)
+    #
+    # with a similar implementation for the password case.
     value = _get_input(f"DIDE username (default: {default}) > ")
     return _check_username(value or default)
 
@@ -121,8 +143,9 @@ def _check_username(value) -> str:
 def _get_password() -> str:
     msg = (
         "Please enter your DIDE password. "
-        "You will not see characters while you type"
+        "You will not see characters while you type."
     )
+    ui.text(msg)
     value = getpass.getpass()
     if not value:
         msg = "Invalid empty password"
