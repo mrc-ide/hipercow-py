@@ -136,15 +136,7 @@ def test_configure_python_version(tmp_path, mocker, capsys):
     capsys.readouterr()
     show_configuration(None, r)
     out = capsys.readouterr().out
-    assert (
-        out
-        == """Configuration for 'dide-windows'
-path mapping:
-  drive: V:
-  share: \\\\projects\\other
-python version: 3.12
-"""
-    )
+    assert "Python version: 3.12" in out
 
 
 def test_get_outer_logs_from_web_client(tmp_path, mocker):

@@ -1,3 +1,4 @@
+from hipercow import ui
 from hipercow.driver import HipercowDriver
 from hipercow.provision import provision_run
 from hipercow.resources import ClusterResources, Queues, TaskResources
@@ -21,7 +22,7 @@ class ExampleDriver(HipercowDriver):
                 raise Exception(msg)
 
     def show_configuration(self) -> None:
-        print("(no configuration)")
+        ui.text("[dim](no configuration)[/dim]")
 
     def submit(
         self,
@@ -29,7 +30,7 @@ class ExampleDriver(HipercowDriver):
         resources: TaskResources | None,  # noqa: ARG002
         root: Root,  # noqa: ARG002
     ) -> None:
-        print(f"submitting '{task_id}'")
+        ui.alert_info(f"submitting '{task_id}'")
 
     def provision(self, name: str, id: str, root: Root) -> None:
         provision_run(name, id, root)

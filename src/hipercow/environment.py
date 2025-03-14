@@ -2,6 +2,7 @@ import pickle
 import shutil
 from dataclasses import dataclass
 
+from hipercow import ui
 from hipercow.environment_engines import (
     Empty,
     EnvironmentEngine,
@@ -66,7 +67,7 @@ def environment_new(name: str, engine: str, root: OptionalRoot = None) -> None:
         msg = "Only the 'pip' and 'empty' engines are supported"
         raise Exception(msg)
 
-    print(f"Creating environment '{name}' using '{engine}'")
+    ui.alert_info(f"Creating environment '{name}' using '{engine}'")
     EnvironmentConfiguration(engine).write(name, root)
 
 
@@ -109,12 +110,13 @@ def environment_delete(name: str, root: OptionalRoot = None) -> None:
             reason = "it does not exist"
         msg = f"Can't delete environment '{name}', as {reason}"
         raise Exception(msg)
-    print(
+    ui.alert_info(
         f"Attempting to delete environment '{name}'; this might fail if "
-        "files are in use on a network share, in which case you should ",
+        "files are in use on a network share, in which case you should "
         "try again later",
     )
     shutil.rmtree(str(root.path_environment(name)))
+    ui.alert_success("Done!")
 
 
 def environment_check(name: str | None, root: OptionalRoot = None) -> str:
