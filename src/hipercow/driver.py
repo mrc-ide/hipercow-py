@@ -1,17 +1,28 @@
-import pickle
 from abc import ABC, abstractmethod
+
+from pydantic import BaseModel
 
 from hipercow.resources import ClusterResources, TaskResources
 from hipercow.root import Root
 from hipercow.util import read_file_if_exists
 
 
+class DriverConfiguration(BaseModel):
+    pass
+
+
 class HipercowDriver(ABC):
     name: str
+    config: DriverConfiguration
 
     @abstractmethod
-    def __init__(self, root: Root, **kwargs):
+    def __init__(self, root: Root, config: DriverConfiguration):
         pass  # pragma: no cover
+
+    @abstractmethod
+    @staticmethod
+    def configure(root: Root, **kwargs) -> DriverConfiguration:
+        pass
 
     @abstractmethod
     def show_configuration(self) -> None:
@@ -66,8 +77,9 @@ def _load_driver(driver: str | None, root: Root) -> HipercowDriver | None:
     if not path.exists():
         msg = f"No such driver '{driver}'"
         raise Exception(msg)
-    with open(path, "rb") as f:
-        return pickle.load(f)
+    with open(path) as f:
+        # f.write(driver.config.model_dump_json())
+        
 
 
 def _default_driver(root: Root) -> HipercowDriver | None:

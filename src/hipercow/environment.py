@@ -10,6 +10,7 @@ from hipercow.environment_engines import (
 from hipercow.root import OptionalRoot, Root, open_root
 
 
+# If all we have is a string we can just save that as a string really
 @dataclass
 class EnvironmentConfiguration:
     engine: str

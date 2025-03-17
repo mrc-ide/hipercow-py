@@ -14,11 +14,14 @@ from hipercow.root import Root
 
 class DideWindowsDriver(HipercowDriver):
     name = "dide-windows"
-    config: DideConfiguration
 
-    def __init__(self, root: Root, **kwargs):
+    def __init__(self, root: Root, config: DideConfiguration):
+        self.config = config
+
+    @staticmethod
+    def configure(root: Root, **kwargs) -> DideConfiguration:
         mounts = detect_mounts()
-        self.config = DideConfiguration(root, mounts=mounts, **kwargs)
+        return DideConfiguration(root, mounts=mounts, **kwargs)
 
     def show_configuration(self) -> None:
         path_map = self.config.path_map

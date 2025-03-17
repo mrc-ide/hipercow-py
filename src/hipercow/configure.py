@@ -1,4 +1,4 @@
-import pickle
+from dataclasses import dataclass
 
 from hipercow.dide.driver import DideWindowsDriver
 from hipercow.driver import HipercowDriver, load_driver
@@ -29,8 +29,8 @@ def configure(name: str, *, root: OptionalRoot = None, **kwargs) -> None:
     root = open_root(root)
     driver = _get_driver(name)
     with transient_working_directory(root.path):
-        config = driver(root, **kwargs)
-    _write_configuration(config, root)
+        dr = driver(root, **kwargs)
+    _write_configuration(name, dr.config, root)
 
 
 def unconfigure(name: str, root: OptionalRoot = None) -> None:
@@ -91,8 +91,8 @@ def _write_configuration(driver: HipercowDriver, root: Root) -> None:
     path = root.path_configuration(name)
     exists = path.exists()
     path.parent.mkdir(exist_ok=True, parents=True)
-    with path.open("wb") as f:
-        pickle.dump(driver, f)
+    with path.open("w") as f:
+        f.write(driver.config.model_dump_json())
     if exists:
         print(f"Updated configuration for '{name}'")
     else:

@@ -1,12 +1,10 @@
-from dataclasses import dataclass
-
 from hipercow.dide.mounts import Mount, PathMap, remap_path
+from hipercow.driver import DriverConfiguration
 from hipercow.root import Root
 from hipercow.util import check_python_version
 
 
-@dataclass
-class DideConfiguration:
+class DideConfiguration(DriverConfiguration):
     path_map: PathMap
     python_version: str
 
