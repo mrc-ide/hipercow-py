@@ -11,7 +11,9 @@ def test_can_create_batch_data(tmp_path):
     root.init(path)
     r = root.open_root(path)
     m = Mount("wpia-hn", "didehomes/bob", tmp_path)
-    config = DideConfiguration(r, mounts=[m], python_version=None)
+    config = DideConfiguration(
+        r, mounts=[m], python_version=None, check_credentials=False
+    )
 
     res = batch._template_data_task_run("abcde", config)
     assert res["task_id"] == "abcde"
@@ -30,7 +32,9 @@ def test_can_write_batch(tmp_path):
     root.init(path)
     r = root.open_root(path)
     m = Mount("wpia-hn", "didehomes/bob", tmp_path)
-    config = DideConfiguration(r, mounts=[m], python_version=None)
+    config = DideConfiguration(
+        r, mounts=[m], python_version=None, check_credentials=False
+    )
 
     with transient_working_directory(path):
         tid = tc.task_create_shell(["echo", "hello world"], root=r)
@@ -46,7 +50,9 @@ def test_can_create_provision_data(tmp_path):
     root.init(path)
     r = root.open_root(path)
     m = Mount("wpia-hn", "didehomes/bob", tmp_path)
-    config = DideConfiguration(r, mounts=[m], python_version=None)
+    config = DideConfiguration(
+        r, mounts=[m], python_version=None, check_credentials=False
+    )
 
     res = batch._template_data_provision("env", "abcde", config)
     assert res["environment_name"] == "env"
@@ -64,7 +70,9 @@ def test_can_write_provision_batch(tmp_path):
     root.init(path)
     r = root.open_root(path)
     m = Mount("wpia-hn", "didehomes/bob", tmp_path)
-    config = DideConfiguration(r, mounts=[m], python_version=None)
+    config = DideConfiguration(
+        r, mounts=[m], python_version=None, check_credentials=False
+    )
 
     unc = batch.write_batch_provision("myenv", "abcdef", config, r)
     path_rel = "hipercow\\py\\env\\myenv\\provision\\abcdef\\run.bat"

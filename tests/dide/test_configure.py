@@ -19,13 +19,18 @@ def test_can_configure_dide_mount(tmp_path, mocker):
     root.init(path)
     r = root.open_root(path)
     mock_mounts = [Mount("projects", "other", tmp_path)]
+    mock_check_auth = mock.Mock()
     mocker.patch("hipercow.dide.driver.detect_mounts", return_value=mock_mounts)
+    mocker.patch("hipercow.dide.configuration.check_auth", mock_check_auth)
     configure("dide-windows", python_version=None, root=r)
 
     assert list_drivers(r) == ["dide-windows"]
+    assert mock_check_auth.call_count == 1
+    assert mock_check_auth.mock_calls[0] == mock.call()
+
     driver = load_driver("dide-windows", r)
     assert driver.config == DideConfiguration(
-        r, mounts=mock_mounts, python_version=None
+        r, mounts=mock_mounts, python_version=None, check_credentials=False
     )
 
 
@@ -44,7 +49,9 @@ def test_creating_task_triggers_submission(tmp_path, mocker):
     mocker.patch("hipercow.dide.driver.DideWebClient", mock_web_client)
     mock_web_client.return_value.submit.return_value = "1234"
 
-    configure("dide-windows", python_version=None, root=r)
+    configure(
+        "dide-windows", python_version=None, root=r, check_credentials=False
+    )
     with transient_working_directory(path):
         tid = task_create_shell(["echo", "hello world"], root=r)
 
@@ -73,7 +80,9 @@ def test_creating_task_with_resources(tmp_path, mocker):
     mocker.patch("hipercow.dide.driver.DideWebClient", mock_web_client)
     mock_web_client.return_value.submit.return_value = "1234"
 
-    configure("dide-windows", python_version=None, root=r)
+    configure(
+        "dide-windows", python_version=None, check_credentials=False, root=r
+    )
     resources = TaskResources(cores=4)
     with transient_working_directory(path):
         tid = task_create_shell(
@@ -99,7 +108,9 @@ def test_provision_using_driver(tmp_path, mocker):
     mock_provision = mock.MagicMock()
     mocker.patch("hipercow.dide.driver.detect_mounts", return_value=mock_mounts)
     mocker.patch("hipercow.dide.driver._dide_provision", mock_provision)
-    configure("dide-windows", python_version=None, root=r)
+    configure(
+        "dide-windows", python_version=None, check_credentials=False, root=r
+    )
     environment_new("default", "pip", r)
     file_create(r.path / "requirements.txt")
     provision("default", [], root=r)
@@ -118,7 +129,9 @@ def test_resources_using_driver(tmp_path, mocker):
     mock_provision = mock.MagicMock()
     mocker.patch("hipercow.dide.driver.detect_mounts", return_value=mock_mounts)
     mocker.patch("hipercow.dide.driver._dide_provision", mock_provision)
-    configure("dide-windows", python_version=None, root=r)
+    configure(
+        "dide-windows", python_version=None, check_credentials=False, root=r
+    )
     dr = load_driver(None, r)
     resources = dr.resources()
     assert resources.queues.default == "AllNodes"
@@ -132,7 +145,9 @@ def test_configure_python_version(tmp_path, mocker, capsys):
     r = root.open_root(path)
     mock_mounts = [Mount("projects", "other", tmp_path)]
     mocker.patch("hipercow.dide.driver.detect_mounts", return_value=mock_mounts)
-    configure("dide-windows", python_version="3.12", root=r)
+    configure(
+        "dide-windows", python_version="3.12", check_credentials=False, root=r
+    )
     capsys.readouterr()
     show_configuration(None, r)
     out = capsys.readouterr().out
@@ -154,7 +169,9 @@ def test_get_outer_logs_from_web_client(tmp_path, mocker):
         "hipercow.dide.driver.DideWebClient", return_value=mock_web_client
     )
     mock_web_client.submit.return_value = "1234"
-    configure("dide-windows", python_version=None, root=r)
+    configure(
+        "dide-windows", python_version=None, check_credentials=False, root=r
+    )
     with transient_working_directory(path):
         tid = task_create_shell(["echo", "hello world"], root=r)
 
