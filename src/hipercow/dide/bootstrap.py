@@ -5,6 +5,7 @@ from string import Template
 
 from taskwait import Task, taskwait
 
+from hipercow import ui
 from hipercow.dide.driver import _web_client
 from hipercow.dide.mounts import Mount, _backward_slash, detect_mounts
 from hipercow.dide.web import DideWebClient
@@ -48,7 +49,7 @@ def bootstrap(
 
     _bootstrap_check_pipx_pyz(path.parent)
 
-    print(f"Bootstrap id: {bootstrap_id}")
+    ui.alert_info(f"Bootstrap id: {bootstrap_id}")
 
     target = _bootstrap_target(target, mount, bootstrap_id)
     args = _bootstrap_args(force=force, verbose=verbose)
@@ -141,18 +142,22 @@ def _bootstrap_mount(mounts: list[Mount] | None = None) -> Mount:
 
 
 def _bootstrap_wait(tasks: list[BootstrapTask]) -> None:
-    print(f"Waiting on {len(tasks)} tasks")
+    ui.alert_info(f"Waiting on {len(tasks)} tasks")
     fail = 0
     for t in tasks:
         res = taskwait(t)
-        print(f"  - {t.version}: {res.status}")
-
-        print("Logs from pipx:")
-        print(read_file_if_exists(t.path_log))
-
+        result_str = f"{t.version}: {res.status}"
+        if res.status == "success":
+            ui.alert_success(result_str)
+        else:
+            ui.alert_danger(result_str)
+        ui.logs("Logs from pipx:", read_file_if_exists(t.path_log), indent=4)
         if res.status != "success":
-            print(f"Additional logs from cluster for task '{t.dide_id}':")
-            print(t.client.log(t.dide_id))
+            ui.logs(
+                f"Additional logs from cluster for task '{t.dide_id}':",
+                t.client.log(t.dide_id),
+                indent=4,
+            )
             fail += 1
 
     if fail:

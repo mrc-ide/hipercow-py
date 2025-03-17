@@ -63,10 +63,10 @@ def test_can_reconfigure_driver(tmp_path, capsys):
     capsys.readouterr()
     configure("example", root=r)
     str1 = capsys.readouterr().out
-    assert str1.startswith("Configured hipercow to use 'example'")
+    assert "Configured hipercow to use 'example'" in str1
     configure("example", root=r)
     str2 = capsys.readouterr().out
-    assert str2.startswith("Updated configuration for 'example'")
+    assert "Updated configuration for 'example'" in str2
 
 
 def test_get_default_driver(tmp_path):
@@ -92,7 +92,8 @@ def test_can_show_configuration(tmp_path, capsys):
     capsys.readouterr()
     show_configuration(None, r)
     out = capsys.readouterr().out
-    assert out == "Configuration for 'example'\n(no configuration)\n"
+    assert "Configuration for 'example'" in out
+    assert "(no configuration)" in out
 
 
 def test_can_read_logs_with_example_driver(tmp_path):
