@@ -30,7 +30,9 @@ def test_can_provision_with_dide(tmp_path, mocker):
     mocker.patch(
         "hipercow.dide.configuration.remap_path", return_value=path_map
     )
-    config = DideConfiguration(r, mounts=[m], python_version=None)
+    config = DideConfiguration(
+        r, mounts=[m], python_version=None, check_credentials=False
+    )
 
     _dide_provision("myenv", "abcdef", config, r)
     resources = TaskResources(queue="BuildQueue")
@@ -92,7 +94,9 @@ def test_throw_after_failed_provision_with_dide(tmp_path, mocker, capsys):
     mocker.patch(
         "hipercow.dide.configuration.remap_path", return_value=path_map
     )
-    config = DideConfiguration(r, mounts=[m], python_version=None)
+    config = DideConfiguration(
+        r, mounts=[m], python_version=None, check_credentials=False
+    )
 
     capsys.readouterr()
     with pytest.raises(Exception, match="Provisioning failed"):
