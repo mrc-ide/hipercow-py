@@ -149,6 +149,17 @@ def test_can_call_cli_dide_authenticate(mocker):
     assert cli.dide_auth.authenticate.call_count == 1
 
 
+def test_can_run_dide_check(tmp_path, mocker):
+    mock_check = mock.Mock()
+    mocker.patch("hipercow.cli.dide_check", mock_check)
+    runner = CliRunner()
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        res = runner.invoke(cli.cli_dide_check, [])
+        assert res.exit_code == 0
+        assert mock_check.call_count == 1
+        assert mock_check.mock_calls[0] == mock.call()
+
+
 def test_can_configure_driver(tmp_path):
     runner = CliRunner()
     with runner.isolated_filesystem(temp_dir=tmp_path):
