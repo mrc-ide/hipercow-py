@@ -437,3 +437,9 @@ def check_task_id(task_id: str) -> None:
     if not is_valid_task_id(task_id):
         msg = f"'{task_id}' does not look like a valid task identifier"
         raise Exception(msg)
+
+
+def check_task_exists(task_id: str, root: Root):
+    if not task_exists(task_id, root):
+        msg = f"Task '{task_id}' does not exist"
+        raise Exception(msg)
