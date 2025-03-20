@@ -125,6 +125,9 @@ class Root:
     def path_repl_history(self) -> Path:
         return self.path_base() / "repl_history"
 
+    def path_bundle(self, name: str | None) -> Path:
+        return self.path_base() / "bundles" / (name or ".")
+
 
 OptionalRoot: TypeAlias = None | str | Path | Root
 """Optional root type, for user-facing functions.

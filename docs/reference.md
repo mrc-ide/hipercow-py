@@ -8,6 +8,8 @@
 
 ::: hipercow.task_create
 
+::: hipercow.bundle
+
 ::: hipercow.environment
 
 ::: hipercow.provision
