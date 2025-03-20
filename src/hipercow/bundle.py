@@ -1,7 +1,6 @@
 """Support for bundles of related tasks."""
 
 import secrets
-import shutil
 
 from pydantic import BaseModel
 
@@ -69,8 +68,9 @@ def bundle_create(
         msg = f"Bundle '{name}' exists and overwrite is False"
         raise Exception(msg)
     path.parent.mkdir(parents=True, exist_ok=True)
+    bundle = Bundle(name=name, task_ids=task_ids)
     with path.open("w") as f:
-        f.writelines("".join([f"{el}\n" for el in task_ids]))
+        f.write(bundle.model_dump_json())
     ui.alert_success(f"Created bundle '{name}' with {len(task_ids)} tasks")
     return name
 
@@ -91,8 +91,8 @@ def bundle_load(name: str, root: OptionalRoot = None) -> Bundle:
         msg = f"No such bundle '{name}'"
         raise Exception(msg)
     with path.open() as f:
-        task_ids = [el.strip() for el in f.readlines()]
-    return Bundle(name=name, task_ids=task_ids)
+        json_str = f.read()
+    return Bundle.model_validate_json(json_str)
 
 
 def bundle_list(root: OptionalRoot = None) -> list[str]:
@@ -137,7 +137,7 @@ def bundle_delete(name: str, root: OptionalRoot = None) -> None:
         msg = f"Can't delete bundle '{name}', it does not exist"
         raise Exception(msg)
 
-    shutil.rmtree(str(path))
+    path.unlink()
     ui.alert_success("Deleted bundle '{name}'")
 
 
@@ -157,8 +157,8 @@ def bundle_status(name: str, root: OptionalRoot = None) -> list[TaskStatus]:
         the same order as the original bundle.
 
     """
-    bundle = bundle_load(name, root)
-    return [task_status(i) for i in bundle.task_ids]
+    bundle = bundle_load(name, root=root)
+    return [task_status(i, root=root) for i in bundle.task_ids]
 
 
 def bundle_status_reduce(name: str, root: OptionalRoot = None) -> TaskStatus:
