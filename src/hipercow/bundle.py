@@ -49,7 +49,7 @@ def bundle_create(
         root: The root, or if not given search from the current directory.
 
     Returns: The name of the newly created bundle.  Also, as a side
-        effects, writes out the task bundle to disk.
+        effect, writes out the task bundle to disk.
 
     """
     root = open_root(root)
