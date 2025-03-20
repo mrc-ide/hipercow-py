@@ -1,6 +1,7 @@
 """Support for bundles of related tasks."""
 
 import secrets
+import shutil
 from dataclasses import dataclass
 
 from hipercow import ui
@@ -15,8 +16,23 @@ from hipercow.task import (
 
 @dataclass
 class Bundle:
+    """A bundle of tasks.
+
+    Attributes:
+        name: The bundle name
+        task_ids: The task identifiers in the bundle
+    """
+
     name: str
     task_ids: list[str]
+
+    def status(self) -> list[TaskStatus]:
+        """Fetch status for each task in the bundle."""
+        return [task_status(i) for i in self.task_ids]
+
+    def status_reduce(self) -> TaskStatus:
+        """Fetch overall status of the bundle."""
+        return _status_reduce(self.status())
 
 
 def bundle_create(
@@ -26,7 +42,25 @@ def bundle_create(
     validate: bool = True,
     overwrite: bool = True,
     root: OptionalRoot = None,
-) -> Bundle:
+) -> str:
+    """Create a new bundle from a list of tasks.
+
+    Arguments:
+        task_ids: The task identifiers in the bundle
+
+        name: The name for the bundle.  If not given, we randomly
+            create one.  The format of the name is subject to change.
+
+        validate: Check that all tasks exist before creating the bundle.
+
+        overwrite: Overwrite a bundle if it already exists.
+
+        root: The root, or if not given search from the current directory.
+
+    Returns: The name of the newly created bundle.  Also, as a side
+        effects, writes out the task bundle to disk.
+
+    """
     root = open_root(root)
     if validate:
         for i in task_ids:
@@ -46,10 +80,19 @@ def bundle_create(
     with path.open("w") as f:
         f.writelines("".join([f"{el}\n" for el in task_ids]))
     ui.alert_success(f"Created bundle '{name}' with {len(task_ids)} tasks")
-    return Bundle(name, task_ids)
+    return name
 
 
 def bundle_load(name: str, root: OptionalRoot = None) -> Bundle:
+    """Load a task bundle.
+
+    Args:
+        name: The name of the bundle to load
+        root: The root, or if not given search from the current directory.
+
+    Returns:
+        The loaded bundle.
+    """
     root = open_root(root)
     path = root.path_bundle(name)
     if not path.exists():
@@ -61,6 +104,15 @@ def bundle_load(name: str, root: OptionalRoot = None) -> Bundle:
 
 
 def bundle_list(root: OptionalRoot = None) -> list[str]:
+    """List bundles.
+
+    Args:
+        root: The root, or if not given search from the current directory.
+
+    Returns: The names of known bundles.  Currently the order of these
+        is arbitrary.
+
+    """
     root = open_root(root)
     path = root.path_bundle(None)
     # We could/should order by time here; we do a similar thing with
@@ -74,23 +126,59 @@ def bundle_list(root: OptionalRoot = None) -> list[str]:
 
 
 def bundle_delete(name: str, root: OptionalRoot = None) -> None:
+    """Delete a bundle.
+
+    Note that this does not delete the tasks in the bundle, just the
+    bundle itself.
+
+    Args:
+        name: The name of the bundle to delete
+        root: The root, or if not given search from the current directory.
+
+    Returns:
+        Nothing, called for side effects only.
+
+    """
     root = open_root(root)
     path = root.path_bundle(name)
-    if path.exists():
-        path.unlink()
-        ui.alert_success("Deleted bundle '{name}'")
-    else:
-        ui.alert_danger("No such bundle '{name}'")
+    if not path.exists():
+        msg = f"Can't delete bundle '{name}', it does not exist"
+        raise Exception(msg)
+
+    shutil.rmtree(str(path))
+    ui.alert_success("Deleted bundle '{name}'")
 
 
 def bundle_status(name: str, root: OptionalRoot = None) -> list[TaskStatus]:
-    bundle = bundle_load(name, root)
-    return [task_status(i) for i in bundle.task_ids]
+    """Get the statuses of tasks in a bundle.
+
+    Depending on the context, `bundle_status_reduce()` may be more
+    appropriate function to use, which attempts to reduce the list of
+    statuses into the single "worst" status.
+
+    Args:
+        name: The name of the bundle to get the statuses for.
+        root: The root, or if not given search from the current directory.
+
+    Returns:
+        A list of statuses, one per task.  These are stored in
+        the same order as the original bundle.
+
+    """
+    return bundle_load(name, root).status()
 
 
 def bundle_status_reduce(name: str, root: OptionalRoot = None) -> TaskStatus:
-    status = bundle_status(name, root)
-    return _status_reduce(status)
+    """Get the overall status from a bundle.
+
+    Args:
+        name: The name of the bundle to get the statuses for.
+        root: The root, or if not given search from the current directory.
+
+    Returns:
+        The overall bundle status.
+    """
+    return bundle_load(name, root).status_reduce()
 
 
 def _status_reduce(status: list[TaskStatus]) -> TaskStatus:

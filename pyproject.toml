@@ -119,6 +119,9 @@ skip-string-normalization = true
 [tool.ruff]
 line-length = 80
 
+[tool.ruff.format]
+docstring-code-format = true
+
 [tool.ruff.lint]
 select = [
   "A",
