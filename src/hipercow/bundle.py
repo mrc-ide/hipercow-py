@@ -2,7 +2,8 @@
 
 import secrets
 import shutil
-from dataclasses import dataclass
+
+from pydantic import BaseModel
 
 from hipercow import ui
 from hipercow.root import OptionalRoot, open_root
@@ -14,8 +15,7 @@ from hipercow.task import (
 )
 
 
-@dataclass
-class Bundle:
+class Bundle(BaseModel):
     """A bundle of tasks.
 
     Attributes:
@@ -25,14 +25,6 @@ class Bundle:
 
     name: str
     task_ids: list[str]
-
-    def status(self) -> list[TaskStatus]:
-        """Fetch status for each task in the bundle."""
-        return [task_status(i) for i in self.task_ids]
-
-    def status_reduce(self) -> TaskStatus:
-        """Fetch overall status of the bundle."""
-        return _status_reduce(self.status())
 
 
 def bundle_create(
@@ -100,7 +92,7 @@ def bundle_load(name: str, root: OptionalRoot = None) -> Bundle:
         raise Exception(msg)
     with path.open() as f:
         task_ids = [el.strip() for el in f.readlines()]
-    return Bundle(name, task_ids)
+    return Bundle(name=name, task_ids=task_ids)
 
 
 def bundle_list(root: OptionalRoot = None) -> list[str]:
@@ -165,7 +157,8 @@ def bundle_status(name: str, root: OptionalRoot = None) -> list[TaskStatus]:
         the same order as the original bundle.
 
     """
-    return bundle_load(name, root).status()
+    bundle = bundle_load(name, root)
+    return [task_status(i) for i in bundle.task_ids]
 
 
 def bundle_status_reduce(name: str, root: OptionalRoot = None) -> TaskStatus:
@@ -178,7 +171,7 @@ def bundle_status_reduce(name: str, root: OptionalRoot = None) -> TaskStatus:
     Returns:
         The overall bundle status.
     """
-    return bundle_load(name, root).status_reduce()
+    return _status_reduce(bundle_status(name, root))
 
 
 def _status_reduce(status: list[TaskStatus]) -> TaskStatus:

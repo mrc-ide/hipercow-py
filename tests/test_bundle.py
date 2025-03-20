@@ -1,6 +1,13 @@
-
-from hipercow.bundle import Bundle, bundle_create, bundle_load, bundle_list, bundle_delete, bundle_status, bundle_status_reduce
 from hipercow import root
+from hipercow.bundle import (
+    Bundle,
+    bundle_create,
+    bundle_delete,
+    bundle_list,
+    bundle_load,
+    bundle_status,
+    bundle_status_reduce,
+)
 from hipercow.task_create import task_create_shell
 from hipercow.util import transient_working_directory
 

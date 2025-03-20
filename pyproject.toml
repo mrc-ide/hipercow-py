@@ -27,6 +27,7 @@ dependencies = [
   "click-repl",
   "defusedxml",
   "keyring",
+  "pydantic",
   "requests",
   "rich",
   "taskwait",
