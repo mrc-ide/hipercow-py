@@ -33,7 +33,6 @@ def test_throw_if_load_missing_bundle(tmp_path):
         bundle_load("foo", root=r)
 
 
-
 def test_can_delete_bundle(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
