@@ -7,6 +7,7 @@ import pytest
 
 from hipercow.util import (
     check_python_version,
+    expand_grid,
     find_file_descend,
     loop_while,
     subprocess_run,
@@ -117,3 +118,21 @@ def test_loop_while_loops():
     fn = mock.Mock(side_effect=[False, True, True, False, False])
     loop_while(fn)
     assert fn.call_count == 1
+
+
+def test_expand_grid():
+    assert expand_grid({}) == [{}]
+    assert expand_grid({"a": [1]}) == [{"a": 1}]
+    assert expand_grid({"a": [1, 2]}) == [{"a": 1}, {"a": 2}]
+    assert expand_grid({"a": [1, 2], "b": [3]}) == [
+        {"a": 1, "b": 3},
+        {"a": 2, "b": 3},
+    ]
+    assert expand_grid({"a": [1, 2], "b": [3, 4, 5]}) == [
+        {"a": 1, "b": 3},
+        {"a": 1, "b": 4},
+        {"a": 1, "b": 5},
+        {"a": 2, "b": 3},
+        {"a": 2, "b": 4},
+        {"a": 2, "b": 5},
+    ]
