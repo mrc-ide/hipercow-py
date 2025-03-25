@@ -104,14 +104,16 @@ def bulk_create_shell_commands(
         keys_template |= set(el.get_identifiers())
 
     data_list = _check_template_data(data)
+    keys_data = set(data_list[0].keys())
 
-    if keys_template != set(data_list[0].keys()):
-        # Make this one better; we need to provide information about
-        # the unexpected or missing elements really.  Perhaps it's
-        # fine if there is data provided that is not interpolated
-        # though?  Maybe that's an option?  Definitely elements found
-        # in the
-        msg = "Unexpected substitutions found in template"
+    if extra := keys_template - keys_data:
+        extra_str = ", ".join(extra)
+        msg = f"Template variables not present in data: {extra_str}"
+        raise Exception(msg)
+
+    if unused := keys_data - keys_template:
+        unused_str = ", ".join(unused)
+        msg = f"Data variables not present in template: {unused_str}"
         raise Exception(msg)
 
     return [[i.substitute(d) for i in template] for d in data_list]
