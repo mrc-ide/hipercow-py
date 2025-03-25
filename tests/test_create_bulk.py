@@ -27,6 +27,8 @@ def test_prepare_simple_grid():
 
 def test_can_construct_templated_calls():
     cmd = ["cmd", "path/@{a}", "@b"]
-    data = _bulk_data_combine({"a": ["0", "1"], "b": ["2"]})
+    pars = {"a": ["0", "1"], "b": ["2"]}
+    data = _bulk_data_combine(pars)
     res = bulk_create_shell_commands(cmd, data)
     assert res == [["cmd", "path/0", "2"], ["cmd", "path/1", "2"]]
+    assert bulk_create_shell_commands(cmd, pars) == res
