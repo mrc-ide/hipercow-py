@@ -1,3 +1,4 @@
+import csv
 import os
 import platform
 import re
@@ -7,6 +8,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from itertools import product
 from pathlib import Path
+from typing import Any
 
 
 def find_file_descend(filename: str, path: str | Path) -> Path | None:
@@ -150,3 +152,9 @@ def expand_grid(data: dict) -> list[dict]:
         dict(zip(data.keys(), el, strict=False))
         for el in product(*data.values())
     ]
+
+
+# Probably some more work here to get the name to str here?
+def read_csv_to_dict(filename: str | Path) -> list[dict[str, Any]]:
+    with Path(filename).open(newline="") as f:
+        return list(csv.DictReader(f))

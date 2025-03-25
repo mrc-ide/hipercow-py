@@ -1,6 +1,5 @@
-import csv
-from pathlib import Path
 from string import Template
+from typing import TypeAlias
 
 from hipercow.bundle import bundle_create
 from hipercow.root import OptionalRoot, open_root
@@ -12,11 +11,14 @@ class _TemplateAt(Template):
     delimiter = "@"
 
 
+BulkDataInput: TypeAlias = list[dict[str, str]] | dict[str, str | list[str]]
+
+
 # ignoring the details of doing the substitutions, this is really all
 # we need to do:
 def bulk_create_shell(
     cmd_template: list[str],
-    data: list[dict[str, str]],
+    data: BulkDataInput,
     *,
     name: str | None = None,
     root: OptionalRoot = None,
@@ -69,7 +71,7 @@ def bulk_create_shell(
 
 
 def bulk_create_shell_commands(
-    cmd_template: list[str], data: list[dict[str, str]]
+    cmd_template: list[str], data: BulkDataInput
 ) -> list[list[str]]:
     """Create a list of commands from a template and data.
 
@@ -85,10 +87,12 @@ def bulk_create_shell_commands(
         cmd_template: A command template.  This should be a list of
             strings, with some containing template placeholders.
 
-        data: A list of dictionaries to substitute into the template.
+        data: A list of dictionaries or dictionary of lists to
+            substitute into the template; see
+            `hipercow.task_create_bulk.bulk_create_shell` for details.
 
     Returns: A list of lists of strings; the `i`th element of this is
-    the command substituted from the `i`th element of `data`.
+        the command substituted from the `i`th element of `data`.
 
     """
     template = [_TemplateAt(el) for el in cmd_template]
@@ -99,9 +103,9 @@ def bulk_create_shell_commands(
     for el in template:
         keys_template |= set(el.get_identifiers())
 
-    keys_data = _check_template_data(data)
+    data_list = _check_template_data(data)
 
-    if keys_template != set(keys_data):
+    if keys_template != set(data_list[0].keys()):
         # Make this one better; we need to provide information about
         # the unexpected or missing elements really.  Perhaps it's
         # fine if there is data provided that is not interpolated
@@ -110,29 +114,23 @@ def bulk_create_shell_commands(
         msg = "Unexpected substitutions found in template"
         raise Exception(msg)
 
-    return [[i.substitute(d) for i in template] for d in data]
+    return [[i.substitute(d) for i in template] for d in data_list]
 
 
-def _check_template_data(data: list[dict[str, str]]) -> list[str]:
+def _check_template_data(data: BulkDataInput) -> list[dict[str, str]]:
     if not data:
         msg = "No data provided"
         raise Exception(msg)
 
-    # There is no real need to do this if we have created things by
-    # reading a csv or by expanding, which is most of the way that we
-    # get here...
-    keys = data[0].keys()
-    for el in data[1:]:
-        if el.keys() != keys:
-            msg = "Unexpected keys"
-            raise Exception(msg)
-
-    return list(keys)
-
-
-def _bulk_data_csv(filename: str | Path) -> list[dict[str, str]]:
-    with Path(filename).open(newline="") as f:
-        return list(csv.DictReader(f))
+    if isinstance(data, list):
+        keys = data[0].keys()
+        for el in data[1:]:
+            if el.keys() != keys:
+                msg = "Unexpected keys"
+                raise Exception(msg)
+        return data
+    else:
+        return _bulk_data_combine(data)
 
 
 def _bulk_data_combine(
