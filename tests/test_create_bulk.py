@@ -1,9 +1,14 @@
 import pytest
 
+from hipercow import root
+from hipercow.bundle import bundle_load
+from hipercow.task import task_info
 from hipercow.task_create_bulk import (
     _bulk_data_combine,
+    bulk_create_shell,
     bulk_create_shell_commands,
 )
+from hipercow.util import transient_working_directory
 
 
 def test_prepare_simple_grid():
@@ -65,3 +70,20 @@ def test_can_raise_if_data_does_not_have_consistent_keys():
     data = [{"a": "0", "b": "1"}, {"a": "0", "b": "1", "c": "2"}]
     with pytest.raises(Exception, match="Inconsistent keys among data"):
         bulk_create_shell_commands(cmd, data)
+
+
+def test_can_bulk_create_tasks(tmp_path):
+    root.init(tmp_path)
+    r = root.open_root(tmp_path)
+    data = {"by": ["cow", "horse"], "what": ["hello", "hipercow"]}
+    with transient_working_directory(tmp_path):
+        nm = bulk_create_shell(
+            ["cowsay", "-c", "@by", "-t", "@{what}"],
+            data,
+        )
+    bundle = bundle_load(nm, root=r)
+    assert len(bundle.task_ids) == 4
+    d0 = task_info(bundle.task_ids[0], root=r)
+    assert d0.data.data["cmd"] == ["cowsay", "-c", "cow", "-t", "hello"]
+    d1 = task_info(bundle.task_ids[1], root=r)
+    assert d1.data.data["cmd"] == ["cowsay", "-c", "cow", "-t", "hipercow"]
