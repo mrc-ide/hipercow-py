@@ -50,3 +50,18 @@ def test_can_raise_if_unexpected_symbols_in_data():
     pat = "Data variables not present in template: b"
     with pytest.raises(Exception, match=pat):
         bulk_create_shell_commands(cmd, pars)
+
+
+def test_can_raise_if_no_data():
+    cmd = ["cmd", "path/@{a}"]
+    with pytest.raises(Exception, match="No data provided"):
+        bulk_create_shell_commands(cmd, {})
+    with pytest.raises(Exception, match="No data provided"):
+        bulk_create_shell_commands(cmd, [])
+
+
+def test_can_raise_if_data_does_not_have_consistent_keys():
+    cmd = ["cmd", "path/@{a}", "@b"]
+    data = [{"a": "0", "b": "1"}, {"a": "0", "b": "1", "c": "2"}]
+    with pytest.raises(Exception, match="Inconsistent keys among data"):
+        bulk_create_shell_commands(cmd, data)

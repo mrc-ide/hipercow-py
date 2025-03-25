@@ -128,7 +128,7 @@ def _check_template_data(data: BulkDataInput) -> list[dict[str, str]]:
         keys = data[0].keys()
         for el in data[1:]:
             if el.keys() != keys:
-                msg = "Unexpected keys"
+                msg = "Inconsistent keys among data"
                 raise Exception(msg)
         return data
     else:
