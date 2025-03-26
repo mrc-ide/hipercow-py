@@ -1,3 +1,4 @@
+import re
 import sys
 from functools import reduce
 from operator import ior
@@ -9,6 +10,12 @@ from rich.console import Console
 from typing_extensions import Never  # 3.10 does not have this in typing
 
 from hipercow import root
+from hipercow.bundle import (
+    bundle_delete,
+    bundle_list,
+    bundle_status,
+    bundle_status_reduce,
+)
 from hipercow.configure import configure, show_configuration, unconfigure
 from hipercow.dide import auth as dide_auth
 from hipercow.dide.bootstrap import bootstrap as dide_bootstrap
@@ -32,8 +39,9 @@ from hipercow.task import (
     task_wait,
 )
 from hipercow.task_create import task_create_shell
+from hipercow.task_create_bulk import bulk_create_shell
 from hipercow.task_eval import task_eval
-from hipercow.util import loop_while, truthy_envvar
+from hipercow.util import loop_while, read_csv_to_dict, tabulate, truthy_envvar
 
 # This is how the 'rich' docs drive things:
 console = Console()
@@ -499,3 +507,123 @@ def cli_environment_provision(name: str, cmd: tuple[str]):
 def cli_environment_provision_run(name: str, id: str):
     r = root.open_root()
     provision_run(name, id, r)
+
+
+@cli.group()
+def bundle():
+    """Interact with bundles."""
+    pass
+
+
+@bundle.command("list")
+def cli_bundle_list():
+    """List bundles."""
+    r = root.open_root()
+    for el in bundle_list(r):
+        click.echo(el)
+
+
+@bundle.command("delete")
+@click.argument("name")
+def cli_bundle_delete(name: str):
+    """Delete a bundle.
+
+    Note that this does not delete the tasks in the bundle, just the
+    bundle itself.
+    """
+    r = root.open_root()
+    bundle_delete(name, root=r)
+
+
+@bundle.command("status")
+@click.argument("name")
+@click.option(
+    "--summary",
+    type=click.Choice(["none", "group", "single"], case_sensitive=False),
+    help="Summarise the statuses",
+)
+def cli_bundle_status(name: str, summary: str):
+    """Get the status of a bundle.
+
+    This can offer three levels of summary; and we might redesign the
+    output a bit to make this easier to work with, depending on what
+    people actually do with the output.
+
+    Please don't try and parse the output directly, but let us know
+    what sort of format you might like it in, as we can easily add
+    something like a json format output.
+
+    """
+    r = root.open_root()
+    if summary == "single":
+        click.echo(bundle_status_reduce(name, root=r))
+    else:
+        res = bundle_status(name, root=r)
+        if summary == "none":
+            for status in res:
+                click.echo(status)
+        else:
+            summary = tabulate([str(el) for el in res])
+            for status, n in summary.items():
+                # We might format this more nicely so that we
+                # align on status?
+                click.echo(f"{status}: {n}")
+
+
+# I am torn here about names; currently we might have (following
+# hipercow-r):
+#
+# hipercow task status <id> (for task.task_status)
+# hipercow task create <cmd> (for task_create.task_create_shell)
+# hipercow bundle status <name> for (bundle.bundle_status)
+# hipercow bulk create <cmd> <data> for (task_create_bulk.bulk_create_shell)
+#
+# Some of the inconsistency is inherited from hipercow, but it also
+# reflects that bundles might not be only created by bulk submission.
+#
+# I wonder if we might resolve this by having a 'create' subcommand,
+# so I've put the bulk submission here.  We can move things around
+# later if needed.
+@cli.group("create")
+def create():
+    pass
+
+
+@create.command("bulk")
+@click.argument("cmd", nargs=-1)
+@click.argument("data", multiple=True)
+@click.option(
+    "--environment", type=str, help="The environment in which to run the task"
+)
+@click.option("--queue", help="Queue to submit the task to")
+@click.option("--name", help="Name for the bundle")
+def cli_create_bulk(
+    cmd: tuple[str],
+    *,
+    environment: str | None,
+    data: tuple[str],
+    queue: str | None,
+    name: str | None,
+):
+    r = root.open_root()
+    resources = None if queue is None else TaskResources(queue=queue)
+
+    name = bulk_create_shell(
+        list(cmd),
+        _cli_bulk_create_data(data),
+        name=name,
+        environment=environment,
+        resources=resources,
+        root=r,
+    )
+    click.echo(name)
+
+
+def _cli_bulk_create_data(data: tuple[str]):
+    if not data:
+        msg = "Expected at least one argument to 'data'"
+        raise Exception(msg)
+
+    if len(data) == 1 and re.match("\\.csv$", data[0], re.IGNORECASE):
+        res = read_csv_to_dict(data[0])
+        return res
