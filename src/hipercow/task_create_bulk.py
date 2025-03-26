@@ -10,6 +10,25 @@ from hipercow.util import expand_grid
 class _TemplateAt(Template):
     delimiter = "@"
 
+    # Backport a simplified version of get_idenfiers for python 3.10,
+    # which lacks this method https://docs.python.org/3/library/string.html
+    # no cover: start
+    if not hasattr(Template, "foo"):
+
+        def get_identnfiers(self):
+            return _template_identifiers(self)
+
+    # no cover: end
+
+
+def _template_identifiers(obj: Template) -> list[str]:
+    ids = []
+    for mo in obj.pattern.finditer(obj.template):
+        named = mo.group("named") or mo.group("braced")
+        if named is not None and named not in ids:
+            ids.append(named)
+    return ids
+
 
 BulkDataInput: TypeAlias = list[dict[str, str]] | dict[str, str | list[str]]
 

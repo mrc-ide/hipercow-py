@@ -5,6 +5,8 @@ from hipercow.bundle import bundle_load
 from hipercow.task import task_info
 from hipercow.task_create_bulk import (
     _bulk_data_combine,
+    _template_identifiers,
+    _TemplateAt,
     bulk_create_shell,
     bulk_create_shell_commands,
 )
@@ -87,3 +89,8 @@ def test_can_bulk_create_tasks(tmp_path):
     assert d0.data.data["cmd"] == ["cowsay", "-c", "cow", "-t", "hello"]
     d1 = task_info(bundle.task_ids[1], root=r)
     assert d1.data.data["cmd"] == ["cowsay", "-c", "cow", "-t", "hipercow"]
+
+
+def test_can_extract_identrifiers_with_backport():
+    obj = _TemplateAt("hello @{a} @b world")
+    assert _template_identifiers(obj) == ["a", "b"]
