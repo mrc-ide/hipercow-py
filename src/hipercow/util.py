@@ -152,9 +152,3 @@ def expand_grid(data: dict) -> list[dict]:
         dict(zip(data.keys(), el, strict=False))
         for el in product(*data.values())
     ]
-
-
-# Probably some more work here to get the name to str here?
-def read_csv_to_dict(filename: str | Path) -> list[dict[str, Any]]:
-    with Path(filename).open(newline="") as f:
-        return list(csv.DictReader(f))
