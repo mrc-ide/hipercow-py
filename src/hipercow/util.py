@@ -5,6 +5,7 @@ import subprocess
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
+from itertools import product
 from pathlib import Path
 
 
@@ -142,3 +143,10 @@ class Result:
     @staticmethod
     def err(exception: Exception) -> "Result":
         return Result(exception)
+
+
+def expand_grid(data: dict) -> list[dict]:
+    return [
+        dict(zip(data.keys(), el, strict=False))
+        for el in product(*data.values())
+    ]
