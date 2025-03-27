@@ -51,7 +51,7 @@ def bulk_create_shell(
     There are a couple of ways that you might want to load data into
     the template:
 
-    * You might have data in a table (e.g., in csv file).  In this
+    * You might have data in a table (e.g., in a csv file).  In this
       case we might model this as a list of `dict`s, each
       corresponding to a row in the original table.
 
@@ -70,7 +70,7 @@ def bulk_create_shell(
         data: A list of dictionaries to substitute into the template.
 
         name: Optional name for the created bundle.  If `None` (the
-            default) then a random name will be creted for the bundle.
+            default) then a random name will be created for the bundle.
 
         root: The root, or if not given search from the current directory.
 
@@ -99,7 +99,7 @@ def bulk_create_shell_commands(
     `@{...}` placeholders -- and data to substitute into this.
 
     You can use this to debug or preview commands that would be
-    produced by `bust_create_shell` without accidentally submitting
+    produced by `bulk_create_shell` without accidentally submitting
     thousands of tasks.
 
     Args:
