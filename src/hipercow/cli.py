@@ -40,6 +40,7 @@ from hipercow.task import (
 )
 from hipercow.task_create import task_create_shell
 from hipercow.task_create_bulk import (
+    BulkDataInput,
     bulk_create_shell,
     bulk_create_shell_commands,
 )
@@ -572,8 +573,8 @@ def cli_bundle_status(name: str, summary: str):
                 click.echo(f"{status_str}: {n}")
 
 
-# I am torn here about names; currently we might have (following
-# hipercow-r):
+# The names are a bit of a mess here, something that largely follows
+# hipercow-r:
 #
 # hipercow task status <id> (for task.task_status)
 # hipercow task create <cmd> (for task_create.task_create_shell)
@@ -584,8 +585,8 @@ def cli_bundle_status(name: str, summary: str):
 # reflects that bundles might not be only created by bulk submission.
 #
 # I wonder if we might resolve this by having a 'create' subcommand,
-# so I've put the bulk submission here.  We can move things around
-# later if needed.
+# so I've put the bulk submission here and we might move the single
+# task creation down here later.  Or we can move elsewhere.
 @cli.group("create")
 def create():
     pass
@@ -597,17 +598,19 @@ def create():
 @click.option(
     "--environment", type=str, help="The environment in which to run the task"
 )
-@click.option("--queue", help="Queue to submit the task to")
-@click.option("--name", help="Name for the bundle")
+@click.option("--queue", help="The queue to submit the task to")
+@click.option("--name", help="An optional name for the bundle")
 @click.option(
-    "--dry-run",
-    help="Don't create tasks, just report on subsitutions",
-    is_flag=True,
+    "--preview",
+    help="Show preview of tasks that would be created, but don't create any",
+    is_flag=False,
+    flag_value=4,
+    default=0,
 )
 def cli_create_bulk(
     cmd: tuple[str],
     *,
-    dry_run: bool,
+    preview: bool,
     environment: str | None,
     data: tuple[str],
     queue: str | None,
@@ -638,23 +641,22 @@ def cli_create_bulk(
 
     """
     template_data = _cli_bulk_create_data(data)
-    if dry_run:
+    if preview > 0:
         cmds = bulk_create_shell_commands(list(cmd), template_data)
-        n = len(cmds)
-        cmds_show = list(enumerate(cmds))
-        max_show = 4
-        if n > max_show:
-            cmds_show = cmds_show[:2] + cmds_show[-2:]
-        ui.alert_info(f"Created {n} commands:")
-        for i, cmd_i in cmds_show:
-            cmd_str = " ".join(cmd_i)
-            click.echo(f"  {i + 1}: {cmd_str}")
-            if i == 1 and n > max_show:
-                click.echo(f"   : ... {n - 4} commands omitted")
+        _cli_bulk_preview_commands(cmds, preview)
     else:
         r = root.open_root()
         resources = None if queue is None else TaskResources(queue=queue)
 
+        # An alternative here would be to have `bulk_create_shell`
+        # *not* take template data and accept a list of lists of
+        # strings (i.e., the template with substitutions applied) and
+        # then we only do the bulk_create_shell_commands() once here
+        # in this function and not in the bulk support.  That feels a
+        # bit weird - I think we want the substitution to be part of
+        # the programmatic API but it could make this more flexible?
+        # We can always change our mind here in future, as we expect
+        # most usage to be from the cli.
         name = bulk_create_shell(
             list(cmd),
             template_data,
@@ -666,7 +668,7 @@ def cli_create_bulk(
         click.echo(name)
 
 
-def _cli_bulk_create_data(data: tuple[str]):
+def _cli_bulk_create_data(data: tuple[str]) -> BulkDataInput:
     if not data:
         msg = "Expected at least one argument to 'data'"
         raise Exception(msg)
@@ -688,3 +690,17 @@ def _cli_bulk_parse_data_argument(x: str) -> tuple[str, list[str]]:
         values = range(int(start), int(end) + (0 if mode == ":" else 1))
         return name, [str(i) for i in values]
     return name, list(value.split(","))
+
+
+def _cli_bulk_preview_commands(cmds: list[list[str]], preview: int) -> None:
+    n = len(cmds)
+    cmds_show = list(enumerate(cmds))
+    skip = n - 2 * preview
+    if skip > 0:
+        cmds_show = cmds_show[:preview] + cmds_show[-preview:]
+    ui.alert_info(f"Created {n} commands:")
+    for i, cmd_i in cmds_show:
+        cmd_str = " ".join(cmd_i)
+        click.echo(f"  {i + 1}: {cmd_str}")
+        if skip > 0 and i == preview - 1:
+            click.echo(f"   : ... {skip} commands omitted")

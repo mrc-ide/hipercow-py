@@ -1,4 +1,5 @@
 import platform
+import re
 import time
 from pathlib import Path
 from unittest import mock
@@ -8,6 +9,7 @@ import pytest
 from click.testing import CliRunner
 
 from hipercow import cli, root, task
+from hipercow.bundle import bundle_load
 from hipercow.driver import list_drivers
 from hipercow.resources import TaskResources
 from hipercow.task import TaskData, TaskStatus
@@ -569,3 +571,28 @@ def test_can_control_queue_used_in_task_creation(tmp_path):
         )
         assert res.exit_code == 1
         assert "Queue 'other' is not in valid queue list" in str(res.exception)
+
+
+def test_can_use_bulk_create(tmp_path):
+    runner = CliRunner()
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        root.init(".")
+        r = root.open_root()
+        res = runner.invoke(
+            cli.cli_create_bulk,
+            [
+                "--name",
+                "mybundle",
+                "--data",
+                "a=1..2",
+                "--data",
+                "b=x,y",
+                "mycmd",
+                "@a",
+                "c/@{b}/d",
+            ],
+        )
+        assert res.exit_code == 0
+        assert re.search("Created bundle '.+' with 4 tasks", res.output)
+        bundle = bundle_load("mybundle", root=r)
+        assert len(bundle.task_ids) == 4
