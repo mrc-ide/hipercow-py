@@ -85,7 +85,17 @@ def _handle_error(e: Exception) -> Never:
         sys.exit(1)
 
 
-@click.group()
+class NaturalOrderGroup(click.Group):
+    """A click utility to define commands in the order defined.
+
+    See https://github.com/pallets/click/issues/513 for context.
+    """
+
+    def list_commands(self, ctx):  # noqa: ARG002
+        return self.commands.keys()
+
+
+@click.group(cls=NaturalOrderGroup)
 @click.version_option()
 def cli():
     """Interact with hipercow."""
@@ -145,7 +155,7 @@ def _repl_call(ctx, prompt_kwargs) -> bool:
         return True
 
 
-@cli.group()
+@cli.group(cls=NaturalOrderGroup)
 def driver():
     """Configure drivers."""
     pass  # pragma: no cover
@@ -194,7 +204,7 @@ def cli_driver_list():
         click.echo("(none)")
 
 
-@cli.group()
+@cli.group(cls=NaturalOrderGroup)
 def task():
     """Create and interact with tasks."""
     pass  # pragma: no cover
@@ -368,7 +378,7 @@ def _process_with_status(with_status: list[str]):
     return reduce(ior, [TaskStatus[i.upper()] for i in with_status])
 
 
-@cli.group()
+@cli.group(cls=NaturalOrderGroup)
 def dide():
     """Commands for interacting with the DIDE cluster."""
     pass  # pragma: no cover
@@ -446,7 +456,7 @@ def cli_dide_bootstrap(
     )
 
 
-@cli.group()
+@cli.group(cls=NaturalOrderGroup)
 def environment():
     """Interact with environments."""
     pass  # pragma: no cover
@@ -514,7 +524,7 @@ def cli_environment_provision_run(name: str, id: str):
     provision_run(name, id, r)
 
 
-@cli.group()
+@cli.group(cls=NaturalOrderGroup)
 def bundle():
     """Interact with bundles."""
     pass  # pragma: no cover
@@ -592,8 +602,9 @@ def cli_bundle_status(name: str, summary: str):
 # I wonder if we might resolve this by having a 'create' subcommand,
 # so I've put the bulk submission here and we might move the single
 # task creation down here later.  Or we can move elsewhere.
-@cli.group("create")
+@cli.group(cls=NaturalOrderGroup)
 def create():
+    """Commands for task creation."""
     pass  # pragma: no cover
 
 
