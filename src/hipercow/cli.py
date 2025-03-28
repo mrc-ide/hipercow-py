@@ -534,7 +534,9 @@ def cli_bundle_delete(name: str):
     """Delete a bundle.
 
     Note that this does not delete the tasks in the bundle, just the
-    bundle itself.
+    bundle itself. So you will not be able to use `hipercow bundle` to
+    manage the ensemble of jobs together, but you will be able to work
+    with the tasks by their individual ids, using `hipercow task`.
     """
     r = root.open_root()
     bundle_delete(name, root=r)
@@ -582,7 +584,7 @@ def cli_bundle_status(name: str, summary: str):
 # hipercow task status <id> (for task.task_status)
 # hipercow task create <cmd> (for task_create.task_create_shell)
 # hipercow bundle status <name> for (bundle.bundle_status)
-# hipercow bulk create <cmd> <data> for (task_create_bulk.bulk_create_shell)
+# hipercow create bulk <cmd> <data> for (task_create_bulk.bulk_create_shell)
 #
 # Some of the inconsistency is inherited from hipercow, but it also
 # reflects that bundles might not be only created by bulk submission.
@@ -618,6 +620,10 @@ def cli_create_bulk(
     name: str | None,
 ):
     """Bulk create tasks by substituting into a template.
+
+       These created tasks will then belong to a "bundle"
+       with a name (either automatically generated, or of your
+       choosing), that can be managed using `hipercow bundle`
 
     The command must contain `@`-prefixed placeholders such as
 
