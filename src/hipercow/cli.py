@@ -85,7 +85,17 @@ def _handle_error(e: Exception) -> Never:
         sys.exit(1)
 
 
-@click.group()
+class NaturalOrderGroup(click.Group):
+    """A click utility to define commands in the order defined.
+
+    See https://github.com/pallets/click/issues/513 for context.
+    """
+
+    def list_commands(self, ctx):  # noqa: ARG002
+        return self.commands.keys()
+
+
+@click.group(cls=NaturalOrderGroup)
 @click.version_option()
 def cli():
     """Interact with hipercow."""
@@ -145,7 +155,7 @@ def _repl_call(ctx, prompt_kwargs) -> bool:
         return True
 
 
-@cli.group()
+@cli.group(cls=NaturalOrderGroup)
 def driver():
     """Configure drivers."""
     pass  # pragma: no cover
@@ -194,7 +204,7 @@ def cli_driver_list():
         click.echo("(none)")
 
 
-@cli.group()
+@cli.group(cls=NaturalOrderGroup)
 def task():
     """Create and interact with tasks."""
     pass  # pragma: no cover
@@ -368,85 +378,7 @@ def _process_with_status(with_status: list[str]):
     return reduce(ior, [TaskStatus[i.upper()] for i in with_status])
 
 
-@cli.group()
-def dide():
-    """Commands for interacting with the DIDE cluster."""
-    pass  # pragma: no cover
-
-
-@dide.command("authenticate")
-@click.argument("action", default="set")
-def cli_dide_authenticate(action: str):
-    """Interact with DIDE authentication.
-
-    The action can be
-
-    * `set`: Set your username and password (the default)
-
-    * `check`: Check the stored credentials
-
-    * `clear`: Clear any stored credentials
-
-    """
-    if action == "set":
-        dide_auth.authenticate()
-    elif action == "check":
-        dide_auth.check()
-    elif action == "clear":
-        dide_auth.clear()
-    else:
-        msg = f"No such action '{action}'; must be one of set/check/clear"
-        raise Exception(msg)
-
-
-@dide.command("check")
-def cli_dide_check():
-    """Check everything is good to use hipercow on the DIDE cluster."""
-    dide_check()
-
-
-@dide.command("bootstrap", hidden=True)
-@click.argument("target", required=False)
-@click.option(
-    "--force/--no-force",
-    default=False,
-    help="Force reinstallation; passed through to pip",
-)
-@click.option(
-    "--verbose/--no-verbose",
-    default=True,
-    help="Verbose output from pip; default is verbose output",
-)
-@click.option(
-    "--python-version",
-    multiple=True,
-    help="Python version to update. Multiple copies of this flag allowed",
-)
-def cli_dide_bootstrap(
-    target: str, *, force: bool, verbose: bool, python_version: list[str]
-):
-    r"""Update the bootstrap.
-
-    You will need `--force` much more often than expcted at present,
-    because pip won't always reinstall if only the patch version has
-    changed.
-
-    This only works if you have write access to
-    `\\wpia-hn\hipercow`.  See the administration guide on the
-    hipercow website for details:
-
-    https://mrc-ide.github.io/hipercow-py/administration/
-
-    """
-    dide_bootstrap(
-        target,
-        force=force,
-        verbose=verbose,
-        python_versions=list(python_version),
-    )
-
-
-@cli.group()
+@cli.group(cls=NaturalOrderGroup)
 def environment():
     """Interact with environments."""
     pass  # pragma: no cover
@@ -514,7 +446,7 @@ def cli_environment_provision_run(name: str, id: str):
     provision_run(name, id, r)
 
 
-@cli.group()
+@cli.group(cls=NaturalOrderGroup)
 def bundle():
     """Interact with bundles."""
     pass  # pragma: no cover
@@ -592,8 +524,9 @@ def cli_bundle_status(name: str, summary: str):
 # I wonder if we might resolve this by having a 'create' subcommand,
 # so I've put the bulk submission here and we might move the single
 # task creation down here later.  Or we can move elsewhere.
-@cli.group("create")
+@cli.group(cls=NaturalOrderGroup)
 def create():
+    """Commands for task creation."""
     pass  # pragma: no cover
 
 
@@ -713,3 +646,81 @@ def _cli_bulk_preview_commands(cmds: list[list[str]], preview: int) -> None:
         click.echo(f"  {i + 1}: {cmd_str}")
         if skip > 0 and i == preview - 1:
             click.echo(f"   : ... {skip} commands omitted")
+
+
+@cli.group(cls=NaturalOrderGroup)
+def dide():
+    """Commands for interacting with the DIDE cluster."""
+    pass  # pragma: no cover
+
+
+@dide.command("authenticate")
+@click.argument("action", default="set")
+def cli_dide_authenticate(action: str):
+    """Interact with DIDE authentication.
+
+    The action can be
+
+    * `set`: Set your username and password (the default)
+
+    * `check`: Check the stored credentials
+
+    * `clear`: Clear any stored credentials
+
+    """
+    if action == "set":
+        dide_auth.authenticate()
+    elif action == "check":
+        dide_auth.check()
+    elif action == "clear":
+        dide_auth.clear()
+    else:
+        msg = f"No such action '{action}'; must be one of set/check/clear"
+        raise Exception(msg)
+
+
+@dide.command("check")
+def cli_dide_check():
+    """Check everything is good to use hipercow on the DIDE cluster."""
+    dide_check()
+
+
+@dide.command("bootstrap", hidden=True)
+@click.argument("target", required=False)
+@click.option(
+    "--force/--no-force",
+    default=False,
+    help="Force reinstallation; passed through to pip",
+)
+@click.option(
+    "--verbose/--no-verbose",
+    default=True,
+    help="Verbose output from pip; default is verbose output",
+)
+@click.option(
+    "--python-version",
+    multiple=True,
+    help="Python version to update. Multiple copies of this flag allowed",
+)
+def cli_dide_bootstrap(
+    target: str, *, force: bool, verbose: bool, python_version: list[str]
+):
+    r"""Update the bootstrap.
+
+    You will need `--force` much more often than expcted at present,
+    because pip won't always reinstall if only the patch version has
+    changed.
+
+    This only works if you have write access to
+    `\\wpia-hn\hipercow`.  See the administration guide on the
+    hipercow website for details:
+
+    https://mrc-ide.github.io/hipercow-py/administration/
+
+    """
+    dide_bootstrap(
+        target,
+        force=force,
+        verbose=verbose,
+        python_versions=list(python_version),
+    )
