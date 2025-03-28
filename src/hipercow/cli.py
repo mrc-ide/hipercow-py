@@ -379,84 +379,6 @@ def _process_with_status(with_status: list[str]):
 
 
 @cli.group(cls=NaturalOrderGroup)
-def dide():
-    """Commands for interacting with the DIDE cluster."""
-    pass  # pragma: no cover
-
-
-@dide.command("authenticate")
-@click.argument("action", default="set")
-def cli_dide_authenticate(action: str):
-    """Interact with DIDE authentication.
-
-    The action can be
-
-    * `set`: Set your username and password (the default)
-
-    * `check`: Check the stored credentials
-
-    * `clear`: Clear any stored credentials
-
-    """
-    if action == "set":
-        dide_auth.authenticate()
-    elif action == "check":
-        dide_auth.check()
-    elif action == "clear":
-        dide_auth.clear()
-    else:
-        msg = f"No such action '{action}'; must be one of set/check/clear"
-        raise Exception(msg)
-
-
-@dide.command("check")
-def cli_dide_check():
-    """Check everything is good to use hipercow on the DIDE cluster."""
-    dide_check()
-
-
-@dide.command("bootstrap", hidden=True)
-@click.argument("target", required=False)
-@click.option(
-    "--force/--no-force",
-    default=False,
-    help="Force reinstallation; passed through to pip",
-)
-@click.option(
-    "--verbose/--no-verbose",
-    default=True,
-    help="Verbose output from pip; default is verbose output",
-)
-@click.option(
-    "--python-version",
-    multiple=True,
-    help="Python version to update. Multiple copies of this flag allowed",
-)
-def cli_dide_bootstrap(
-    target: str, *, force: bool, verbose: bool, python_version: list[str]
-):
-    r"""Update the bootstrap.
-
-    You will need `--force` much more often than expcted at present,
-    because pip won't always reinstall if only the patch version has
-    changed.
-
-    This only works if you have write access to
-    `\\wpia-hn\hipercow`.  See the administration guide on the
-    hipercow website for details:
-
-    https://mrc-ide.github.io/hipercow-py/administration/
-
-    """
-    dide_bootstrap(
-        target,
-        force=force,
-        verbose=verbose,
-        python_versions=list(python_version),
-    )
-
-
-@cli.group(cls=NaturalOrderGroup)
 def environment():
     """Interact with environments."""
     pass  # pragma: no cover
@@ -724,3 +646,81 @@ def _cli_bulk_preview_commands(cmds: list[list[str]], preview: int) -> None:
         click.echo(f"  {i + 1}: {cmd_str}")
         if skip > 0 and i == preview - 1:
             click.echo(f"   : ... {skip} commands omitted")
+
+
+@cli.group(cls=NaturalOrderGroup)
+def dide():
+    """Commands for interacting with the DIDE cluster."""
+    pass  # pragma: no cover
+
+
+@dide.command("authenticate")
+@click.argument("action", default="set")
+def cli_dide_authenticate(action: str):
+    """Interact with DIDE authentication.
+
+    The action can be
+
+    * `set`: Set your username and password (the default)
+
+    * `check`: Check the stored credentials
+
+    * `clear`: Clear any stored credentials
+
+    """
+    if action == "set":
+        dide_auth.authenticate()
+    elif action == "check":
+        dide_auth.check()
+    elif action == "clear":
+        dide_auth.clear()
+    else:
+        msg = f"No such action '{action}'; must be one of set/check/clear"
+        raise Exception(msg)
+
+
+@dide.command("check")
+def cli_dide_check():
+    """Check everything is good to use hipercow on the DIDE cluster."""
+    dide_check()
+
+
+@dide.command("bootstrap", hidden=True)
+@click.argument("target", required=False)
+@click.option(
+    "--force/--no-force",
+    default=False,
+    help="Force reinstallation; passed through to pip",
+)
+@click.option(
+    "--verbose/--no-verbose",
+    default=True,
+    help="Verbose output from pip; default is verbose output",
+)
+@click.option(
+    "--python-version",
+    multiple=True,
+    help="Python version to update. Multiple copies of this flag allowed",
+)
+def cli_dide_bootstrap(
+    target: str, *, force: bool, verbose: bool, python_version: list[str]
+):
+    r"""Update the bootstrap.
+
+    You will need `--force` much more often than expcted at present,
+    because pip won't always reinstall if only the patch version has
+    changed.
+
+    This only works if you have write access to
+    `\\wpia-hn\hipercow`.  See the administration guide on the
+    hipercow website for details:
+
+    https://mrc-ide.github.io/hipercow-py/administration/
+
+    """
+    dide_bootstrap(
+        target,
+        force=force,
+        verbose=verbose,
+        python_versions=list(python_version),
+    )
