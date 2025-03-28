@@ -4,6 +4,7 @@ import json
 import pytest
 import responses
 
+from hipercow.__about__ import __version__ as hipercow_version
 from hipercow.dide import web
 from hipercow.resources import TaskResources
 from hipercow.task import TaskStatus
@@ -309,7 +310,7 @@ def test_create_basic_submit_data():
         "jobs": web.encode64(web._call_quote_batch_path(path)),
         "dep": web.encode64(""),
         "hpcfunc": "submit",
-        "ver": web.encode64("hipercow-py"),
+        "ver": web.encode64(f"hipercow-py/{hipercow_version}"),
         "rc": web.encode64("1"),
         "rt": web.encode64("Cores"),
     }

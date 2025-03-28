@@ -8,6 +8,7 @@ from urllib.parse import urljoin
 import requests
 from defusedxml import ElementTree
 
+from hipercow.__about__ import __version__ as hipercow_version
 from hipercow.resources import TaskResources
 from hipercow.task import TaskStatus
 
@@ -202,7 +203,7 @@ def _client_body_submit(
         "jobs": encode64(_call_quote_batch_path(path)),
         "dep": encode64(""),  # dependencies, eventually
         "hpcfunc": "submit",
-        "ver": encode64("hipercow-py"),
+        "ver": encode64(f"hipercow-py/{hipercow_version}"),
     }
 
     data["rc"] = encode64(str(resources.cores))
