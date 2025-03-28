@@ -1,3 +1,5 @@
+import math
+
 import pytest
 
 from hipercow.resources import ClusterResources, Queues, TaskResources
@@ -63,6 +65,13 @@ def test_can_create_non_default_resources():
 def test_that_cores_is_positive():
     with pytest.raises(ValueError, match="'cores' must be positive"):
         TaskResources(cores=-1)
+
+
+def test_that_cores_must_be_integer_or_inf():
+    assert TaskResources(cores=math.inf).cores == math.inf
+    assert TaskResources(cores=100).cores == 100
+    with pytest.raises(ValueError, match="'cores' must be an integer"):
+        TaskResources(cores=1.5)
 
 
 def test_can_validate_resources_against_cluster():

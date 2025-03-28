@@ -1,5 +1,6 @@
 """Specify and interact with resources."""
 
+import math
 from dataclasses import dataclass
 
 
@@ -22,7 +23,8 @@ class TaskResources:
             have some mechanism to exploit this parallelism (e.g.,
             using the
             [`multiprocessing`](https://docs.python.org/3/library/multiprocessing.html)
-            package).
+            package).  Specify `math.inf` if you want to request all
+            the cores on a single node.
 
         exclusive: Request exclusive access to a node.
 
@@ -39,7 +41,7 @@ class TaskResources:
     """
 
     queue: str | None = None
-    cores: int = 1
+    cores: int | float = 1
     exclusive: bool = False
     max_runtime: int | None = None
     memory_per_node: int | None = None
@@ -47,6 +49,9 @@ class TaskResources:
 
     def __post_init__(self):
         _require_positive(self.cores, "cores")
+        if self.cores != math.inf and not isinstance(self.cores, int):
+            msg = "'cores' must be an integer (or inf)"
+            raise ValueError(msg)
         _require_positive(self.max_runtime, "max_runtime")
         _require_positive(self.memory_per_node, "memory_per_node")
         _require_positive(self.memory_per_task, "memory_per_task")
