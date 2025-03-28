@@ -94,3 +94,5 @@ def test_can_bulk_create_tasks(tmp_path):
 def test_can_extract_identrifiers_with_backport():
     obj = _TemplateAt("hello @{a} @b world")
     assert _template_identifiers(obj) == ["a", "b"]
+    obj = _TemplateAt("hello @{a} @b world @a")
+    assert _template_identifiers(obj) == ["a", "b"]

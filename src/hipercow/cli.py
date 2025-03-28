@@ -675,17 +675,17 @@ def cli_create_bulk(
 
 def _cli_bulk_create_data(data: tuple[str]) -> BulkDataInput:
     if not data:
-        msg = "Expected at least one argument to 'data'"
+        msg = "Expected at least one '--data' argument"
         raise Exception(msg)
 
-    if len(data) == 1 and re.match("\\.csv$", data[0], re.IGNORECASE):
+    if len(data) == 1 and re.search("\\.csv$", data[0], re.IGNORECASE):
         return read_csv_to_dict(data[0])
 
     return dict(_cli_bulk_parse_data_argument(el) for el in data)
 
 
 def _cli_bulk_parse_data_argument(x: str) -> tuple[str, list[str]]:
-    m = re.match("^([_a-z][_a-z0-9]*)\\s*=\\s*(.+)$", x, re.IGNORECASE)
+    m = re.match("^([_a-z][_a-z0-9]*)\\s*=\\s*([^=]+)$", x, re.IGNORECASE)
     if not m:
         msg = f"Failed to parse '--data' argument '{x}'"
         raise Exception(msg)
@@ -703,7 +703,7 @@ def _cli_bulk_preview_commands(cmds: list[list[str]], preview: int) -> None:
     skip = n - 2 * preview
     if skip > 0:
         cmds_show = cmds_show[:preview] + cmds_show[-preview:]
-    ui.alert_info(f"Created {n} commands:")
+    ui.alert_info(f"I would create {n} commands:")
     for i, cmd_i in cmds_show:
         cmd_str = " ".join(cmd_i)
         click.echo(f"  {i + 1}: {cmd_str}")
