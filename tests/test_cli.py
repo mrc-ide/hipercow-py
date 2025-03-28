@@ -1,4 +1,5 @@
 import platform
+import re
 import time
 from pathlib import Path
 from unittest import mock
@@ -8,9 +9,10 @@ import pytest
 from click.testing import CliRunner
 
 from hipercow import cli, root, task
+from hipercow.bundle import bundle_load
 from hipercow.driver import list_drivers
 from hipercow.resources import TaskResources
-from hipercow.task import TaskData, TaskStatus
+from hipercow.task import TaskData, TaskStatus, set_task_status
 from hipercow.task_create import task_create_shell
 from hipercow.util import transient_envvars
 from tests.helpers import AnyInstanceOf
@@ -569,3 +571,180 @@ def test_can_control_queue_used_in_task_creation(tmp_path):
         )
         assert res.exit_code == 1
         assert "Queue 'other' is not in valid queue list" in str(res.exception)
+
+
+def test_can_use_bulk_create(tmp_path):
+    runner = CliRunner()
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        root.init(".")
+        r = root.open_root()
+        res = runner.invoke(
+            cli.cli_create_bulk,
+            [
+                "--name",
+                "mybundle",
+                "--data",
+                "a=1..2",
+                "--data",
+                "b=x,y",
+                "mycmd",
+                "@a",
+                "c/@{b}/d",
+            ],
+        )
+        assert res.exit_code == 0
+        assert re.search("Created bundle '.+' with 4 tasks", res.output)
+        bundle = bundle_load("mybundle", root=r)
+        assert len(bundle.task_ids) == 4
+
+        res = runner.invoke(cli.cli_bundle_list, [])
+        assert res.exit_code == 0
+        assert res.output.strip() == "mybundle"
+
+        res = runner.invoke(cli.cli_bundle_delete, ["mybundle"])
+        assert res.exit_code == 0
+
+        res = runner.invoke(cli.cli_bundle_list, [])
+        assert res.exit_code == 0
+        assert res.output.strip() == ""
+
+
+def test_can_get_bundle_status(tmp_path):
+    runner = CliRunner()
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        root.init(".")
+        r = root.open_root()
+        res = runner.invoke(
+            cli.cli_create_bulk,
+            [
+                "--name",
+                "mybundle",
+                "--data",
+                "a=1..5",
+                "echo",
+                "@a",
+            ],
+        )
+        assert res.exit_code == 0
+        assert re.search("Created bundle '.+' with 5 tasks", res.output)
+        bundle = bundle_load("mybundle", root=r)
+
+        set_task_status(bundle.task_ids[3], TaskStatus.SUCCESS, None, r)
+
+        res = runner.invoke(cli.cli_bundle_status, ["mybundle"])
+        assert res.exit_code == 0
+        status = ["created", "created", "created", "success", "created"]
+        assert res.output == "".join(
+            f"{id}: {status}\n"
+            for id, status in zip(bundle.task_ids, status, strict=False)
+        )
+
+        res = runner.invoke(
+            cli.cli_bundle_status, ["mybundle", "--summary", "group"]
+        )
+        assert res.exit_code == 0
+        assert res.output == "created: 4\nsuccess: 1\n"
+
+        res = runner.invoke(
+            cli.cli_bundle_status, ["mybundle", "--summary", "single"]
+        )
+        assert res.exit_code == 0
+        assert res.output == "created\n"
+
+
+def test_can_preview_commands():
+    runner = CliRunner()
+    res = runner.invoke(
+        cli.cli_create_bulk,
+        [
+            "--preview",
+            "--data",
+            "a=1..3",
+            "echo",
+            "@a",
+        ],
+    )
+    assert res.exit_code == 0
+    lines = res.output.splitlines()
+    assert "I would create 3 commands:" in lines[0]
+    assert lines[1] == "  1: echo 1"
+    assert lines[2] == "  2: echo 2"
+    assert lines[3] == "  3: echo 3"
+
+
+def test_can_summarise_generated_commands():
+    runner = CliRunner()
+    res = runner.invoke(
+        cli.cli_create_bulk,
+        [
+            "--preview",
+            "--data",
+            "a=1..10",
+            "--data",
+            "b=1..5",
+            "echo",
+            "@a/@{b}",
+        ],
+    )
+    assert res.exit_code == 0
+    lines = res.output.splitlines()
+    assert "I would create 50 commands:" in lines[0]
+    assert lines[1] == "  1: echo 1/1"
+    assert lines[2] == "  2: echo 1/2"
+    assert lines[3] == "  3: echo 1/3"
+    assert lines[4] == "   : ... 44 commands omitted"
+    assert lines[5] == "  48: echo 10/3"
+    assert lines[6] == "  49: echo 10/4"
+    assert lines[7] == "  50: echo 10/5"
+
+
+def test_can_create_commands_from_csv(tmp_path):
+    runner = CliRunner()
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        with open("data.csv", "w") as f:
+            f.write("a,b\n1,1\n1,2\n2,2")
+        res = runner.invoke(
+            cli.cli_create_bulk,
+            [
+                "--preview",
+                "--data=data.csv",
+                "echo",
+                "@{a}-@{b}",
+            ],
+        )
+
+        assert res.exit_code == 0
+        output = res.output.splitlines()
+        assert len(output) == 4
+        assert output[1:] == ["  1: echo 1-1", "  2: echo 1-2", "  3: echo 2-2"]
+
+
+def test_require_at_least_one_data_argument():
+    runner = CliRunner()
+    res = runner.invoke(
+        cli.cli_create_bulk,
+        [
+            "--preview",
+            "echo",
+            "hello",
+        ],
+    )
+
+    assert res.exit_code == 1
+    assert str(res.exception) == "Expected at least one '--data' argument"
+
+
+def test_can_parse_data_argument():
+    assert cli._cli_bulk_parse_data_argument("a=1") == ("a", ["1"])
+    assert cli._cli_bulk_parse_data_argument("a=1,2") == ("a", ["1", "2"])
+    assert cli._cli_bulk_parse_data_argument("a=1:4") == ("a", ["1", "2", "3"])
+    assert cli._cli_bulk_parse_data_argument("a=1..4") == (
+        "a",
+        ["1", "2", "3", "4"],
+    )
+
+    with pytest.raises(Exception, match="Failed to parse"):
+        cli._cli_bulk_parse_data_argument("a=b=c")
+
+    with pytest.raises(Exception, match="Failed to parse"):
+        cli._cli_bulk_parse_data_argument("a")

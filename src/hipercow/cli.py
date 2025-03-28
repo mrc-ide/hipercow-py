@@ -1,3 +1,4 @@
+import re
 import sys
 from functools import reduce
 from operator import ior
@@ -8,7 +9,14 @@ from prompt_toolkit.history import FileHistory
 from rich.console import Console
 from typing_extensions import Never  # 3.10 does not have this in typing
 
-from hipercow import root
+from hipercow import root, ui
+from hipercow.bundle import (
+    bundle_delete,
+    bundle_list,
+    bundle_load,
+    bundle_status,
+    bundle_status_reduce,
+)
 from hipercow.configure import configure, show_configuration, unconfigure
 from hipercow.dide import auth as dide_auth
 from hipercow.dide.bootstrap import bootstrap as dide_bootstrap
@@ -32,8 +40,13 @@ from hipercow.task import (
     task_wait,
 )
 from hipercow.task_create import task_create_shell
+from hipercow.task_create_bulk import (
+    BulkDataInput,
+    bulk_create_shell,
+    bulk_create_shell_commands,
+)
 from hipercow.task_eval import task_eval
-from hipercow.util import loop_while, truthy_envvar
+from hipercow.util import loop_while, read_csv_to_dict, tabulate, truthy_envvar
 
 # This is how the 'rich' docs drive things:
 console = Console()
@@ -499,3 +512,204 @@ def cli_environment_provision(name: str, cmd: tuple[str]):
 def cli_environment_provision_run(name: str, id: str):
     r = root.open_root()
     provision_run(name, id, r)
+
+
+@cli.group()
+def bundle():
+    """Interact with bundles."""
+    pass  # pragma: no cover
+
+
+@bundle.command("list")
+def cli_bundle_list():
+    """List bundles."""
+    r = root.open_root()
+    for el in bundle_list(r):
+        click.echo(el)
+
+
+@bundle.command("delete")
+@click.argument("name")
+def cli_bundle_delete(name: str):
+    """Delete a bundle.
+
+    Note that this does not delete the tasks in the bundle, just the
+    bundle itself. So you will not be able to use `hipercow bundle` to
+    manage the ensemble of jobs together, but you will be able to work
+    with the tasks by their individual ids, using `hipercow task`.
+    """
+    r = root.open_root()
+    bundle_delete(name, root=r)
+
+
+@bundle.command("status")
+@click.argument("name")
+@click.option(
+    "--summary",
+    type=click.Choice(["none", "group", "single"], case_sensitive=False),
+    default="none",
+    help="Summarise the statuses",
+)
+def cli_bundle_status(name: str, summary: str):
+    """Get the status of a bundle.
+
+    This can offer three levels of summary; and we might redesign the
+    output a bit to make this easier to work with, depending on what
+    people actually do with the output.
+
+    Please don't try and parse the output directly, but let us know
+    what sort of format you might like it in, as we can easily add
+    something like a JSON format output.
+
+    """
+    r = root.open_root()
+    if summary == "single":
+        click.echo(bundle_status_reduce(name, root=r))
+    else:
+        res = bundle_status(name, root=r)
+        if summary == "none":
+            task_ids = bundle_load(name, root=r).task_ids
+            for task_id, status in zip(task_ids, res, strict=False):
+                click.echo(f"{task_id}: {status}")
+        else:
+            for status_str, n in tabulate([str(el) for el in res]).items():
+                # We might format this more nicely so that we
+                # align on status?
+                click.echo(f"{status_str}: {n}")
+
+
+# The names are a bit of a mess here, something that largely follows
+# hipercow-r:
+#
+# hipercow task status <id> (for task.task_status)
+# hipercow task create <cmd> (for task_create.task_create_shell)
+# hipercow bundle status <name> for (bundle.bundle_status)
+# hipercow create bulk <cmd> <data> for (task_create_bulk.bulk_create_shell)
+#
+# Some of the inconsistency is inherited from hipercow, but it also
+# reflects that bundles might not be only created by bulk submission.
+#
+# I wonder if we might resolve this by having a 'create' subcommand,
+# so I've put the bulk submission here and we might move the single
+# task creation down here later.  Or we can move elsewhere.
+@cli.group("create")
+def create():
+    pass  # pragma: no cover
+
+
+@create.command("bulk")
+@click.argument("cmd", nargs=-1)
+@click.option("--data", multiple=True, help="Data to use in the template")
+@click.option(
+    "--environment", type=str, help="The environment in which to run the task"
+)
+@click.option("--queue", help="The queue to submit the task to")
+@click.option("--name", help="An optional name for the bundle")
+@click.option(
+    "--preview",
+    help="Show preview of tasks that would be created, but don't create any",
+    is_flag=True,
+)
+def cli_create_bulk(
+    cmd: tuple[str],
+    *,
+    preview: bool,
+    environment: str | None,
+    data: tuple[str],
+    queue: str | None,
+    name: str | None,
+):
+    """Bulk create tasks by substituting into a template.
+
+       These created tasks will then belong to a "bundle"
+       with a name (either automatically generated, or of your
+       choosing), that can be managed using `hipercow bundle`
+
+    The command must contain `@`-prefixed placeholders such as
+
+    ```
+    mycommand --output=path/@{subdir} @action
+    ```
+
+    which includes the placeholders `subdir` and `action`.
+
+    You can include data to substitute into this template in three
+    ways:
+
+    * A single `--data=filename.csv` argument which will read a `csv` file
+      of inputs (here it must contain columns `subdir` and `action`)
+
+    * Two arguments `--data` containing:
+      - a comma separated set of values (e.g., `--data action=a,b,c`)
+      - a range of values (e.g., `--data subdir=0:n` or `--data
+        subdir=0..n`); the `:` form is python-like and does not
+        include the end of the range, while the `..` is inclusive and
+        does include `n`
+      - in both cases we will compute the outer product of all
+        `--data` arguments and submit all combinations of arguments.
+
+    """
+    template_data = _cli_bulk_create_data(data)
+    if preview:
+        cmds = bulk_create_shell_commands(list(cmd), template_data)
+        _cli_bulk_preview_commands(cmds, 3)
+    else:
+        r = root.open_root()
+        resources = None if queue is None else TaskResources(queue=queue)
+
+        # An alternative here would be to have `bulk_create_shell`
+        # *not* take template data and accept a list of lists of
+        # strings (i.e., the template with substitutions applied) and
+        # then we only do the bulk_create_shell_commands() once here
+        # in this function and not in the bulk support.  That feels a
+        # bit weird - I think we want the substitution to be part of
+        # the programmatic API but it could make this more flexible?
+        # We can always change our mind here in future, as we expect
+        # most usage to be from the cli.
+        name = bulk_create_shell(
+            list(cmd),
+            template_data,
+            name=name,
+            environment=environment,
+            resources=resources,
+            root=r,
+        )
+        click.echo(name)
+
+
+def _cli_bulk_create_data(data: tuple[str]) -> BulkDataInput:
+    if not data:
+        msg = "Expected at least one '--data' argument"
+        raise Exception(msg)
+
+    if len(data) == 1 and re.search("\\.csv$", data[0], re.IGNORECASE):
+        return read_csv_to_dict(data[0])
+
+    return dict(_cli_bulk_parse_data_argument(el) for el in data)
+
+
+def _cli_bulk_parse_data_argument(x: str) -> tuple[str, list[str]]:
+    m = re.match("^([_a-z][_a-z0-9]*)\\s*=\\s*([^=]+)$", x, re.IGNORECASE)
+    if not m:
+        msg = f"Failed to parse '--data' argument '{x}'"
+        raise Exception(msg)
+    name, value = m.groups()
+    if m_range := re.match(r"^([0-9]+)(:|\.\.)([0-9]+)$", value):
+        start, mode, end = m_range.groups()
+        values = range(int(start), int(end) + (0 if mode == ":" else 1))
+        return name, [str(i) for i in values]
+    return name, list(value.split(","))
+
+
+def _cli_bulk_preview_commands(cmds: list[list[str]], preview: int) -> None:
+    n = len(cmds)
+    cmds_show = list(enumerate(cmds))
+    skip = n - 2 * preview
+    if skip > 0:
+        cmds_show = cmds_show[:preview] + cmds_show[-preview:]
+    ui.alert_info(f"I would create {n} commands:")
+    for i, cmd_i in cmds_show:
+        cmd_str = " ".join(cmd_i)
+        click.echo(f"  {i + 1}: {cmd_str}")
+        if skip > 0 and i == preview - 1:
+            click.echo(f"   : ... {skip} commands omitted")

@@ -12,13 +12,10 @@ class _TemplateAt(Template):
 
     # Backport a simplified version of get_idenfiers for python 3.10,
     # which lacks this method https://docs.python.org/3/library/string.html
-    # no cover: start
-    if not hasattr(Template, "get_identifiers"):
+    if not hasattr(Template, "get_identifiers"):  # pragma: no cover
 
         def get_identifiers(self):
             return _template_identifiers(self)
-
-    # no cover: end
 
 
 def _template_identifiers(obj: Template) -> list[str]:
