@@ -557,7 +557,7 @@ def cli_bundle_status(name: str, summary: str):
 
     Please don't try and parse the output directly, but let us know
     what sort of format you might like it in, as we can easily add
-    something like a json format output.
+    something like a JSON format output.
 
     """
     r = root.open_root()
@@ -623,14 +623,16 @@ def cli_create_bulk(
 
     The command must contain `@`-prefixed placeholders such as
 
+    ```
     mycommand --output=path/@{subdir} @action
+    ```
 
     which includes the placeholders `subdir` and `action`.
 
     You can include data to substitute into this template in three
     ways:
 
-    * A single `--data=filename.csv` argument which will read a csv file
+    * A single `--data=filename.csv` argument which will read a `csv` file
       of inputs (here it must contain columns `subdir` and `action`)
 
     * Two arguments `--data` containing:
