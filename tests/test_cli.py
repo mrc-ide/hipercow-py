@@ -12,7 +12,7 @@ from hipercow import cli, root, task
 from hipercow.bundle import bundle_load
 from hipercow.driver import list_drivers
 from hipercow.resources import TaskResources
-from hipercow.task import TaskData, TaskStatus
+from hipercow.task import TaskData, TaskStatus, set_task_status
 from hipercow.task_create import task_create_shell
 from hipercow.util import transient_envvars
 from tests.helpers import AnyInstanceOf
@@ -596,3 +596,57 @@ def test_can_use_bulk_create(tmp_path):
         assert re.search("Created bundle '.+' with 4 tasks", res.output)
         bundle = bundle_load("mybundle", root=r)
         assert len(bundle.task_ids) == 4
+
+        res = runner.invoke(cli.cli_bundle_list, [])
+        assert res.exit_code == 0
+        assert res.output.strip() == "mybundle"
+
+        res = runner.invoke(cli.cli_bundle_delete, ["mybundle"])
+        assert res.exit_code == 0
+
+        res = runner.invoke(cli.cli_bundle_list, [])
+        assert res.exit_code == 0
+        assert res.output.strip() == ""
+
+
+def test_can_get_bundle_status(tmp_path):
+    runner = CliRunner()
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        root.init(".")
+        r = root.open_root()
+        res = runner.invoke(
+            cli.cli_create_bulk,
+            [
+                "--name",
+                "mybundle",
+                "--data",
+                "a=1..5",
+                "echo",
+                "@a",
+            ],
+        )
+        assert res.exit_code == 0
+        assert re.search("Created bundle '.+' with 5 tasks", res.output)
+        bundle = bundle_load("mybundle", root=r)
+
+        set_task_status(bundle.task_ids[3], TaskStatus.SUCCESS, None, r)
+
+        res = runner.invoke(cli.cli_bundle_status, ["mybundle"])
+        assert res.exit_code == 0
+        status = ["created", "created", "created", "success", "created"]
+        assert res.output == "".join(
+            f"{id}: {status}\n"
+            for id, status in zip(bundle.task_ids, status, strict=False)
+        )
+
+        res = runner.invoke(
+            cli.cli_bundle_status, ["mybundle", "--summary", "group"]
+        )
+        assert res.exit_code == 0
+        assert res.output == "created: 4\nsuccess: 1\n"
+
+        res = runner.invoke(
+            cli.cli_bundle_status, ["mybundle", "--summary", "single"]
+        )
+        assert res.exit_code == 0
+        assert res.output == "created\n"

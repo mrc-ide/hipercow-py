@@ -13,6 +13,7 @@ from hipercow import root, ui
 from hipercow.bundle import (
     bundle_delete,
     bundle_list,
+    bundle_load,
     bundle_status,
     bundle_status_reduce,
 )
@@ -516,7 +517,7 @@ def cli_environment_provision_run(name: str, id: str):
 @cli.group()
 def bundle():
     """Interact with bundles."""
-    pass
+    pass  # pragma: no cover
 
 
 @bundle.command("list")
@@ -544,6 +545,7 @@ def cli_bundle_delete(name: str):
 @click.option(
     "--summary",
     type=click.Choice(["none", "group", "single"], case_sensitive=False),
+    default="none",
     help="Summarise the statuses",
 )
 def cli_bundle_status(name: str, summary: str):
@@ -564,8 +566,9 @@ def cli_bundle_status(name: str, summary: str):
     else:
         res = bundle_status(name, root=r)
         if summary == "none":
-            for status in res:
-                click.echo(status)
+            task_ids = bundle_load(name, root=r).task_ids
+            for task_id, status in zip(task_ids, res, strict=False):
+                click.echo(f"{task_id}: {status}")
         else:
             for status_str, n in tabulate([str(el) for el in res]).items():
                 # We might format this more nicely so that we
@@ -589,7 +592,7 @@ def cli_bundle_status(name: str, summary: str):
 # task creation down here later.  Or we can move elsewhere.
 @cli.group("create")
 def create():
-    pass
+    pass  # pragma: no cover
 
 
 @create.command("bulk")
