@@ -1,5 +1,6 @@
 import base64
 import datetime
+import math
 import re
 from dataclasses import dataclass
 from subprocess import list2cmdline
@@ -206,8 +207,12 @@ def _client_body_submit(
         "ver": encode64(f"hipercow-py/{hipercow_version}"),
     }
 
-    data["rc"] = encode64(str(resources.cores))
-    data["rt"] = encode64("Cores")
+    if resources.cores == math.inf:
+        data["rc"] = encode64("1")
+        data["rt"] = encode64("Nodes")
+    else:
+        data["rc"] = encode64(str(resources.cores))
+        data["rt"] = encode64("Cores")
 
     if resources.exclusive:
         data["exc"] = encode64("1")
@@ -223,7 +228,6 @@ def _client_body_submit(
 
     # Still missing:
     #
-    # infinite cores is a node (rc = 1, rt = Nodes)
     # hold until (hu)
     # requested nodes (rn)
     # priority (pri)
