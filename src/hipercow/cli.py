@@ -606,9 +606,7 @@ def create():
 @click.option(
     "--preview",
     help="Show preview of tasks that would be created, but don't create any",
-    is_flag=False,
-    flag_value=4,
-    default=0,
+    is_flag=True,
 )
 def cli_create_bulk(
     cmd: tuple[str],
@@ -646,9 +644,9 @@ def cli_create_bulk(
 
     """
     template_data = _cli_bulk_create_data(data)
-    if preview > 0:
+    if preview:
         cmds = bulk_create_shell_commands(list(cmd), template_data)
-        _cli_bulk_preview_commands(cmds, preview)
+        _cli_bulk_preview_commands(cmds, 3)
     else:
         r = root.open_root()
         resources = None if queue is None else TaskResources(queue=queue)

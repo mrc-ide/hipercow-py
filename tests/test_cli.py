@@ -677,7 +677,7 @@ def test_can_summarise_generated_commands():
     res = runner.invoke(
         cli.cli_create_bulk,
         [
-            "--preview=3",
+            "--preview",
             "--data",
             "a=1..10",
             "--data",
@@ -724,8 +724,7 @@ def test_require_at_least_one_data_argument():
     res = runner.invoke(
         cli.cli_create_bulk,
         [
-            # TODO: not _quite_ right here, needs to be a flag too
-            "--preview=3",
+            "--preview",
             "echo",
             "hello",
         ],
