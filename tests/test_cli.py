@@ -748,3 +748,9 @@ def test_can_parse_data_argument():
 
     with pytest.raises(Exception, match="Failed to parse"):
         cli._cli_bulk_parse_data_argument("a")
+
+
+def test_can_drop_non_breaking_spaces_from_cmd():
+    assert cli._clean_cmd(("a", "b")) == ["a", "b"]
+    assert cli._clean_cmd(("a", "b\xa0c")) == ["a", "b", "c"]
+    assert cli._clean_cmd(("a", "b\xa0c\xa0d")) == ["a", "b", "c", "d"]

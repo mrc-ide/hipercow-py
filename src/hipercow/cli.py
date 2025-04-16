@@ -319,7 +319,7 @@ def cli_task_create(
     """
     resources = None if queue is None else TaskResources(queue=queue)
     task_id = task_create_shell(
-        list(cmd), environment=environment, resources=resources
+        _clean_cmd(cmd), environment=environment, resources=resources
     )
     click.echo(task_id)
     if wait:
@@ -435,7 +435,7 @@ def cli_environment_provision(name: str, cmd: tuple[str]):
 
     """
     r = root.open_root()
-    provision(name, list(cmd), root=r)
+    provision(name, _clean_cmd(cmd), root=r)
 
 
 @environment.command("provision-run", hidden=True)
@@ -584,7 +584,7 @@ def cli_create_bulk(
     """
     template_data = _cli_bulk_create_data(data)
     if preview:
-        cmds = bulk_create_shell_commands(list(cmd), template_data)
+        cmds = bulk_create_shell_commands(_clean_cmd(cmd), template_data)
         _cli_bulk_preview_commands(cmds, 3)
     else:
         r = root.open_root()
@@ -600,7 +600,7 @@ def cli_create_bulk(
         # We can always change our mind here in future, as we expect
         # most usage to be from the cli.
         name = bulk_create_shell(
-            list(cmd),
+            _clean_cmd(cmd),
             template_data,
             name=name,
             environment=environment,
@@ -724,3 +724,18 @@ def cli_dide_bootstrap(
         verbose=verbose,
         python_versions=list(python_version),
     )
+
+
+# This cleans non-breaking spaces only in the command; it's not
+# obvious how we strip them before parsing with click but that would
+# seem preferable really.
+def _clean_cmd(cmd: tuple[str]) -> list[str]:
+    nbsp = "\xa0"
+    ret = []
+    for el in cmd:
+        if nbsp in el:
+            ui.alert_warning(f"Dropping non-breaking spaces from '{el}'")
+            ret += el.split(nbsp)
+        else:
+            ret.append(el)
+    return ret
