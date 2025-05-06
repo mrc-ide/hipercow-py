@@ -1,6 +1,6 @@
-import pickle
 import shutil
-from dataclasses import dataclass
+
+from pydantic import BaseModel
 
 from hipercow import ui
 from hipercow.environment_engines import (
@@ -11,23 +11,8 @@ from hipercow.environment_engines import (
 from hipercow.root import OptionalRoot, Root, open_root
 
 
-@dataclass
-class EnvironmentConfiguration:
+class EnvironmentConfiguration(BaseModel):
     engine: str
-
-    # As with elsewhere, we will need to avoid actually serialising
-    # the instance itself and only the configuration. Ignore this for
-    # now, even though this will create versioning headaches for us.
-    def write(self, name: str, root: Root):
-        path = root.path_environment_config(name)
-        path.parent.mkdir(parents=True, exist_ok=True)
-        with path.open("wb") as f:
-            pickle.dump(self, f)
-
-    @staticmethod
-    def read(name: str, root: Root) -> "EnvironmentConfiguration":
-        with root.path_environment_config(name).open("rb") as f:
-            return pickle.load(f)
 
 
 # Called 'new' and not 'create' to make it clear that this does not
@@ -68,7 +53,12 @@ def environment_new(name: str, engine: str, root: OptionalRoot = None) -> None:
         raise Exception(msg)
 
     ui.alert_info(f"Creating environment '{name}' using '{engine}'")
-    EnvironmentConfiguration(engine).write(name, root)
+    cfg = EnvironmentConfiguration(engine=engine)
+
+    path = root.path_environment_config(name)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w") as f:
+        f.write(cfg.model_dump_json())
 
 
 def environment_list(root: OptionalRoot = None) -> list[str]:
@@ -170,9 +160,10 @@ def environment_engine(name: str, root: Root) -> EnvironmentEngine:
         name == "default" and not environment_exists(name, root)
     )
     if use_empty_environment:
-        cfg = EnvironmentConfiguration("empty")
+        cfg = EnvironmentConfiguration(engine="empty")
     else:
-        cfg = EnvironmentConfiguration.read(name, root)
+        with root.path_environment_config(name).open("rb") as f:
+            cfg = EnvironmentConfiguration.model_validate_json(f.read())
     if cfg.engine == "pip":
         return Pip(root, name)
     elif cfg.engine == "empty":

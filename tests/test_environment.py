@@ -19,7 +19,8 @@ def test_create_pip_environment(tmp_path):
     assert environment_list(r) == ["default", "empty"]
     with pytest.raises(Exception, match="'default' already exists"):
         environment_new("default", "pip", r)
-    cfg = EnvironmentConfiguration.read("default", r)
+    with r.path_environment_config("default").open() as f:
+        cfg = EnvironmentConfiguration.model_validate_json(f.read())
     assert cfg.engine == "pip"
 
 
