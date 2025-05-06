@@ -162,7 +162,7 @@ def environment_engine(name: str, root: Root) -> EnvironmentEngine:
     if use_empty_environment:
         cfg = EnvironmentConfiguration(engine="empty")
     else:
-        with root.path_environment_config(name).open("rb") as f:
+        with root.path_environment_config(name).open() as f:
             cfg = EnvironmentConfiguration.model_validate_json(f.read())
     if cfg.engine == "pip":
         return Pip(root, name)

@@ -3,29 +3,19 @@ import secrets
 import time
 from dataclasses import dataclass, field
 
+from pydantic import BaseModel, Field
+
 from hipercow.driver import load_driver
 from hipercow.environment import environment_engine
 from hipercow.root import OptionalRoot, Root, open_root
 from hipercow.util import transient_working_directory
 
 
-@dataclass
-class ProvisioningData:
+class ProvisioningData(BaseModel):
     name: str
     id: str
     cmd: list[str]
-    time: float = field(default_factory=time.time, init=False)
-
-    def write(self, root: Root) -> None:
-        path = root.path_provision_data(self.name, self.id)
-        path.parent.mkdir(parents=True, exist_ok=False)
-        with path.open("wb") as f:
-            pickle.dump(self, f)
-
-    @staticmethod
-    def read(name: str, id: str, root: Root) -> "ProvisioningData":
-        with root.path_provision_data(name, id).open("rb") as f:
-            return pickle.load(f)
+    time: float = Field(default_factory=time.time, init=False)
 
 
 @dataclass
@@ -52,7 +42,8 @@ class ProvisioningRecord:
 
     @staticmethod
     def read(name: str, id: str, root: Root) -> "ProvisioningRecord":
-        data = ProvisioningData.read(name, id, root)
+        with root.path_provision_data(name, id).open() as f:
+            data = ProvisioningData.model_validate_json(f.read())
         try:
             result = ProvisioningResult.read(name, id, root)
         except FileNotFoundError:
@@ -109,7 +100,14 @@ def provision(
     id = secrets.token_hex(8)
     with transient_working_directory(root.path):
         cmd = env.check_args(cmd)
-    ProvisioningData(name, id, cmd).write(root)
+
+    data = ProvisioningData(name=name, id=id, cmd=cmd)
+    # TODO: write a small helper for this pattern?
+    path = root.path_provision_data(name, id)
+    path.parent.mkdir(parents=True, exist_ok=False)
+    with path.open("w") as f:
+        f.write(data.model_dump_json())
+
     dr.provision(name, id, root)
 
 
@@ -117,7 +115,10 @@ def provision_run(name: str, id: str, root: Root) -> None:
     if root.path_provision_result(name, id).exists():
         msg = f"Provisioning task '{id}' for '{name}' has already been run"
         raise Exception(msg)
-    data = ProvisioningData.read(name, id, root)
+
+    with root.path_provision_data(name, id).open() as f:
+        data = ProvisioningData.model_validate_json(f.read())
+
     env = environment_engine(name, root)
     logfile = root.path_provision_log(name, id)
     start = time.time()
