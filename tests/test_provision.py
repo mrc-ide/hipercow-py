@@ -106,7 +106,7 @@ def test_record_provisioning_error(tmp_path, mocker):
 
     h = provision_history("default", r)
     assert len(h) == 1
-    assert isinstance(h[0].result.error, Exception)
+    assert h[0].result.error == "some ghastly error"
 
 
 def test_throw_on_provision_if_no_environment(tmp_path):

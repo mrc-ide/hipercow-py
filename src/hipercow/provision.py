@@ -1,7 +1,6 @@
-import pickle
 import secrets
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from pydantic import BaseModel, Field
 
@@ -18,21 +17,15 @@ class ProvisioningData(BaseModel):
     time: float = Field(default_factory=time.time, init=False)
 
 
-@dataclass
-class ProvisioningResult:
-    error: Exception | None
+# This bit is an issue; there is no serialiser for exceptions, so we
+# need to set something up so that we can serialise this nicely.  The
+# simplest bit would be to save it as a massive chunk of base64
+# encoded data representing the pickle-dumped exception.  Or we can
+# run it through rich and save the text.
+class ProvisioningResult(BaseModel):
+    error: None | str
     start: float
-    end: float = field(default_factory=time.time, init=False)
-
-    def write(self, name: str, id: str, root: Root) -> None:
-        path = root.path_provision_result(name, id)
-        with path.open("wb") as f:
-            pickle.dump(self, f)
-
-    @staticmethod
-    def read(name: str, id: str, root: Root) -> "ProvisioningResult":
-        with root.path_provision_result(name, id).open("rb") as f:
-            return pickle.load(f)
+    end: float = Field(default_factory=time.time, init=False)
 
 
 @dataclass
@@ -45,7 +38,8 @@ class ProvisioningRecord:
         with root.path_provision_data(name, id).open() as f:
             data = ProvisioningData.model_validate_json(f.read())
         try:
-            result = ProvisioningResult.read(name, id, root)
+            with root.path_provision_result(name, id).open() as f:
+                result = ProvisioningResult.model_validate_json(f.read())
         except FileNotFoundError:
             result = None
         return ProvisioningRecord(data, result)
@@ -127,9 +121,18 @@ def provision_run(name: str, id: str, root: Root) -> None:
             env.create(filename=logfile)
         try:
             env.provision(data.cmd, filename=logfile)
-            ProvisioningResult(None, start).write(name, id, root)
+            result = ProvisioningResult(error=None, start=start)
+            with root.path_provision_result(name, id).open("w") as f:
+                f.write(result.model_dump_json())
         except Exception as e:
-            ProvisioningResult(e, start).write(name, id, root)
+            # TODO: we need to get more here on the error; probably
+            # some sort of information on the stack trace ideally but
+            # that's fairly hard to pull out (but see
+            # traceback.format_exception(e) which gives us most of
+            # what we might want)
+            result = ProvisioningResult(error=str(e), start=start)
+            with root.path_provision_result(name, id).open("w") as f:
+                f.write(result.model_dump_json())
             msg = "Provisioning failed"
             raise Exception(msg) from e
 
