@@ -3,9 +3,10 @@
 import math
 from dataclasses import dataclass
 
+from pydantic import BaseModel, field_validator
 
-@dataclass(kw_only=True)
-class TaskResources:
+
+class TaskResources(BaseModel):
     """Resources required for a task.
 
     We don't support everything that the R version does yet; in
@@ -47,14 +48,30 @@ class TaskResources:
     memory_per_node: int | None = None
     memory_per_task: int | None = None
 
-    def __post_init__(self):
-        _require_positive(self.cores, "cores")
-        if self.cores != math.inf and not isinstance(self.cores, int):
+    @field_validator("cores")
+    @classmethod
+    def _require_positive_cores(cls, v: int | float) -> int | float:
+        if not isinstance(v, int):
+            if v == math.inf:
+                return v
             msg = "'cores' must be an integer (or inf)"
             raise ValueError(msg)
-        _require_positive(self.max_runtime, "max_runtime")
-        _require_positive(self.memory_per_node, "memory_per_node")
-        _require_positive(self.memory_per_task, "memory_per_task")
+        return _require_positive(v, "cores")
+
+    @field_validator("max_runtime")
+    @classmethod
+    def _require_positive_max_runtime(cls, v: int) -> int:
+        return _require_positive(v, "max_runtime")
+
+    @field_validator("memory_per_node")
+    @classmethod
+    def _require_positive_memory_per_node(cls, v: int) -> int:
+        return _require_positive(v, "memory_per_node")
+
+    @field_validator("memory_per_task")
+    @classmethod
+    def _require_positive_memory_per_task(cls, v: int) -> int:
+        return _require_positive(v, "memory_per_task")
 
 
 @dataclass
@@ -156,10 +173,11 @@ class ClusterResources:
         return resources
 
 
-def _require_positive(x: float | int, name: str) -> None:
+def _require_positive(x: int, name: str) -> int:
     if x is not None and x < 0:
         msg = f"'{name}' must be positive"
         raise ValueError(msg)
+    return x
 
 
 def _check_ram(requested: int | None, available: int, type: str):
