@@ -9,6 +9,7 @@ from hipercow.task import (
     TaskStatus,
     TaskTimes,
     set_task_status,
+    task_data_read,
     task_status,
 )
 
@@ -24,7 +25,7 @@ def task_eval(
     task_id: str, *, capture: bool, root: OptionalRoot = None
 ) -> None:
     root = open_root(root)
-    data = TaskData.read(task_id, root)
+    data = task_data_read(task_id, root)
     task_eval_data(data, capture=capture, root=root)
 
 

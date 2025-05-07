@@ -1,8 +1,6 @@
 """Functions for interacting with tasks."""
 
-import pickle
 import re
-from dataclasses import dataclass
 from enum import Flag, auto
 
 import taskwait
@@ -173,8 +171,7 @@ def set_task_status(
             f.write(value)
 
 
-@dataclass(kw_only=True)
-class TaskData:
+class TaskData(BaseModel):
     task_id: str
     method: str  # shell etc
     data: dict
@@ -183,25 +180,18 @@ class TaskData:
     resources: TaskResources | None
     envvars: dict[str, str]
 
-    def write(self, root: Root):
-        task_data_write(self, root)
-
-    @staticmethod
-    def read(task_id: str, root: Root):
-        return task_data_read(task_id, root)
-
 
 def task_data_write(data: TaskData, root: Root) -> None:
     task_id = data.task_id
     path_task_dir = root.path_task(task_id)
     path_task_dir.mkdir(parents=True, exist_ok=True)
-    with root.path_task_data(task_id).open("wb") as f:
-        pickle.dump(data, f)
+    with root.path_task_data(task_id).open("w") as f:
+        f.write(data.model_dump_json())
 
 
 def task_data_read(task_id: str, root: Root) -> TaskData:
-    with root.path_task_data(task_id).open("rb") as f:
-        return pickle.load(f)
+    with root.path_task_data(task_id).open() as f:
+        return TaskData.model_validate_json(f.read())
 
 
 class TaskInfo(BaseModel):
@@ -217,7 +207,7 @@ def task_info(task_id: str, root: OptionalRoot = None) -> TaskInfo:
     if status == TaskStatus.MISSING:
         msg = f"Task '{task_id}' does not exist"
         raise Exception(msg)
-    data = TaskData.read(task_id, root)
+    data = task_data_read(task_id, root)
     times = _read_task_times(task_id, root)
     return TaskInfo(status=status, data=data, times=times)
 

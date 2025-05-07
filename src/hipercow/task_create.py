@@ -4,7 +4,7 @@ from hipercow.driver import load_driver_optional
 from hipercow.environment import environment_check
 from hipercow.resources import TaskResources
 from hipercow.root import OptionalRoot, Root, open_root
-from hipercow.task import TaskData, TaskStatus, set_task_status
+from hipercow.task import TaskData, TaskStatus, set_task_status, task_data_write
 from hipercow.util import relative_workdir
 
 
@@ -95,7 +95,7 @@ def _task_create(
         resources=resources,
         envvars=envvars,
     )
-    task_data.write(root)
+    task_data_write(task_data, root)
     with root.path_recent().open("a") as f:
         f.write(f"{task_id}\n")
     if dr:
