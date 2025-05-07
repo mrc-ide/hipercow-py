@@ -204,8 +204,7 @@ def task_data_read(task_id: str, root: Root) -> TaskData:
         return pickle.load(f)
 
 
-@dataclass
-class TaskInfo:
+class TaskInfo(BaseModel):
     status: TaskStatus
     data: TaskData
     times: TaskTimes
@@ -220,7 +219,7 @@ def task_info(task_id: str, root: OptionalRoot = None) -> TaskInfo:
         raise Exception(msg)
     data = TaskData.read(task_id, root)
     times = _read_task_times(task_id, root)
-    return TaskInfo(status, data, times)
+    return TaskInfo(status=status, data=data, times=times)
 
 
 def task_list(
