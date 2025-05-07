@@ -8,8 +8,8 @@ from hipercow import task_create as tc
 from hipercow.task import (
     TaskData,
     TaskStatus,
-    TaskTimes,
     TaskWaitWrapper,
+    _read_task_times,
     check_task_id,
     is_valid_task_id,
     set_task_status,
@@ -79,7 +79,7 @@ def test_read_task_info(tmp_path):
     info = task_info(tid, r)
     assert info.status == TaskStatus.CREATED
     assert info.data == TaskData.read(tid, r)
-    assert info.times == TaskTimes.read(tid, r)
+    assert info.times == _read_task_times(tid, r)
     assert isinstance(info.times.created, float)
     assert info.times.started is None
     assert info.times.finished is None
@@ -102,7 +102,7 @@ def test_that_can_read_info_for_completed_task(tmp_path):
         info = task_info(tid, r)
     assert info.status == TaskStatus.SUCCESS
     assert info.data == TaskData.read(tid, r)
-    assert info.times == TaskTimes.read(tid, r)
+    assert info.times == _read_task_times(tid, r)
     assert isinstance(info.times.created, float)
     assert isinstance(info.times.started, float)
     assert isinstance(info.times.finished, float)

@@ -49,8 +49,9 @@ def task_eval_data(data: TaskData, *, capture: bool, root: Root) -> None:
     with root.path_task_result(task_id).open("wb") as f:
         pickle.dump(res.data, f)
 
-    times = TaskTimes(t_created, t_start, t_end)
-    times.write(task_id, root)
+    times = TaskTimes(created=t_created, started=t_start, finished=t_end)
+    with root.path_task_times(task_id).open("w") as f:
+        f.write(times.model_dump_json())
 
     set_task_status(task_id, status, None, root)
 

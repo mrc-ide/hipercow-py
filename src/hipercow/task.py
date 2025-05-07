@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from enum import Flag, auto
 
 import taskwait
+from pydantic import BaseModel
 
 from hipercow.driver import load_driver
 from hipercow.resources import TaskResources
@@ -60,33 +61,27 @@ STATUS_FILE_MAP = {
 }
 
 
-## TODO: we'll probably move these to use json soon via pydantic.
-@dataclass
-class TaskTimes:
+class TaskTimes(BaseModel):
     created: float
     started: float | None
     finished: float | None
 
-    def write(self, task_id: str, root: Root):
-        with root.path_task_times(task_id).open("wb") as f:
-            pickle.dump(self, f)
 
-    @staticmethod
-    def read(task_id: str, root: Root):
-        path_times = root.path_task_times(task_id)
-        if path_times.exists():
-            with path_times.open("rb") as f:
-                return pickle.load(f)
-        created = root.path_task_data(task_id).stat().st_ctime
-        path_task_running = (
-            root.path_task(task_id) / STATUS_FILE_MAP[TaskStatus.RUNNING]
-        )
-        running = (
-            path_task_running.stat().st_ctime
-            if path_task_running.exists()
-            else None
-        )
-        return TaskTimes(created, running, None)
+def _read_task_times(task_id: str, root: Root):
+    path_times = root.path_task_times(task_id)
+    if path_times.exists():
+        with path_times.open() as f:
+            return TaskTimes.model_validate_json(f.read())
+    created = root.path_task_data(task_id).stat().st_ctime
+    path_task_running = (
+        root.path_task(task_id) / STATUS_FILE_MAP[TaskStatus.RUNNING]
+    )
+    started = (
+        path_task_running.stat().st_ctime
+        if path_task_running.exists()
+        else None
+    )
+    return TaskTimes(created=created, started=started, finished=None)
 
 
 def task_exists(task_id: str, root: OptionalRoot = None) -> bool:
@@ -224,7 +219,7 @@ def task_info(task_id: str, root: OptionalRoot = None) -> TaskInfo:
         msg = f"Task '{task_id}' does not exist"
         raise Exception(msg)
     data = TaskData.read(task_id, root)
-    times = TaskTimes.read(task_id, root)
+    times = _read_task_times(task_id, root)
     return TaskInfo(status, data, times)
 
 
