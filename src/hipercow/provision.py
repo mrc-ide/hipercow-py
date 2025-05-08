@@ -143,4 +143,4 @@ def _read_provisioning_record(
             result = ProvisioningResult.model_validate_json(f.read())
     except FileNotFoundError:
         result = None
-    return ProvisioningRecord(data = data, result = result)
+    return ProvisioningRecord(data=data, result=result)
