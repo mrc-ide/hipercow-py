@@ -1,6 +1,5 @@
 import secrets
 import time
-from dataclasses import dataclass
 
 from pydantic import BaseModel, Field
 
@@ -28,21 +27,9 @@ class ProvisioningResult(BaseModel):
     end: float = Field(default_factory=time.time, init=False)
 
 
-@dataclass
-class ProvisioningRecord:
+class ProvisioningRecord(BaseModel):
     data: ProvisioningData
     result: ProvisioningResult | None
-
-    @staticmethod
-    def read(name: str, id: str, root: Root) -> "ProvisioningRecord":
-        with root.path_provision_data(name, id).open() as f:
-            data = ProvisioningData.model_validate_json(f.read())
-        try:
-            with root.path_provision_result(name, id).open() as f:
-                result = ProvisioningResult.model_validate_json(f.read())
-        except FileNotFoundError:
-            result = None
-        return ProvisioningRecord(data, result)
 
 
 def provision(
@@ -139,8 +126,21 @@ def provision_run(name: str, id: str, root: Root) -> None:
 
 def provision_history(name: str, root: Root) -> list[ProvisioningRecord]:
     results = [
-        ProvisioningRecord.read(name, x.name, root)
+        _read_provisioning_record(name, x.name, root)
         for x in (root.path_environment(name) / "provision").glob("*")
     ]
     results.sort(key=lambda x: x.data.time)
     return results
+
+
+def _read_provisioning_record(
+    name: str, id: str, root: Root
+) -> ProvisioningRecord:
+    with root.path_provision_data(name, id).open() as f:
+        data = ProvisioningData.model_validate_json(f.read())
+    try:
+        with root.path_provision_result(name, id).open() as f:
+            result = ProvisioningResult.model_validate_json(f.read())
+    except FileNotFoundError:
+        result = None
+    return ProvisioningRecord(data = data, result = result)
