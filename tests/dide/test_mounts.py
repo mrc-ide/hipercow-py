@@ -71,7 +71,9 @@ def test_can_remap_path():
     m = [mounts.Mount(host="host", remote="/hostmount", local=Path("/local"))]
     path = Path("/local/path/to/dir")
     res = mounts.remap_path(path, m)
-    assert res == mounts.PathMap(path, m[0], "V:", relative="path/to/dir")
+    assert res == mounts.PathMap(
+        path=path, mount=m[0], remote="V:", relative="path/to/dir"
+    )
 
 
 def test_throw_if_two_plausible_mounts():
@@ -88,14 +90,18 @@ def test_preserve_drive_letter_if_given():
     m = [mounts.Mount(host="host", remote="/hostmount", local=Path("P:/"))]
     path = Path("P:/local/path")
     res = mounts.remap_path(path, m)
-    assert res == mounts.PathMap(path, m[0], "P:", relative="local/path")
+    assert res == mounts.PathMap(
+        path=path, mount=m[0], remote="P:", relative="local/path"
+    )
 
 
 def test_can_map_home_to_q_drive():
     m = [mounts.Mount(host="qdrive", remote="user", local=Path("/local"))]
     path = Path("/local/path/to/dir")
     res = mounts.remap_path(path, m)
-    assert res == mounts.PathMap(path, m[0], "Q:", relative="path/to/dir")
+    assert res == mounts.PathMap(
+        path=path, mount=m[0], remote="Q:", relative="path/to/dir"
+    )
 
 
 def test_can_parse_unix_entry():

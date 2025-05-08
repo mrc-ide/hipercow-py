@@ -22,7 +22,9 @@ def test_can_provision_with_dide(tmp_path, mocker):
         f.write("cowsay\n")
 
     m = mounts.Mount(host="host", remote="hostmount", local=Path("/local"))
-    path_map = mounts.PathMap(tmp_path, m, "Q:", relative="path/to/dir")
+    path_map = mounts.PathMap(
+        path=tmp_path, mount=m, remote="Q:", relative="path/to/dir"
+    )
 
     mock_client = mock.MagicMock(spec=DideWebClient)
     mocker.patch("hipercow.dide.driver._web_client", return_value=mock_client)
@@ -84,7 +86,9 @@ def test_throw_after_failed_provision_with_dide(tmp_path, mocker, capsys):
         f.write("cowsay\n")
 
     m = mounts.Mount(host="host", remote="hostmount", local=Path("/local"))
-    path_map = mounts.PathMap(tmp_path, m, "Q:", relative="path/to/dir")
+    path_map = mounts.PathMap(
+        path=tmp_path, mount=m, remote="Q:", relative="path/to/dir"
+    )
 
     mock_client = mock.MagicMock(spec=DideWebClient)
     mock_client.log.return_value = "more logs"

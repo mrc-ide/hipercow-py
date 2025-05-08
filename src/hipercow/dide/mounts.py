@@ -2,7 +2,6 @@ import csv
 import platform
 import re
 import subprocess
-from dataclasses import dataclass
 from pathlib import Path
 
 from pydantic import BaseModel
@@ -32,8 +31,7 @@ class Mount(BaseModel):
     local: Path
 
 
-@dataclass
-class PathMap:
+class PathMap(BaseModel):
     """The mapping between a local path and one on a remote share."""
 
     path: Path
@@ -70,7 +68,7 @@ def remap_path(path: Path, mounts: list[Mount]) -> PathMap:
     else:
         remote = "V:"
 
-    return PathMap(path, mount, remote, relative_str)
+    return PathMap(path=path, mount=mount, remote=remote, relative=relative_str)
 
 
 def detect_mounts() -> list[Mount]:
