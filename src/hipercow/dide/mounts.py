@@ -2,8 +2,9 @@ import csv
 import platform
 import re
 import subprocess
-from dataclasses import dataclass
 from pathlib import Path
+
+from pydantic import BaseModel
 
 
 # We use 'str' here and not 'Path' because we are interested in
@@ -14,8 +15,7 @@ from pathlib import Path
 # different type than the host system, which means things like leading
 # and trailing slashes or forward slashes vs backslashes become hard
 # to reason about.
-@dataclass
-class Mount:
+class Mount(BaseModel):
     """The name of the host on which the mount is found."""
 
     host: str
@@ -31,8 +31,7 @@ class Mount:
     local: Path
 
 
-@dataclass
-class PathMap:
+class PathMap(BaseModel):
     """The mapping between a local path and one on a remote share."""
 
     path: Path
@@ -69,7 +68,7 @@ def remap_path(path: Path, mounts: list[Mount]) -> PathMap:
     else:
         remote = "V:"
 
-    return PathMap(path, mount, remote, relative_str)
+    return PathMap(path=path, mount=mount, remote=remote, relative=relative_str)
 
 
 def detect_mounts() -> list[Mount]:
@@ -102,7 +101,9 @@ def _parse_unix_mount_entry(x: str) -> Mount:
 
     _, host, remote, local, _ = m.groups()
 
-    return Mount(_clean_dide_hostname(host), remote, Path(local))
+    return Mount(
+        host=_clean_dide_hostname(host), remote=remote, local=Path(local)
+    )
 
 
 def _detect_mounts_windows() -> list[Mount]:
@@ -134,7 +135,9 @@ def _parse_windows_mount_entry(local: str, remote: str) -> Mount:
         msg = "Failed to parse windows entry"
         raise Exception(msg)
     host, remote = m.groups()
-    return Mount(_clean_dide_hostname(host), remote, Path(local + "/"))
+    return Mount(
+        host=_clean_dide_hostname(host), remote=remote, local=Path(local + "/")
+    )
 
 
 def _clean_dide_hostname(host: str) -> str:

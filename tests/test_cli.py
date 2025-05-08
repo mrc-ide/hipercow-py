@@ -12,7 +12,7 @@ from hipercow import cli, root, task
 from hipercow.bundle import bundle_load
 from hipercow.driver import list_drivers
 from hipercow.resources import TaskResources
-from hipercow.task import TaskData, TaskStatus, set_task_status
+from hipercow.task import TaskStatus, set_task_status, task_data_read
 from hipercow.task_create import task_create_shell
 from hipercow.util import transient_envvars
 from tests.helpers import AnyInstanceOf
@@ -216,7 +216,7 @@ def test_can_create_task_in_environment(tmp_path):
         )
         assert res.exit_code == 0
         task_id = res.stdout.strip()
-        data = TaskData.read(task_id, r)
+        data = task_data_read(task_id, r)
         assert data.environment == "other"
 
 
@@ -562,7 +562,7 @@ def test_can_control_queue_used_in_task_creation(tmp_path):
         )
         assert res.exit_code == 0
         task_id = res.stdout.splitlines()[1]
-        data = TaskData.read(task_id, r)
+        data = task_data_read(task_id, r)
         assert data.resources == TaskResources(queue="default")
 
         res = runner.invoke(

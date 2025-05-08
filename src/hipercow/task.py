@@ -1,11 +1,10 @@
 """Functions for interacting with tasks."""
 
-import pickle
 import re
-from dataclasses import dataclass
 from enum import Flag, auto
 
 import taskwait
+from pydantic import BaseModel
 
 from hipercow.driver import load_driver
 from hipercow.resources import TaskResources
@@ -60,33 +59,27 @@ STATUS_FILE_MAP = {
 }
 
 
-## TODO: we'll probably move these to use json soon via pydantic.
-@dataclass
-class TaskTimes:
+class TaskTimes(BaseModel):
     created: float
     started: float | None
     finished: float | None
 
-    def write(self, task_id: str, root: Root):
-        with root.path_task_times(task_id).open("wb") as f:
-            pickle.dump(self, f)
 
-    @staticmethod
-    def read(task_id: str, root: Root):
-        path_times = root.path_task_times(task_id)
-        if path_times.exists():
-            with path_times.open("rb") as f:
-                return pickle.load(f)
-        created = root.path_task_data(task_id).stat().st_ctime
-        path_task_running = (
-            root.path_task(task_id) / STATUS_FILE_MAP[TaskStatus.RUNNING]
-        )
-        running = (
-            path_task_running.stat().st_ctime
-            if path_task_running.exists()
-            else None
-        )
-        return TaskTimes(created, running, None)
+def _read_task_times(task_id: str, root: Root):
+    path_times = root.path_task_times(task_id)
+    if path_times.exists():
+        with path_times.open() as f:
+            return TaskTimes.model_validate_json(f.read())
+    created = root.path_task_data(task_id).stat().st_ctime
+    path_task_running = (
+        root.path_task(task_id) / STATUS_FILE_MAP[TaskStatus.RUNNING]
+    )
+    started = (
+        path_task_running.stat().st_ctime
+        if path_task_running.exists()
+        else None
+    )
+    return TaskTimes(created=created, started=started, finished=None)
 
 
 def task_exists(task_id: str, root: OptionalRoot = None) -> bool:
@@ -178,8 +171,7 @@ def set_task_status(
             f.write(value)
 
 
-@dataclass(kw_only=True)
-class TaskData:
+class TaskData(BaseModel):
     task_id: str
     method: str  # shell etc
     data: dict
@@ -188,29 +180,21 @@ class TaskData:
     resources: TaskResources | None
     envvars: dict[str, str]
 
-    def write(self, root: Root):
-        task_data_write(self, root)
-
-    @staticmethod
-    def read(task_id: str, root: Root):
-        return task_data_read(task_id, root)
-
 
 def task_data_write(data: TaskData, root: Root) -> None:
     task_id = data.task_id
     path_task_dir = root.path_task(task_id)
     path_task_dir.mkdir(parents=True, exist_ok=True)
-    with root.path_task_data(task_id).open("wb") as f:
-        pickle.dump(data, f)
+    with root.path_task_data(task_id).open("w") as f:
+        f.write(data.model_dump_json())
 
 
 def task_data_read(task_id: str, root: Root) -> TaskData:
-    with root.path_task_data(task_id).open("rb") as f:
-        return pickle.load(f)
+    with root.path_task_data(task_id).open() as f:
+        return TaskData.model_validate_json(f.read())
 
 
-@dataclass
-class TaskInfo:
+class TaskInfo(BaseModel):
     status: TaskStatus
     data: TaskData
     times: TaskTimes
@@ -223,9 +207,9 @@ def task_info(task_id: str, root: OptionalRoot = None) -> TaskInfo:
     if status == TaskStatus.MISSING:
         msg = f"Task '{task_id}' does not exist"
         raise Exception(msg)
-    data = TaskData.read(task_id, root)
-    times = TaskTimes.read(task_id, root)
-    return TaskInfo(status, data, times)
+    data = task_data_read(task_id, root)
+    times = _read_task_times(task_id, root)
+    return TaskInfo(status=status, data=data, times=times)
 
 
 def task_list(

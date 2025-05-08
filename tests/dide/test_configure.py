@@ -18,7 +18,7 @@ def test_can_configure_dide_mount(tmp_path, mocker):
     path = tmp_path / "a" / "b"
     root.init(path)
     r = root.open_root(path)
-    mock_mounts = [Mount("projects", "other", tmp_path)]
+    mock_mounts = [Mount(host="projects", remote="other", local=tmp_path)]
     mock_check_auth = mock.Mock()
     mocker.patch("hipercow.dide.driver.detect_mounts", return_value=mock_mounts)
     mocker.patch("hipercow.dide.configuration.check_auth", mock_check_auth)
@@ -38,7 +38,7 @@ def test_creating_task_triggers_submission(tmp_path, mocker):
     path = tmp_path / "a" / "b"
     root.init(path)
     r = root.open_root(path)
-    mock_mounts = [Mount("projects", "other", tmp_path)]
+    mock_mounts = [Mount(host="projects", remote="other", local=tmp_path)]
     mock_creds = Credentials("bob", "secret")
     mock_web_client = mock.MagicMock(spec=DideWebClient)
 
@@ -69,7 +69,7 @@ def test_creating_task_with_resources(tmp_path, mocker):
     path = tmp_path / "a" / "b"
     root.init(path)
     r = root.open_root(path)
-    mock_mounts = [Mount("projects", "other", tmp_path)]
+    mock_mounts = [Mount(host="projects", remote="other", local=tmp_path)]
     mock_creds = Credentials("bob", "secret")
     mock_web_client = mock.MagicMock(spec=DideWebClient)
 
@@ -104,7 +104,7 @@ def test_provision_using_driver(tmp_path, mocker):
     path = tmp_path / "a" / "b"
     root.init(path)
     r = root.open_root(path)
-    mock_mounts = [Mount("projects", "other", tmp_path)]
+    mock_mounts = [Mount(host="projects", remote="other", local=tmp_path)]
     mock_provision = mock.MagicMock()
     mocker.patch("hipercow.dide.driver.detect_mounts", return_value=mock_mounts)
     mocker.patch("hipercow.dide.driver._dide_provision", mock_provision)
@@ -125,7 +125,7 @@ def test_resources_using_driver(tmp_path, mocker):
     path = tmp_path / "a" / "b"
     root.init(path)
     r = root.open_root(path)
-    mock_mounts = [Mount("projects", "other", tmp_path)]
+    mock_mounts = [Mount(host="projects", remote="other", local=tmp_path)]
     mock_provision = mock.MagicMock()
     mocker.patch("hipercow.dide.driver.detect_mounts", return_value=mock_mounts)
     mocker.patch("hipercow.dide.driver._dide_provision", mock_provision)
@@ -143,7 +143,7 @@ def test_configure_python_version(tmp_path, mocker, capsys):
     path = tmp_path / "a" / "b"
     root.init(path)
     r = root.open_root(path)
-    mock_mounts = [Mount("projects", "other", tmp_path)]
+    mock_mounts = [Mount(host="projects", remote="other", local=tmp_path)]
     mocker.patch("hipercow.dide.driver.detect_mounts", return_value=mock_mounts)
     configure(
         "dide-windows", python_version="3.12", check_credentials=False, root=r
@@ -158,7 +158,7 @@ def test_get_outer_logs_from_web_client(tmp_path, mocker):
     path = tmp_path / "a" / "b"
     root.init(path)
     r = root.open_root(path)
-    mock_mounts = [Mount("projects", "other", tmp_path)]
+    mock_mounts = [Mount(host="projects", remote="other", local=tmp_path)]
     mock_creds = Credentials("bob", "secret")
     mock_web_client = mock.MagicMock(spec=DideWebClient)
     mocker.patch("hipercow.dide.driver.detect_mounts", return_value=mock_mounts)
