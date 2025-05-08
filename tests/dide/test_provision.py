@@ -21,7 +21,7 @@ def test_can_provision_with_dide(tmp_path, mocker):
     with (r.path / "requirements.txt").open("w") as f:
         f.write("cowsay\n")
 
-    m = mounts.Mount("host", "hostmount", Path("/local"))
+    m = mounts.Mount(host="host", remote="hostmount", local=Path("/local"))
     path_map = mounts.PathMap(tmp_path, m, "Q:", relative="path/to/dir")
 
     mock_client = mock.MagicMock(spec=DideWebClient)
@@ -83,7 +83,7 @@ def test_throw_after_failed_provision_with_dide(tmp_path, mocker, capsys):
     with (r.path / "requirements.txt").open("w") as f:
         f.write("cowsay\n")
 
-    m = mounts.Mount("host", "hostmount", Path("/local"))
+    m = mounts.Mount(host="host", remote="hostmount", local=Path("/local"))
     path_map = mounts.PathMap(tmp_path, m, "Q:", relative="path/to/dir")
 
     mock_client = mock.MagicMock(spec=DideWebClient)

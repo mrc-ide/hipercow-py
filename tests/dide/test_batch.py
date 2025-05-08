@@ -10,7 +10,7 @@ def test_can_create_batch_data(tmp_path):
     path = tmp_path / "my/project"
     root.init(path)
     r = root.open_root(path)
-    m = Mount("wpia-hn", "didehomes/bob", tmp_path)
+    m = Mount(host="wpia-hn", remote="didehomes/bob", local=tmp_path)
     config = DideConfiguration(
         r, mounts=[m], python_version=None, check_credentials=False
     )
@@ -31,7 +31,7 @@ def test_can_write_batch(tmp_path):
     path = tmp_path / "my/project"
     root.init(path)
     r = root.open_root(path)
-    m = Mount("wpia-hn", "didehomes/bob", tmp_path)
+    m = Mount(host="wpia-hn", remote="didehomes/bob", local=tmp_path)
     config = DideConfiguration(
         r, mounts=[m], python_version=None, check_credentials=False
     )
@@ -49,7 +49,7 @@ def test_can_create_provision_data(tmp_path):
     path = tmp_path / "my/project"
     root.init(path)
     r = root.open_root(path)
-    m = Mount("wpia-hn", "didehomes/bob", tmp_path)
+    m = Mount(host="wpia-hn", remote="didehomes/bob", local=tmp_path)
     config = DideConfiguration(
         r, mounts=[m], python_version=None, check_credentials=False
     )
@@ -69,7 +69,7 @@ def test_can_write_provision_batch(tmp_path):
     path = tmp_path / "my/project"
     root.init(path)
     r = root.open_root(path)
-    m = Mount("wpia-hn", "didehomes/bob", tmp_path)
+    m = Mount(host="wpia-hn", remote="didehomes/bob", local=tmp_path)
     config = DideConfiguration(
         r, mounts=[m], python_version=None, check_credentials=False
     )
