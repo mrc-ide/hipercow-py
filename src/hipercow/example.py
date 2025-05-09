@@ -1,25 +1,52 @@
+from pydantic import BaseModel
+
 from hipercow import ui
-from hipercow.driver import HipercowDriver
+from hipercow.driver import HipercowDriver, hipercow_driver
 from hipercow.provision import provision_run
 from hipercow.resources import ClusterResources, Queues, TaskResources
 from hipercow.root import Root
 from hipercow.util import check_python_version
 
 
+class ExampleDriverConfiguration(BaseModel):
+    pass
+
+
+def example_configuration(**kwargs) -> ExampleDriverConfiguration:
+    version = kwargs.get("python_version")
+    if isinstance(version, str):
+        requested = check_python_version(version)
+        local = check_python_version(None)
+        if local != requested:
+            msg = (
+                f"Requested python version {version}"
+                f"is not the same as the local version {local}"
+            )
+            raise Exception(msg)
+    return ExampleDriverConfiguration()
+
+
+@hipercow_driver
 class ExampleDriver(HipercowDriver):
     name = "example"
+    config: ExampleDriverConfiguration
 
-    def __init__(self, root: Root, **kwargs):  # noqa: ARG002
-        version = kwargs.get("python_version")
-        if isinstance(version, str):
-            requested = check_python_version(version)
-            local = check_python_version(None)
-            if local != requested:
-                msg = (
-                    f"Requested python version {version}"
-                    f"is not the same as the local version {local}"
-                )
-                raise Exception(msg)
+    def __init__(self, config: ExampleDriverConfiguration):
+        self.config = config
+
+    @staticmethod
+    def configure(
+        root: Root, **kwargs  # noqa: ARG004
+    ) -> ExampleDriverConfiguration:
+        return example_configuration(**kwargs)
+
+    @staticmethod
+    def load(data: str) -> "ExampleDriver":
+        config = ExampleDriverConfiguration.model_validate_json(data)
+        return ExampleDriver(config)
+
+    def configuration(self) -> BaseModel:
+        return self.config
 
     def show_configuration(self) -> None:
         ui.text("[dim](no configuration)[/dim]")

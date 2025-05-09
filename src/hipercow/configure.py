@@ -1,9 +1,7 @@
-import pickle
+from pydantic import BaseModel
 
 from hipercow import ui
-from hipercow.dide.driver import DideWindowsDriver
-from hipercow.driver import HipercowDriver, load_driver
-from hipercow.example import ExampleDriver
+from hipercow.driver import _get_driver
 from hipercow.root import OptionalRoot, Root, open_root
 from hipercow.util import transient_working_directory
 
@@ -30,8 +28,8 @@ def configure(name: str, *, root: OptionalRoot = None, **kwargs) -> None:
     root = open_root(root)
     driver = _get_driver(name)
     with transient_working_directory(root.path):
-        config = driver(root, **kwargs)
-    _write_configuration(config, root)
+        config = driver.configure(root, **kwargs)
+    _write_configuration(name, config, root)
 
 
 def unconfigure(name: str, root: OptionalRoot = None) -> None:
@@ -56,44 +54,12 @@ def unconfigure(name: str, root: OptionalRoot = None) -> None:
         )
 
 
-def show_configuration(
-    name: str | None = None, root: OptionalRoot = None
-) -> None:
-    """Show a driver configuration.
-
-    Args:
-        name: The name of the driver.  This will be `dide` unless you
-            are developing `hipercow` itself :)
-        root: The root, or if not given search from the current directory.
-
-    Returns:
-        Nothing, called for side effects only.
-    """
-    root = open_root(root)
-    dr = load_driver(name, root)
-    ui.h1(f"Configuration for '{dr.name}'")
-    dr.show_configuration()
-
-
-# ahead of some sort of global store of drivers:
-_DRIVERS = {d.name: d for d in [ExampleDriver, DideWindowsDriver]}
-
-
-def _get_driver(name: str) -> type[HipercowDriver]:
-    try:
-        return _DRIVERS[name]
-    except KeyError:
-        msg = f"No such driver '{name}'"
-        raise Exception(msg) from None
-
-
-def _write_configuration(driver: HipercowDriver, root: Root) -> None:
-    name = driver.name
+def _write_configuration(name: str, config: BaseModel, root: Root) -> None:
     path = root.path_configuration(name)
     exists = path.exists()
     path.parent.mkdir(exist_ok=True, parents=True)
-    with path.open("wb") as f:
-        pickle.dump(driver, f)
+    with path.open("w") as f:
+        f.write(config.model_dump_json())
     if exists:
         ui.alert_success(f"Updated configuration for '{name}'")
     else:

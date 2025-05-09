@@ -1,11 +1,11 @@
 from unittest import mock
 
 from hipercow import root
-from hipercow.configure import configure, show_configuration
-from hipercow.dide.configuration import DideConfiguration
+from hipercow.configure import configure
+from hipercow.dide.configuration import dide_configuration
 from hipercow.dide.mounts import Mount
 from hipercow.dide.web import Credentials, DideWebClient
-from hipercow.driver import list_drivers, load_driver
+from hipercow.driver import list_drivers, load_driver, show_configuration
 from hipercow.environment import environment_new
 from hipercow.provision import provision
 from hipercow.resources import TaskResources
@@ -29,7 +29,7 @@ def test_can_configure_dide_mount(tmp_path, mocker):
     assert mock_check_auth.mock_calls[0] == mock.call()
 
     driver = load_driver("dide-windows", r)
-    assert driver.config == DideConfiguration(
+    assert driver.config == dide_configuration(
         r, mounts=mock_mounts, python_version=None, check_credentials=False
     )
 
