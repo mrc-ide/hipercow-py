@@ -1,7 +1,7 @@
 from hipercow import root
 from hipercow import task_create as tc
 from hipercow.dide import batch
-from hipercow.dide.configuration import DideConfiguration
+from hipercow.dide.configuration import dide_configuration
 from hipercow.dide.mounts import Mount
 from hipercow.util import transient_working_directory
 
@@ -11,7 +11,7 @@ def test_can_create_batch_data(tmp_path):
     root.init(path)
     r = root.open_root(path)
     m = Mount(host="wpia-hn", remote="didehomes/bob", local=tmp_path)
-    config = DideConfiguration(
+    config = dide_configuration(
         r, mounts=[m], python_version=None, check_credentials=False
     )
 
@@ -32,7 +32,7 @@ def test_can_write_batch(tmp_path):
     root.init(path)
     r = root.open_root(path)
     m = Mount(host="wpia-hn", remote="didehomes/bob", local=tmp_path)
-    config = DideConfiguration(
+    config = dide_configuration(
         r, mounts=[m], python_version=None, check_credentials=False
     )
 
@@ -50,7 +50,7 @@ def test_can_create_provision_data(tmp_path):
     root.init(path)
     r = root.open_root(path)
     m = Mount(host="wpia-hn", remote="didehomes/bob", local=tmp_path)
-    config = DideConfiguration(
+    config = dide_configuration(
         r, mounts=[m], python_version=None, check_credentials=False
     )
 
@@ -70,7 +70,7 @@ def test_can_write_provision_batch(tmp_path):
     root.init(path)
     r = root.open_root(path)
     m = Mount(host="wpia-hn", remote="didehomes/bob", local=tmp_path)
-    config = DideConfiguration(
+    config = dide_configuration(
         r, mounts=[m], python_version=None, check_credentials=False
     )
 

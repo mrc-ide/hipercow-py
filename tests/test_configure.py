@@ -4,11 +4,15 @@ from hipercow import root
 from hipercow.configure import (
     _write_configuration,
     configure,
-    show_configuration,
     unconfigure,
 )
-from hipercow.driver import list_drivers, load_driver, load_driver_optional
-from hipercow.example import ExampleDriver
+from hipercow.driver import (
+    list_drivers,
+    load_driver,
+    load_driver_optional,
+    show_configuration,
+)
+from hipercow.example import ExampleDriver, ExampleDriverConfiguration
 from hipercow.task import TaskStatus, task_log, task_status
 from hipercow.task_create import task_create_shell
 from hipercow.task_eval import task_eval
@@ -73,12 +77,10 @@ def test_get_default_driver(tmp_path):
     path = tmp_path / "ex"
     root.init(path)
     r = root.open_root(path)
-    a = ExampleDriver(r)
-    a.name = "a"
-    b = ExampleDriver(r)
-    b.name = "b"
-    _write_configuration(a, r)
-    _write_configuration(b, r)
+    a = ExampleDriverConfiguration()
+    b = ExampleDriverConfiguration()
+    _write_configuration("a", a, r)
+    _write_configuration("b", b, r)
     with pytest.raises(Exception, match="More than one candidate driver"):
         load_driver(None, r)
 

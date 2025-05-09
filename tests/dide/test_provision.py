@@ -7,7 +7,7 @@ from taskwait import Result
 import hipercow.dide.driver
 from hipercow import root
 from hipercow.dide import mounts
-from hipercow.dide.configuration import DideConfiguration
+from hipercow.dide.configuration import dide_configuration
 from hipercow.dide.driver import ProvisionWaitWrapper, _dide_provision
 from hipercow.dide.web import DideWebClient
 from hipercow.resources import TaskResources
@@ -32,7 +32,7 @@ def test_can_provision_with_dide(tmp_path, mocker):
     mocker.patch(
         "hipercow.dide.configuration.remap_path", return_value=path_map
     )
-    config = DideConfiguration(
+    config = dide_configuration(
         r, mounts=[m], python_version=None, check_credentials=False
     )
 
@@ -98,7 +98,7 @@ def test_throw_after_failed_provision_with_dide(tmp_path, mocker, capsys):
     mocker.patch(
         "hipercow.dide.configuration.remap_path", return_value=path_map
     )
-    config = DideConfiguration(
+    config = dide_configuration(
         r, mounts=[m], python_version=None, check_credentials=False
     )
 
