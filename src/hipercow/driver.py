@@ -75,16 +75,11 @@ def show_configuration(
 
 
 def hipercow_driver(cls: type[HipercowDriver]) -> type[HipercowDriver]:
-    register_driver(cls.name, cls)
+    _DRIVERS[cls.name] = cls
     return cls
 
 
-# ahead of some sort of global store of drivers:
 _DRIVERS: dict[str, type[HipercowDriver]] = {}
-
-
-def register_driver(name: str, value: type[HipercowDriver]):
-    _DRIVERS[name] = value
 
 
 # TODO: this needs a better name as we will use it internally

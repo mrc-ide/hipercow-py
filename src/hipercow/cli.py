@@ -27,6 +27,7 @@ from hipercow.environment import (
     environment_list,
     environment_new,
 )
+from hipercow.example import ExampleDriver  # noqa: F401 (forces registration)
 from hipercow.provision import provision, provision_run
 from hipercow.resources import TaskResources
 from hipercow.task import (
