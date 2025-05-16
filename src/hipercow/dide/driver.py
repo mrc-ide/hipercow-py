@@ -27,9 +27,8 @@ class DideWindowsDriver(HipercowDriver):
         return dide_configuration(root, mounts=mounts, **kwargs)
 
     @staticmethod
-    def load(data: str) -> "DideWindowsDriver":
-        config = DideConfiguration.model_validate_json(data)
-        return DideWindowsDriver(config)
+    def parse_configuration(data: str) -> DideConfiguration:
+        return DideConfiguration.model_validate_json(data)
 
     def configuration(self) -> DideConfiguration:
         return self.config

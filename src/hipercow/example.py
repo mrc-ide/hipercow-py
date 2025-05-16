@@ -41,9 +41,8 @@ class ExampleDriver(HipercowDriver):
         return example_configuration(**kwargs)
 
     @staticmethod
-    def load(data: str) -> "ExampleDriver":
-        config = ExampleDriverConfiguration.model_validate_json(data)
-        return ExampleDriver(config)
+    def parse_configuration(data: str) -> ExampleDriverConfiguration:
+        return ExampleDriverConfiguration.model_validate_json(data)
 
     def configuration(self) -> BaseModel:
         return self.config

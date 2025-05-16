@@ -22,7 +22,7 @@ class HipercowDriver(ABC):
 
     @staticmethod
     @abstractmethod
-    def load(data: str) -> "HipercowDriver":
+    def parse_configuration(data: str) -> BaseModel:
         pass  # pragma: no cover
 
     @abstractmethod
@@ -121,7 +121,7 @@ def _load_driver(name: str | None, root: Root) -> HipercowDriver | None:
     driver = _get_driver(name)
     with path.open() as f:
         data = f.read()
-    return driver.load(data)
+    return driver(driver.parse_configuration(data))
 
 
 def _default_driver(root: Root) -> HipercowDriver | None:
