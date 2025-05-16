@@ -5,21 +5,33 @@ from taskwait import Task, taskwait
 from hipercow import ui
 from hipercow.dide.auth import fetch_credentials
 from hipercow.dide.batch import write_batch_provision, write_batch_task_run
-from hipercow.dide.configuration import DideConfiguration
+from hipercow.dide.configuration import DideConfiguration, dide_configuration
 from hipercow.dide.mounts import detect_mounts
 from hipercow.dide.web import DideWebClient
-from hipercow.driver import HipercowDriver
+from hipercow.driver import HipercowDriver, hipercow_driver
 from hipercow.resources import ClusterResources, Queues, TaskResources
 from hipercow.root import Root
 
 
+@hipercow_driver
 class DideWindowsDriver(HipercowDriver):
     name = "dide-windows"
     config: DideConfiguration
 
-    def __init__(self, root: Root, **kwargs):
+    def __init__(self, config: DideConfiguration):
+        self.config = config
+
+    @staticmethod
+    def configure(root: Root, **kwargs) -> DideConfiguration:
         mounts = detect_mounts()
-        self.config = DideConfiguration(root, mounts=mounts, **kwargs)
+        return dide_configuration(root, mounts=mounts, **kwargs)
+
+    @staticmethod
+    def parse_configuration(data: str) -> DideConfiguration:
+        return DideConfiguration.model_validate_json(data)
+
+    def configuration(self) -> DideConfiguration:
+        return self.config
 
     def show_configuration(self) -> None:
         path_map = self.config.path_map
