@@ -5,6 +5,7 @@ from taskwait import Task, taskwait
 from hipercow import ui
 from hipercow.dide.auth import fetch_credentials
 from hipercow.dide.batch import write_batch_provision, write_batch_task_run
+from hipercow.dide.batch import write_batch_provision_sh, write_batch_task_run_sh
 from hipercow.dide.configuration import DideConfiguration, dide_configuration
 from hipercow.dide.mounts import detect_mounts
 from hipercow.dide.web import DideWebClient
@@ -193,7 +194,8 @@ def _web_client() -> DideWebClient:
     cl.login()
     return cl
 
-def _dide_provision_linux(name: str, id: str, config: DideConfiguration, root: Root):
+def _dide_provision_linux(name: str, id: str, config: DideConfiguration,
+                          root: Root):
     cl = _web_client()
     unc = write_batch_provision_sh(name, id, config, root)
     resources = TaskResources(queue="LinuxNodes")
@@ -216,7 +218,8 @@ def _dide_provision_linux(name: str, id: str, config: DideConfiguration, root: R
     else:
         ui.alert_success(f"Provisioning completed in {dt}s")
 
-def _dide_provision_windows(name: str, id: str, config: DideConfiguration, root: Root):
+def _dide_provision_windows(name: str, id: str, config: DideConfiguration,
+                            root: Root):
     cl = _web_client()
     unc = write_batch_provision(name, id, config, root)
     resources = TaskResources(queue="BuildQueue")
