@@ -115,6 +115,92 @@ if %ERRORLEVEL% neq 0 (
 )
 
 
+TASK_RUN_SH = Template(
+    r"""#!/bin/bash
+# automatically generated
+echo generated on host: ${hostname}
+echo generated on date: ${date}
+echo hipercow(py) version: ${hipercow_version}
+echo running on: $(hostname -f)
+
+export PATH=/opt/apps/lmod/lmod/libexec:$PATH
+source /opt/apps/lmod/lmod/init/bash
+export LMOD_CMD=/opt/apps/lmod/lmod/libexec/lmod
+module use /modules-share/modules/all
+
+module load python/${python-version}
+
+cd ${hipercow_root_path}
+echo working directory: $(pwd)
+
+export HIPERCOW_NO_DRIVERS=1
+export HIPERCOW_CORES=$CCP_NUMCPUS
+
+echo this is a single task
+echo TODO - hipercow using the right python.
+# \\I:\bootstrap-py-windows\python-${python_version}\bin\hipercow task eval --capture ${task_id}
+
+ErrorCodeTask=$?
+
+if [ -f hipercow/tasks/{{task_id_1}}/{{task_id_2}}/status-success ]; then
+  TaskStatus=0
+else
+  TaskStatus=1
+fi
+
+echo ERRORLEVEL was $ErrorCodeTask
+
+echo Cleaning up
+
+if [ $ErrorCodeTask -ne 0 ]; then
+  echo Task failed catastrophically
+  exit $ErrorCodeTask
+fi
+
+if [ $TaskStatus -eq 0 ]; then
+  echo Task completed successfully!
+  echo Quitting
+else
+  echo Task did not complete successfully
+  exit 1
+fi"""  # noqa: E501
+)
+
+PROVISION_SH = Template(
+    r"""#!/bin/bash
+# automatically generated
+echo generated on host: ${hostname}
+echo generated on date: ${date}
+echo hipercow(py) version: ${hipercow_version}
+echo running on: $(hostname -f)
+
+export PATH=/opt/apps/lmod/lmod/libexec:$PATH
+source /opt/apps/lmod/lmod/init/bash
+export LMOD_CMD=/opt/apps/lmod/lmod/libexec/lmod
+module use /modules-share/modules/all
+
+module load python/${python-version}
+
+cd ${hipercow_root_path}
+echo working directory: $(pwd)
+
+echo this is a provisioning task
+
+#TODO - run hipercow
+#I:\bootstrap-py-windows\python-${python_version}\bin\hipercow environment provision-run ${environment_name} ${provision_id}
+
+ErrorCode=$?
+
+if [ $errorCode -ne 0 ]; then
+  echo Error running task
+  exit $ErrorCode
+fi
+
+echo Quitting
+"""  # noqa: E501
+)
+
+
 # In a future version, we might prefer to use a configuration object,
 # perhaps extracted from the root, rather than the actual argument for
 # the path mapping, but this iterates towards something that we can

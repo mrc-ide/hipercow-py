@@ -168,12 +168,13 @@ def driver():
 def cli_driver_configure(name: str, python_version: str | None):
     """Add a driver.
 
-    This command will initialise a driver.  Most likely you will call
+    This command will initialise a driver.  There are two current drivers,
+    dide-windows, and dide-linux, which will target jobs onto windows or
+    linux nodes in the DIDE cluster respectively. For example:-
 
         hipercow driver configure dide-windows
 
-    because `dide-windows` is the only real driver at the moment.  If
-    you provide the `--python-version` flag you can specify the Python
+    If you provide the `--python-version` flag you can specify the Python
     version to use, if you want a version that is different to the
     version of Python that you are using locally.
 
