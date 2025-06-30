@@ -1,6 +1,7 @@
 from pathlib import Path
 from string import Template
 
+from hipercow.dide.mounts import _backward_slash
 from hipercow.resources import TaskResources
 
 BOOTSTRAP_WINDOWS = Template(
@@ -32,7 +33,6 @@ def bootstrap_windows_submit(bootstrap_id, version, mount, client, target, args,
         f.write(_batch_bootstrap_windows(bootstrap_id, version, target, args))
 
     resources = TaskResources(queue="AllNodes")  # not BuildQueue, for now
-    breakpoint()
     return client.submit(_bootstrap_windows_path(path), name, resources)
 
 def _batch_bootstrap_windows(

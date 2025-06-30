@@ -69,7 +69,8 @@ def test_can_submit_bootstrap_task(tmp_path):
     version = "3.11"
     target = "hipercow"
     args = ""
-    t = _bootstrap_submit(client, mount, bootstrap_id, version, target, args)
+    platform = "windows"
+    t = _bootstrap_submit(client, mount, bootstrap_id, version, platform, target, args)
     resources = TaskResources(queue="AllNodes")
     assert t.client == client
     assert client.submit.call_count == 1
@@ -100,8 +101,8 @@ def test_can_wait_on_successful_tasks(tmp_path, capsys):
     mount = Mount(host="wpia-hn.hpc", remote="hipercow", local=tmp_path)
     bootstrap_id = "abcdef"
     tasks = [
-        BootstrapTask(mount, bootstrap_id, client, "1", "3.11"),
-        BootstrapTask(mount, bootstrap_id, client, "2", "3.12"),
+        BootstrapTask(mount, bootstrap_id, client, "1", "3.11", "windows"),
+        BootstrapTask(mount, bootstrap_id, client, "2", "3.12", "windows"),
     ]
     _bootstrap_wait(tasks)
     out = capsys.readouterr().out
@@ -117,8 +118,8 @@ def test_can_error_on_failed_tasks(tmp_path, capsys):
     mount = Mount(host="wpia-hn.hpc", remote="hipercow", local=tmp_path)
     bootstrap_id = "abcdef"
     tasks = [
-        BootstrapTask(mount, bootstrap_id, client, "1011", "3.11"),
-        BootstrapTask(mount, bootstrap_id, client, "1012", "3.12"),
+        BootstrapTask(mount, bootstrap_id, client, "1011", "3.11", "windows"),
+        BootstrapTask(mount, bootstrap_id, client, "1012", "3.12", "windows"),
     ]
     tasks[1].path_log.parent.mkdir(parents=True)
     with tasks[1].path_log.open("w") as f:
@@ -151,16 +152,16 @@ def test_can_launch_bootstrap(mocker):
 
     assert mock_client.call_count == 1
     assert mock_mount.call_count == 1
-    assert mock_submit.call_count == 4
+    assert mock_submit.call_count == 8
 
     client = mock_client.return_value
     mount = mock_mount.return_value
 
     assert mock_submit.mock_calls[0] == mock.call(
-        client, mount, mock.ANY, "3.10", "hipercow", ""
+        client, mount, mock.ANY, "3.10", "windows", "hipercow", ""
     )
     assert mock_wait.call_count == 1
-    assert len(mock_wait.mock_calls[0].args[0]) == 4
+    assert len(mock_wait.mock_calls[0].args[0]) == 8
     assert mock_wait.mock_calls[0].args[0][3] == mock_submit.return_value
 
 

@@ -308,7 +308,7 @@ def test_create_basic_submit_data():
         "wd": web.encode64(""),
         "se": web.encode64(""),
         "so": web.encode64(""),
-        "jobs": web.encode64(web._call_quote_batch_path(path)),
+        "jobs": web.encode64(web._call_quote_batch_path(path, "call")),
         "dep": web.encode64(""),
         "hpcfunc": "submit",
         "ver": web.encode64(f"hipercow-py/{hipercow_version}"),
