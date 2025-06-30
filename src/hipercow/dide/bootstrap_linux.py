@@ -4,7 +4,6 @@ from string import Template
 from hipercow.dide.mounts import _forward_slash
 from hipercow.resources import TaskResources
 
-
 BOOTSTRAP_LINUX = Template(
     r"""#!/bin/bash
 echo working directory: $$(pwd)

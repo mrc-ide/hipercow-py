@@ -12,6 +12,7 @@ from hipercow.dide.mounts import Mount, _backward_slash, detect_mounts
 from hipercow.dide.web import DideWebClient
 from hipercow.util import read_file_if_exists
 
+
 def bootstrap(
     target: str | None,
     *,
