@@ -33,7 +33,7 @@ fi
 """  # noqa: E501
 )
 
-def bootstrap_linux_submit(bootstrap_id, version, mount, client, 
+def bootstrap_linux_submit(bootstrap_id, version, mount, client,
                            target, args, name):
     path = Path("bootstrap-py-linux") / "in" / bootstrap_id / f"{version}.sh"
 

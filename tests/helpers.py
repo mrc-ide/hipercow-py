@@ -9,7 +9,7 @@ class AnyInstanceOf:
         return not isinstance(other, self.cls)
 
     def __repr__(self):
-        return f"<ANY {self.cls.__name__}>" 
-        
+        return f"<ANY {self.cls.__name__}>"
+
     def __hash__(self):
         return hash(self.cls)

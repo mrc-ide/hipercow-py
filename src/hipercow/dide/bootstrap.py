@@ -5,8 +5,8 @@ from pathlib import Path
 from taskwait import Task, taskwait
 
 from hipercow import ui
-from hipercow.dide.bootstrap_windows import bootstrap_windows_submit
 from hipercow.dide.bootstrap_linux import bootstrap_linux_submit
+from hipercow.dide.bootstrap_windows import bootstrap_windows_submit
 from hipercow.dide.driver import _web_client
 from hipercow.dide.mounts import Mount, _backward_slash, detect_mounts
 from hipercow.dide.web import DideWebClient
@@ -88,13 +88,13 @@ def _bootstrap_submit(
     name = f"bootstrap/{bootstrap_id}/{version}"
 
     if platform == "windows":
-        dide_id = bootstrap_windows_submit(bootstrap_id, version, mount, 
+        dide_id = bootstrap_windows_submit(bootstrap_id, version, mount,
                                            client, target, args, name)
     elif platform == "linux":
-        dide_id = bootstrap_linux_submit(bootstrap_id, version, mount, 
+        dide_id = bootstrap_linux_submit(bootstrap_id, version, mount,
                                          client, target, args, name)
 
-    return BootstrapTask(mount, bootstrap_id, client, dide_id, 
+    return BootstrapTask(mount, bootstrap_id, client, dide_id,
                          version, platform)
 
 
