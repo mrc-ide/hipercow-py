@@ -384,7 +384,7 @@ def test_can_rebuild_recent_list(tmp_path):
         assert res.stdout == "".join(i + "\n" for i in ids)
 
         with r.path_recent().open("w") as f:
-            for i in ids[:2] + [ids[2] + ids[3], ids[4]]:
+            for i in [*ids[:2], ids[2] + ids[3], ids[4]]:
                 f.write(f"{i}\n")
 
         res = runner.invoke(cli.cli_task_recent, [])
