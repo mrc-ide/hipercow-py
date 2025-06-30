@@ -703,12 +703,20 @@ def cli_dide_check():
     multiple=True,
     help="Python version to update. Multiple copies of this flag allowed",
 )
+
+@click.option(
+    "--platform",
+    multiple=True,
+    help="Operating system - windows or linux. Multiple copies of this flag allowed",
+)
+
 def cli_dide_bootstrap(
-    target: str, *, force: bool, verbose: bool, python_version: list[str]
+    target: str, *, force: bool, verbose: bool, python_version: list[str],
+    platform: list[str]
 ):
     r"""Update the bootstrap.
 
-    You will need `--force` much more often than expcted at present,
+    You will need `--force` much more often than expected at present,
     because pip won't always reinstall if only the patch version has
     changed.
 
@@ -724,6 +732,7 @@ def cli_dide_bootstrap(
         force=force,
         verbose=verbose,
         python_versions=list(python_version),
+        platforms=list(platform)
     )
 
 
