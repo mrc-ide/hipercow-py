@@ -32,8 +32,9 @@ fi
 """  # noqa: E501
 )
 
-def bootstrap_linux_submit(bootstrap_id, version, mount, client,
-                           target, args, name):
+def bootstrap_linux_submit(
+    bootstrap_id, version, mount, client, target, args, name
+):
     path = Path("bootstrap-py-linux") / "in" / bootstrap_id / f"{version}.sh"
 
     path_local = mount.local / path
@@ -43,6 +44,7 @@ def bootstrap_linux_submit(bootstrap_id, version, mount, client,
 
     resources = TaskResources(queue="LinuxNodes")
     return client.submit(_bootstrap_linux_path(path), name, resources)
+
 
 def _batch_bootstrap_linux(
     bootstrap_id: str, version: str, target: str, args: str

@@ -711,8 +711,12 @@ def cli_dide_check():
 )
 
 def cli_dide_bootstrap(
-    target: str, *, force: bool, verbose: bool, python_version: list[str],
-    platform: list[str]
+    target: str, 
+    *, 
+    force: bool, 
+    verbose: bool, 
+    python_version: list[str],
+    platform: list[str],
 ):
     r"""Update the bootstrap.
 
@@ -732,7 +736,7 @@ def cli_dide_bootstrap(
         force=force,
         verbose=verbose,
         python_versions=list(python_version),
-        platforms=list(platform)
+        platforms=list(platform),
     )
 
 

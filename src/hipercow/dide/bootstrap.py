@@ -89,14 +89,14 @@ def _bootstrap_submit(
     name = f"bootstrap/{bootstrap_id}/{version}"
 
     if platform == "windows":
-        dide_id = bootstrap_windows_submit(bootstrap_id, version, mount,
-                                           client, target, args, name)
+        dide_id = bootstrap_windows_submit(
+            bootstrap_id, version, mount, client, target, args, name)
     elif platform == "linux":
-        dide_id = bootstrap_linux_submit(bootstrap_id, version, mount,
-                                         client, target, args, name)
+        dide_id = bootstrap_linux_submit(
+            bootstrap_id, version, mount, client, target, args, name)
 
-    return BootstrapTask(mount, bootstrap_id, client, dide_id,
-                         version, platform)
+    return BootstrapTask(
+        mount, bootstrap_id, client, dide_id, version, platform)
 
 
 def _bootstrap_target(
@@ -175,6 +175,7 @@ def _bootstrap_python_versions(versions: list[str] | None) -> list[str]:
         # later too.
         versions = ["3.10", "3.11", "3.12", "3.13"]
     return versions
+
 
 def _bootstrap_platforms(platforms: list[str] | None) -> list[str]:
     if not platforms:

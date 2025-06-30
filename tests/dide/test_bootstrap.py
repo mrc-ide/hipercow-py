@@ -70,8 +70,9 @@ def test_can_submit_bootstrap_task(tmp_path):
     target = "hipercow"
     args = ""
     platform = "windows"
-    t = _bootstrap_submit(client, mount, bootstrap_id, version, platform,
-                          target, args)
+    t = _bootstrap_submit(
+        client, mount, bootstrap_id, version, platform, target, args
+    )
     resources = TaskResources(queue="AllNodes")
     assert t.client == client
     assert client.submit.call_count == 1

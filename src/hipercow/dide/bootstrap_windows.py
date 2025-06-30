@@ -24,8 +24,9 @@ if %ErrorCode% == 0 (
 """  # noqa: E501
 )
 
-def bootstrap_windows_submit(bootstrap_id, version, mount, client,
-                             target, args, name):
+def bootstrap_windows_submit(
+    bootstrap_id, version, mount, client, target, args, name
+):
     path = Path("bootstrap-py-windows") / "in" / bootstrap_id / f"{version}.bat"
 
     path_local = mount.local / path
@@ -35,6 +36,7 @@ def bootstrap_windows_submit(bootstrap_id, version, mount, client,
 
     resources = TaskResources(queue="AllNodes")  # not BuildQueue, for now
     return client.submit(_bootstrap_windows_path(path), name, resources)
+
 
 def _batch_bootstrap_windows(
     bootstrap_id: str, version: str, target: str, args: str
