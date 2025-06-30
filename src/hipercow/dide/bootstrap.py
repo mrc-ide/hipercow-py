@@ -1,17 +1,16 @@
 import secrets
 import shutil
 from pathlib import Path
-from string import Template
 
 from taskwait import Task, taskwait
 
 from hipercow import ui
+from hipercow.dide.bootstrap_windows import bootstrap_windows_submit
+from hipercow.dide.bootstrap_linux import bootstrap_linux_submit
 from hipercow.dide.driver import _web_client
 from hipercow.dide.mounts import Mount, _backward_slash, detect_mounts
 from hipercow.dide.web import DideWebClient
 from hipercow.util import read_file_if_exists
-from hipercow.dide.bootstrap_windows import bootstrap_windows_submit
-from hipercow.dide.bootstrap_linux import bootstrap_linux_submit
 
 def bootstrap(
     target: str | None,
@@ -87,13 +86,16 @@ def _bootstrap_submit(
     args: str,
 ) -> BootstrapTask:
     name = f"bootstrap/{bootstrap_id}/{version}"
-    
-    if platform == "windows":
-        dide_id = bootstrap_windows_submit(bootstrap_id, version, mount, client, target, args, name)
-    elif platform == "linux":
-        dide_id = bootstrap_linux_submit(bootstrap_id, version, mount, client, target, args, name)
 
-    return BootstrapTask(mount, bootstrap_id, client, dide_id, version, platform)
+    if platform == "windows":
+        dide_id = bootstrap_windows_submit(bootstrap_id, version, mount, 
+                                           client, target, args, name)
+    elif platform == "linux":
+        dide_id = bootstrap_linux_submit(bootstrap_id, version, mount, 
+                                         client, target, args, name)
+
+    return BootstrapTask(mount, bootstrap_id, client, dide_id, 
+                         version, platform)
 
 
 def _bootstrap_target(
@@ -146,19 +148,6 @@ def _bootstrap_wait(tasks: list[BootstrapTask]) -> None:
     if fail:
         msg = f"{fail}/{len(tasks)} bootstrap tasks failed - see logs above"
         raise Exception(msg)
-
-
-def _batch_bootstrap(
-    bootstrap_id: str, version: str, target: str, args: str
-) -> str:
-    data = {
-        "bootstrap_id": bootstrap_id,
-        "version": version,
-        "version2": version.replace(".", ""),  # Wes: update the batch filenames
-        "args": args,
-        "target": target,
-    }
-    return BOOTSTRAP.substitute(data)
 
 
 def _bootstrap_unc(path: Path):

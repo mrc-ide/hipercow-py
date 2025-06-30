@@ -24,7 +24,8 @@ if %ErrorCode% == 0 (
 """  # noqa: E501
 )
 
-def bootstrap_windows_submit(bootstrap_id, version, mount, client, target, args, name):
+def bootstrap_windows_submit(bootstrap_id, version, mount, client, 
+                             target, args, name):
     path = Path("bootstrap-py-windows") / "in" / bootstrap_id / f"{version}.bat"
 
     path_local = mount.local / path

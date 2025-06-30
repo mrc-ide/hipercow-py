@@ -707,7 +707,7 @@ def cli_dide_check():
 @click.option(
     "--platform",
     multiple=True,
-    help="Operating system - windows or linux. Multiple copies of this flag allowed",
+    help="OS - windows or linux. Multiple copies of this flag allowed",
 )
 
 def cli_dide_bootstrap(
