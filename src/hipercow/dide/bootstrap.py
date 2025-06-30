@@ -82,7 +82,7 @@ def _bootstrap_submit(
     mount: Mount,
     bootstrap_id: str,
     version: str,
-    platform : str,
+    platform: str,
     target: str,
     args: str,
 ) -> BootstrapTask:
@@ -90,13 +90,16 @@ def _bootstrap_submit(
 
     if platform == "windows":
         dide_id = bootstrap_windows_submit(
-            bootstrap_id, version, mount, client, target, args, name)
+            bootstrap_id, version, mount, client, target, args, name
+        )
     elif platform == "linux":
         dide_id = bootstrap_linux_submit(
-            bootstrap_id, version, mount, client, target, args, name)
+            bootstrap_id, version, mount, client, target, args, name
+        )
 
     return BootstrapTask(
-        mount, bootstrap_id, client, dide_id, version, platform)
+        mount, bootstrap_id, client, dide_id, version, platform
+    )
 
 
 def _bootstrap_target(

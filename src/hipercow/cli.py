@@ -703,13 +703,11 @@ def cli_dide_check():
     multiple=True,
     help="Python version to update. Multiple copies of this flag allowed",
 )
-
 @click.option(
     "--platform",
     multiple=True,
     help="OS - windows or linux. Multiple copies of this flag allowed",
 )
-
 def cli_dide_bootstrap(
     target: str,
     *,
