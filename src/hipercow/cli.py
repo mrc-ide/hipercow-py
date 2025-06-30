@@ -711,10 +711,10 @@ def cli_dide_check():
 )
 
 def cli_dide_bootstrap(
-    target: str, 
-    *, 
-    force: bool, 
-    verbose: bool, 
+    target: str,
+    *,
+    force: bool,
+    verbose: bool,
     python_version: list[str],
     platform: list[str],
 ):
