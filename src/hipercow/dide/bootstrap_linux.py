@@ -1,7 +1,8 @@
 from pathlib import Path
 from string import Template
 
-from hipercow.dide.mounts import _forward_slash
+from hipercow.dide.mounts import Mount, _forward_slash
+from hipercow.dide.web import DideWebClient
 from hipercow.resources import TaskResources
 
 BOOTSTRAP_LINUX = Template(
@@ -34,8 +35,14 @@ fi
 
 
 def bootstrap_linux_submit(
-    bootstrap_id, version, mount, client, target, args, name
-):
+    bootstrap_id: str,
+    version: str,
+    mount: Mount,
+    client: DideWebClient,
+    target: str,
+    args: str,
+    name: str,
+) -> str:
     path = Path("bootstrap-py-linux") / "in" / bootstrap_id / f"{version}.sh"
 
     path_local = mount.local / path
@@ -48,7 +55,10 @@ def bootstrap_linux_submit(
 
 
 def _batch_bootstrap_linux(
-    bootstrap_id: str, version: str, target: str, args: str
+    bootstrap_id: str,
+    version: str,
+    target: str,
+    args: str,
 ) -> str:
     data = {
         "bootstrap_id": bootstrap_id,
@@ -59,6 +69,6 @@ def _batch_bootstrap_linux(
     return BOOTSTRAP_LINUX.substitute(data)
 
 
-def _bootstrap_linux_path(path: Path):
+def _bootstrap_linux_path(path: Path) -> str:
     path_str = _forward_slash(str(path))
     return f"/wpia-hn/Hipercow/{path_str}"

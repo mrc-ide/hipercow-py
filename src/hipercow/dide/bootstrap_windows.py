@@ -1,7 +1,8 @@
 from pathlib import Path
 from string import Template
 
-from hipercow.dide.mounts import _backward_slash
+from hipercow.dide.mounts import Mount, _backward_slash
+from hipercow.dide.web import DideWebClient
 from hipercow.resources import TaskResources
 
 BOOTSTRAP_WINDOWS = Template(
@@ -26,8 +27,14 @@ if %ErrorCode% == 0 (
 
 
 def bootstrap_windows_submit(
-    bootstrap_id, version, mount, client, target, args, name
-):
+    bootstrap_id: str,
+    version: str,
+    mount: Mount,
+    client: DideWebClient,
+    target: str,
+    args: str,
+    name: str,
+) -> str:
     path = Path("bootstrap-py-windows") / "in" / bootstrap_id / f"{version}.bat"
 
     path_local = mount.local / path
@@ -40,7 +47,10 @@ def bootstrap_windows_submit(
 
 
 def _batch_bootstrap_windows(
-    bootstrap_id: str, version: str, target: str, args: str
+    bootstrap_id: str,
+    version: str,
+    target: str,
+    args: str,
 ) -> str:
     data = {
         "bootstrap_id": bootstrap_id,
@@ -52,6 +62,6 @@ def _batch_bootstrap_windows(
     return BOOTSTRAP_WINDOWS.substitute(data)
 
 
-def _bootstrap_windows_path(path: Path):
+def _bootstrap_windows_path(path: Path) -> str:
     path_str = _backward_slash(str(path))
     return f"\\\\wpia-hn\\hipercow\\{path_str}"
