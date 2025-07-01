@@ -23,7 +23,7 @@ If the version of `hipercow` is on PyPI, you should be able to run, from anywher
 hipercow dide bootstrap
 ```
 
-which will update the bootstrap libraries for all supported versions.
+which will update the bootstrap libraries for all supported versions, for both windows and linux. For a specific platform, use the `--platform` argument, or for specific python versions, use as many `--python-version` tags as you like; currently we are supporting versions from `3.10` to `3.13` inclusive.
 
 If you want to use the current development sources (this will be more useful once we have the development bootstrap up and running: `mrc-6288`) you can do
 
