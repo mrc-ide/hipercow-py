@@ -1,36 +1,16 @@
 import secrets
 import shutil
 from pathlib import Path
-from string import Template
 
 from taskwait import Task, taskwait
 
 from hipercow import ui
+from hipercow.dide.bootstrap_linux import bootstrap_linux_submit
+from hipercow.dide.bootstrap_windows import bootstrap_windows_submit
 from hipercow.dide.driver import _web_client
 from hipercow.dide.mounts import Mount, _backward_slash, detect_mounts
 from hipercow.dide.web import DideWebClient
-from hipercow.resources import TaskResources
 from hipercow.util import read_file_if_exists
-
-BOOTSTRAP = Template(
-    r"""@ECHO on
-ECHO working directory: %CD%
-call set_python_${version2}_64
-set PIPX_HOME=\\wpia-hn-app\hipercow\bootstrap-py-windows\python-${version}\pipx
-set PIPX_BIN_DIR=\\wpia-hn-app\hipercow\bootstrap-py-windows\python-${version}\bin
-
-echo "Running pipx to install hipercow"
-python \\wpia-hn-app\hipercow\bootstrap-py-windows\in\pipx.pyz install ${args} ${target} > \\wpia-hn-app\hipercow\bootstrap-py-windows\in\${bootstrap_id}\${version}.log 2>&1
-set ErrorCode=%ERRORLEVEL%
-@ECHO ERRORLEVEL was %ErrorCode%
-if %ErrorCode% == 0 (
-  @ECHO Installation appears to have been successful
-) else (
-  @ECHO Installation failed
-  EXIT /b %ErrorCode%
-)
-"""  # noqa: E501
-)
 
 
 def bootstrap(
@@ -39,11 +19,13 @@ def bootstrap(
     force: bool = False,
     verbose: bool = False,
     python_versions: list[str] | None = None,
+    platforms: list[str] | None = None,
 ) -> None:
     client = _web_client()
     mount = _bootstrap_mount()
 
     python_versions = _bootstrap_python_versions(python_versions)
+    platforms = _bootstrap_platforms(platforms)
     bootstrap_id = secrets.token_hex(4)
     path = mount.local / _bootstrap_path(bootstrap_id)
 
@@ -55,8 +37,9 @@ def bootstrap(
     args = _bootstrap_args(force=force, verbose=verbose)
 
     tasks = [
-        _bootstrap_submit(client, mount, bootstrap_id, v, target, args)
+        _bootstrap_submit(client, mount, bootstrap_id, v, p, target, args)
         for v in python_versions
+        for p in platforms
     ]
     _bootstrap_wait(tasks)
     # We could clean up here with 'shutil.rmtree(path)' but wait until
@@ -72,10 +55,12 @@ class BootstrapTask(Task):
         client: DideWebClient,
         dide_id: str,
         version: str,
+        platform: str,
     ):
         self.client = client
         self.dide_id = dide_id
         self.version = version
+        self.platform = platform
         self.status_waiting = {"created", "submitted"}
         self.status_running = {"running"}
         self.path_log = Path(
@@ -97,20 +82,24 @@ def _bootstrap_submit(
     mount: Mount,
     bootstrap_id: str,
     version: str,
+    platform: str,
     target: str,
     args: str,
 ) -> BootstrapTask:
     name = f"bootstrap/{bootstrap_id}/{version}"
-    path = _bootstrap_path(bootstrap_id) / f"{version}.bat"
 
-    path_local = mount.local / path
-    path_local.parent.mkdir(parents=True, exist_ok=True)
-    with path_local.open("w") as f:
-        f.write(_batch_bootstrap(bootstrap_id, version, target, args))
+    if platform == "windows":
+        dide_id = bootstrap_windows_submit(
+            bootstrap_id, version, mount, client, target, args, name
+        )
+    elif platform == "linux":
+        dide_id = bootstrap_linux_submit(
+            bootstrap_id, version, mount, client, target, args, name
+        )
 
-    resources = TaskResources(queue="AllNodes")  # not BuildQueue, for now
-    dide_id = client.submit(_bootstrap_unc(path), name, resources)
-    return BootstrapTask(mount, bootstrap_id, client, dide_id, version)
+    return BootstrapTask(
+        mount, bootstrap_id, client, dide_id, version, platform
+    )
 
 
 def _bootstrap_target(
@@ -165,19 +154,6 @@ def _bootstrap_wait(tasks: list[BootstrapTask]) -> None:
         raise Exception(msg)
 
 
-def _batch_bootstrap(
-    bootstrap_id: str, version: str, target: str, args: str
-) -> str:
-    data = {
-        "bootstrap_id": bootstrap_id,
-        "version": version,
-        "version2": version.replace(".", ""),  # Wes: update the batch filenames
-        "args": args,
-        "target": target,
-    }
-    return BOOTSTRAP.substitute(data)
-
-
 def _bootstrap_unc(path: Path):
     path_str = _backward_slash(str(path))
     return f"\\\\wpia-hn\\hipercow\\{path_str}"
@@ -202,3 +178,9 @@ def _bootstrap_python_versions(versions: list[str] | None) -> list[str]:
         # later too.
         versions = ["3.10", "3.11", "3.12", "3.13"]
     return versions
+
+
+def _bootstrap_platforms(platforms: list[str] | None) -> list[str]:
+    if not platforms:
+        platforms = ["windows", "linux"]
+    return platforms

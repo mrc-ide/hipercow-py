@@ -10,3 +10,6 @@ class AnyInstanceOf:
 
     def __repr__(self):
         return f"<ANY {self.cls.__name__}>"
+
+    def __hash__(self):
+        return hash(self.cls)

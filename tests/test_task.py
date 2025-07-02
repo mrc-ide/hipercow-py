@@ -233,7 +233,7 @@ def test_can_detect_corrupt_recent_file(tmp_path):
             ids.append(tc.task_create_shell(["echo", "hello world"], root=r))
     assert task_recent(root=r) == ids
     with r.path_recent().open("w") as f:
-        for i in ids[:2] + [ids[2] + ids[3], ids[4]]:
+        for i in [*ids[:2], ids[2] + ids[3], ids[4]]:
             f.write(f"{i}\n")
     with pytest.raises(Exception, match="Recent data list is corrupt"):
         task_recent(root=r)

@@ -194,6 +194,10 @@ def _client_body_submit(
     # The str here keeps mypy happy, this will be a string by this
     # point.
     template = str(resources.queue)
+    if template == "LinuxNodes":
+        job_to_run = _call_quote_batch_path(path, "bash")
+    else:
+        job_to_run = _call_quote_batch_path(path, "call")
     data = {
         "cluster": encode64(cluster),
         "template": encode64(template),
@@ -201,7 +205,7 @@ def _client_body_submit(
         "wd": encode64(workdir or ""),  # work dir
         "se": encode64(""),  # stderr
         "so": encode64(""),  # stdout
-        "jobs": encode64(_call_quote_batch_path(path)),
+        "jobs": encode64(job_to_run),
         "dep": encode64(""),  # dependencies, eventually
         "hpcfunc": "submit",
         "ver": encode64(f"hipercow-py/{hipercow_version}"),
@@ -231,7 +235,6 @@ def _client_body_submit(
     # hold until (hu)
     # requested nodes (rn)
     # priority (pri)
-
     return data
 
 
@@ -332,7 +335,7 @@ def _parse_dide_timestamp(time: str) -> datetime.datetime:
     )
 
 
-def _call_quote_batch_path(path: str) -> str:
+def _call_quote_batch_path(path: str, prefix: str) -> str:
     # NOTE: list2cmdline is undocumented but needed.
     # not documented https://github.com/conan-io/conan/pull/11553/
-    return f"call {list2cmdline([path])}"
+    return f"{prefix} {list2cmdline([path])}"

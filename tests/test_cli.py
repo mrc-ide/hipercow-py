@@ -384,7 +384,7 @@ def test_can_rebuild_recent_list(tmp_path):
         assert res.stdout == "".join(i + "\n" for i in ids)
 
         with r.path_recent().open("w") as f:
-            for i in ids[:2] + [ids[2] + ids[3], ids[4]]:
+            for i in [*ids[:2], ids[2] + ids[3], ids[4]]:
                 f.write(f"{i}\n")
 
         res = runner.invoke(cli.cli_task_recent, [])
@@ -408,7 +408,7 @@ def test_can_call_cli_dide_bootstrap(mocker):
     assert res.output.strip() == ""
     assert cli.dide_bootstrap.call_count == 1
     assert cli.dide_bootstrap.mock_calls[0] == mock.call(
-        None, force=False, verbose=True, python_versions=[]
+        None, force=False, verbose=True, python_versions=[], platforms=[]
     )
 
     res = runner.invoke(
@@ -418,7 +418,7 @@ def test_can_call_cli_dide_bootstrap(mocker):
     assert res.output.strip() == ""
     assert cli.dide_bootstrap.call_count == 2
     assert cli.dide_bootstrap.mock_calls[1] == mock.call(
-        "myfile", force=True, verbose=True, python_versions=[]
+        "myfile", force=True, verbose=True, python_versions=[], platforms=[]
     )
 
 
