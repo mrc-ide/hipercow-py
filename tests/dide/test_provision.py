@@ -47,8 +47,9 @@ def test_can_provision_with_dide_win(tmp_path, mocker):
     )
 
     assert hipercow.dide.batch_windows.taskwait.call_count == 1
-    assert hipercow.dide.batch_windows.taskwait.mock_calls[0] == \
-           mock.call(mock.ANY)
+    assert hipercow.dide.batch_windows.taskwait.mock_calls[0] == mock.call(
+        mock.ANY
+    )
     task = hipercow.dide.batch_windows.taskwait.mock_calls[0].args[0]
     assert isinstance(task, ProvisionWaitWrapper)
     assert task.client == mock_client

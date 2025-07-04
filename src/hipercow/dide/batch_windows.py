@@ -211,11 +211,7 @@ def _clean_host(host: str) -> str:
     return re.sub("\\.hpc$", "-app", host)
 
 def _dide_provision_win(
-    name: str,
-    id: str,
-    config: DideConfiguration,
-    cl : DideWebClient,
-    root: Root
+    name: str, id: str, config: DideConfiguration, cl: DideWebClient, root: Root
 ):
     unc = write_batch_provision_win(name, id, config, root)
     resources = TaskResources(queue="BuildQueue")

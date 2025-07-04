@@ -80,7 +80,7 @@ def _template_data_core_linux(config: DideConfiguration) -> dict[str, str]:
         "date": str(datetime.datetime.now(tz=datetime.timezone.utc)),
         "python_version": config.python_version,
         "hipercow_version": version,
-        "hipercow_root_path": _linux_dide_path(path_map)
+        "hipercow_root_path": _linux_dide_path(path_map),
     }
 
 
@@ -110,17 +110,19 @@ def _template_data_task_run_linux(
 # \\wpia-hn2\bob => /wpia-hn2/bob
 # \\wpia-hn2.hpc.dide.ic.ac.uk\bob => /wpia-hn2/bob
 
+
 class NoLinuxMountPointError(Exception):
     pass
+
 
 def _linux_dide_path(path_map: PathMap) -> str:
     host = path_map.mount.host.lower()
     if host in {"wpia-san04", "qdrive"}:
         linux_base = "/didehomes" + "/" + path_map.mount.remote.split("/")[-1]
     elif host in {"wpia-hn", "wpia-hn.hpc"}:
-        linux_base = "/wpia-hn"+ "/" + path_map.mount.remote
+        linux_base = "/wpia-hn" + "/" + path_map.mount.remote
     elif host in {"wpia-hn2", "wpia-hn2.hpc"}:
-        linux_base = "/wpia-hn2"+ "/" + path_map.mount.remote
+        linux_base = "/wpia-hn2" + "/" + path_map.mount.remote
     else:
         err = f"Can't resolve {host} on linux node"
         raise NoLinuxMountPointError(err)

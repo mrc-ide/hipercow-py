@@ -160,8 +160,6 @@ class LinuxWindowsDriver(HipercowDriver):
         return root.path_task(task_id) / "dide_id"
 
 
-
-
 def _web_client() -> DideWebClient:
     credentials = fetch_credentials()
     cl = DideWebClient(credentials)
