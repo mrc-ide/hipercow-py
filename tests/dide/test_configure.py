@@ -108,7 +108,7 @@ def test_provision_using_driver(tmp_path, mocker):
     mock_provision = mock.MagicMock()
     mocker.patch("hipercow.dide.driver.detect_mounts", return_value=mock_mounts)
     mocker.patch(
-        "hipercow.dide.batch_windows._dide_provision_win", mock_provision
+        "hipercow.dide.driver._dide_provision_win", mock_provision
     )
     configure(
         "dide-windows", python_version=None, check_credentials=False, root=r
@@ -119,7 +119,7 @@ def test_provision_using_driver(tmp_path, mocker):
     cfg = load_driver(None, r).config
     assert mock_provision.call_count == 1
     assert mock_provision.mock_calls[0] == mock.call(
-        "default", mock.ANY, cfg, r
+        "default", mock.ANY, cfg, mock.ANY, r
     )
 
 
@@ -131,7 +131,7 @@ def test_resources_using_driver(tmp_path, mocker):
     mock_provision = mock.MagicMock()
     mocker.patch("hipercow.dide.driver.detect_mounts", return_value=mock_mounts)
     mocker.patch(
-        "hipercow.dide.batch_windows._dide_provision_win", mock_provision
+        "hipercow.dide.driver._dide_provision_win", mock_provision
     )
     configure(
         "dide-windows", python_version=None, check_credentials=False, root=r
