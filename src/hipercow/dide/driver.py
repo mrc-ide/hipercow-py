@@ -165,5 +165,3 @@ def _web_client() -> DideWebClient:
     cl = DideWebClient(credentials)
     cl.login()
     return cl
-
-
