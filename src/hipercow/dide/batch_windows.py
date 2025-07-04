@@ -210,6 +210,7 @@ def _unc_path(path_map: PathMap, path: Path) -> str:
 def _clean_host(host: str) -> str:
     return re.sub("\\.hpc$", "-app", host)
 
+
 def _dide_provision_win(
     name: str, id: str, config: DideConfiguration, cl: DideWebClient, root: Root
 ):
