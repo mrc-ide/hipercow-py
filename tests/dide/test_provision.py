@@ -9,7 +9,7 @@ from hipercow import root
 from hipercow.dide import mounts
 from hipercow.dide.batch_windows import _dide_provision_win
 from hipercow.dide.configuration import dide_configuration
-from hipercow.dide.driver import ProvisionWaitWrapper
+from hipercow.dide.provision import ProvisionWaitWrapper
 from hipercow.dide.web import DideWebClient
 from hipercow.resources import TaskResources
 from hipercow.task import TaskStatus
