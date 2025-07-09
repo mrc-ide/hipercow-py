@@ -1,11 +1,18 @@
 import datetime
 import os
 import platform
-from string import Template
 
+from pathlib import Path
+from string import Template
+from taskwait import taskwait
+
+from hipercow import ui
 from hipercow.__about__ import __version__ as version
 from hipercow.dide.configuration import DideConfiguration
 from hipercow.dide.mounts import PathMap, _forward_slash
+from hipercow.dide.web import DideWebClient
+from hipercow.dide.provision import ProvisionWaitWrapper
+from hipercow.resources import TaskResources
 from hipercow.root import Root
 
 TASK_RUN_SH = Template(
@@ -105,8 +112,9 @@ def write_batch_task_run_linux(
     task_id: str, config: DideConfiguration, root: Root
 ) -> str:
     data = _template_data_task_run_linux(task_id, config)
-    path = root.path_task(task_id, relative=True) / "task_run.sh"
-    os.makedirs(root.path / path, exist_ok=True)
+    path = root.path_task(task_id, relative=True)
+    Path(root.path / path).mkdir(parents=True, exist_ok=True)
+    path = path / "task_run.sh"
     with (root.path / path).open("w", newline="\n") as f:
         f.write(TASK_RUN_SH.substitute(data))
     return data["hipercow_root_path"] + "/" + _forward_slash(str(path))
@@ -116,8 +124,9 @@ def write_batch_provision_linux(
     name: str, provision_id: str, config: DideConfiguration, root: Root
 ) -> str:
     data = _template_data_provision_linux(name, provision_id, config)
-    path = root.path_provision(name, provision_id, relative=True) / "run.sh"
-    os.makedirs(root.path / path, exist_ok=True)
+    path = root.path_provision(name, provision_id, relative=True)
+    Path(root.path / path).mkdir(parents=True, exist_ok=True)
+    path = path / "run.sh"
     with (root.path / path).open("w", newline="\n") as f:
         f.write(PROVISION_SH.substitute(data))
     return data["hipercow_root_path"] + "/" + _forward_slash(str(path))
@@ -195,3 +204,28 @@ def _linux_dide_path(path_map: PathMap) -> str:
     rel = "" if rel == "." else rel + "/"
 
     return f"/{linux_host}/{linux_share}/{rel}"
+
+
+def _dide_provision_linux(
+    name: str, id: str, config: DideConfiguration, cl: DideWebClient, root: Root
+):
+    unc = write_batch_provision_linux(name, id, config, root)
+    resources = TaskResources(queue="LinuxNodes")
+    dide_id = cl.submit(unc, f"{name}/{id}", resources=resources)
+    task = ProvisionWaitWrapper(root, name, id, cl, dide_id)
+    res = taskwait(task)
+    dt = round(res.end - res.start, 2)
+    if res.status == "failure":
+        path_log = root.path_provision_log(name, id, relative=True)
+        ui.alert_danger(f"Provisioning failed after {dt}s!")
+        ui.blank_line()
+        ui.text("Logs, if produced, may be visible above")
+        ui.text("A copy of all logs is available at:")
+        ui.text(f"    {path_log}")
+        ui.blank_line()
+        dide_log = cl.log(dide_id)
+        ui.logs("Logs from the cluster", dide_log)
+        msg = "Provisioning failed"
+        raise Exception(msg)
+    else:
+        ui.alert_success(f"Provisioning completed in {dt}s")
