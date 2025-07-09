@@ -17,8 +17,8 @@ def configure(name: str, *, root: OptionalRoot = None, **kwargs) -> None:
     Configures a `hipercow` root to use a driver.
 
     Args:
-        name: The name of the driver.  This will be `dide` unless you
-            are developing `hipercow` itself :)
+        name: The name of the driver, `dide-windows` or `dide-linux` are
+            the currently provided drivers.
         root: The root, or if not given search from the current directory.
         **kwargs (Any): Arguments passed to, and supported by, your driver.
 
