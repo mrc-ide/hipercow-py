@@ -164,26 +164,26 @@ def _linux_dide_path(path_map: PathMap) -> str:
     # when mapped on the linux nodes
 
     linux_hosts = {
-      "wpia-san04": "/didehomes",
-      "qdrive": "/didehomes",
-      "wpia-hn", "/wpia-hn",
-      "wpia-hn.hpc", "/wpia-hn",
-      "wpia-hn2", "/wpia-hn2",
-      "wpia-hn2.hpc", "/wpia-hn2",
+        "wpia-san04": "/didehomes",
+        "qdrive": "/didehomes",
+        "wpia-hn": "/wpia-hn",
+        "wpia-hn.hpc": "/wpia-hn",
+        "wpia-hn2": "/wpia-hn2",
+        "wpia-hn2.hpc": "/wpia-hn2",
     }
 
     try:
         linux_host = linux_hosts[host]
     except KeyError:
         err = f"Can't resolve {host} on linux node"
-        raise NoLinuxMountPointError(err)
+        raise NoLinuxMountPointError(err) from None
 
     # Now the sharename within that host. This is
     # usually path.map.mount.remote, except in the
     # special case of wpia-san04 / qdrive, where we
     # have to remove "homes/"
 
-    linux_share = path.map.mount.remote
+    linux_share = path_map.mount.remote
     if host in {"wpia-san04", "qdrive"}:
         linux_share = linux_share.split("/")[-1]
 
@@ -194,4 +194,4 @@ def _linux_dide_path(path_map: PathMap) -> str:
     rel = path_map.relative
     rel = "" if rel == "." else rel + "/"
 
-    return f("/{linux_host}/{linux_share}/{rel}
+    return f"/{linux_host}/{linux_share}/{rel}"

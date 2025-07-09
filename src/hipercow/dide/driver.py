@@ -4,7 +4,7 @@ from hipercow import ui
 from hipercow.dide.auth import fetch_credentials
 from hipercow.dide.batch_linux import (
     _dide_provision_linux,
-     write_batch_task_run_linux
+    write_batch_task_run_linux,
 )
 from hipercow.dide.batch_windows import (
     _dide_provision_win,
