@@ -1,16 +1,16 @@
 import datetime
 import platform
-
 from pathlib import Path
 from string import Template
+
 from taskwait import taskwait
 
 from hipercow import ui
 from hipercow.__about__ import __version__ as version
 from hipercow.dide.configuration import DideConfiguration
 from hipercow.dide.mounts import PathMap, _forward_slash
-from hipercow.dide.web import DideWebClient
 from hipercow.dide.provision import ProvisionWaitWrapper
+from hipercow.dide.web import DideWebClient
 from hipercow.resources import TaskResources
 from hipercow.root import Root
 
