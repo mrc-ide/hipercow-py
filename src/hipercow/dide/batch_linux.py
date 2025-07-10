@@ -116,7 +116,7 @@ def write_batch_task_run_linux(
     path = path / "task_run.sh"
     with (root.path / path).open("w", newline="\n") as f:
         f.write(TASK_RUN_SH.substitute(data))
-    return data["hipercow_root_path"] + "/" + _forward_slash(str(path))
+    return data["hipercow_root_path"] + _forward_slash(str(path))
 
 
 def write_batch_provision_linux(
@@ -128,7 +128,7 @@ def write_batch_provision_linux(
     path = path / "run.sh"
     with (root.path / path).open("w", newline="\n") as f:
         f.write(PROVISION_SH.substitute(data))
-    return data["hipercow_root_path"] + "/" + _forward_slash(str(path))
+    return data["hipercow_root_path"] + _forward_slash(str(path))
 
 
 def _template_data_core_linux(config: DideConfiguration) -> dict[str, str]:
@@ -172,12 +172,12 @@ def _linux_dide_path(path_map: PathMap) -> str:
     # when mapped on the linux nodes
 
     linux_hosts = {
-        "wpia-san04": "/didehomes",
-        "qdrive": "/didehomes",
-        "wpia-hn": "/wpia-hn",
-        "wpia-hn.hpc": "/wpia-hn",
-        "wpia-hn2": "/wpia-hn2",
-        "wpia-hn2.hpc": "/wpia-hn2",
+        "wpia-san04": "didehomes",
+        "qdrive": "didehomes",
+        "wpia-hn": "wpia-hn",
+        "wpia-hn.hpc": "wpia-hn",
+        "wpia-hn2": "wpia-hn2",
+        "wpia-hn2.hpc": "wpia-hn2",
     }
 
     try:
@@ -201,6 +201,9 @@ def _linux_dide_path(path_map: PathMap) -> str:
 
     rel = path_map.relative
     rel = "" if rel == "." else rel + "/"
+
+    # Final path - note that it ends in a trailing slash,
+    # because rel is either empty, or itself ends in `/`
 
     return f"/{linux_host}/{linux_share}/{rel}"
 
