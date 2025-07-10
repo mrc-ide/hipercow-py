@@ -64,8 +64,9 @@ def test_can_write_provision_batch(tmp_path):
         r, mounts=[m], python_version=None, check_credentials=False
     )
 
-    run_sh = batch_linux.write_batch_provision_linux("myenv", "abcdef", config, r)
+    run_sh = batch_linux.write_batch_provision_linux(
+        "myenv", "abcdef", config, r
+    )
     path_rel = "hipercow/py/env/myenv/provision/abcdef/run.sh"
     assert run_sh == f"/didehomes/bob/my/project/{path_rel}"
     assert (r.path / path_rel.replace("\\", "/")).exists()
-
