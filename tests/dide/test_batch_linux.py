@@ -69,4 +69,4 @@ def test_can_write_provision_batch(tmp_path):
     )
     path_rel = "hipercow/py/env/myenv/provision/abcdef/run.sh"
     assert run_sh == f"/didehomes/bob/my/project/{path_rel}"
-    assert (r.path / path_rel.replace("\\", "/")).exists()
+    assert (r.path / path_rel).exists()
