@@ -39,7 +39,6 @@ def test_user_facing_check_function_failure(mocker):
         dide_check()
 
 
-
 def test_user_facing_check_function_config_failure(mocker):
     ok = Result.ok()
     err = Result.err(Exception("foo"))

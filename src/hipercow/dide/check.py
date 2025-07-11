@@ -22,8 +22,10 @@ class DideCheckResult:
 
     def __bool__(self) -> bool:
         return (
-            bool(self.credentials) and bool(self.connection) \
-            and bool(self.path) and bool(self.root)
+            bool(self.credentials)
+            and bool(self.connection)
+            and bool(self.path)
+            and bool(self.root)
         )
 
 
