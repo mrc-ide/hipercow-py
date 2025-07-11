@@ -40,7 +40,7 @@ def test_user_facing_check_function_failure(mocker):
 
 
 
-def test_user_facing_check_function_failure(mocker):
+def test_user_facing_check_function_config_failure(mocker):
     ok = Result.ok()
     err = Result.err(Exception("foo"))
     mocker.patch("hipercow.dide.check._dide_check_credentials", return_value=ok)
