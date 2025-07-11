@@ -22,7 +22,8 @@ class DideCheckResult:
 
     def __bool__(self) -> bool:
         return (
-            bool(self.credentials) and bool(self.connection) and bool(self.path)
+            bool(self.credentials) and bool(self.connection) \
+            and bool(self.path) and bool(self.root)
         )
 
 
@@ -124,13 +125,24 @@ def _dide_check_root_configured(root: Root) -> Result:
             "hipercow is configured to use 'dide-windows'", indent=4
         )
         return Result.ok()
-    except Exception as e:
-        ui.alert_danger(
-            "hipercow is not configured to use 'dide-windows'", indent=4
-        )
-        ui.alert_info(
-            "You can run 'hipercow driver configure dide-windows' to configure the root",  # noqa: E501
-            indent=4,
-        )
-        ui.alert_see_also(f"{_DOCS}/introduction/#initialisation", indent=4)
-        return Result.err(e)
+    except Exception as e_win:
+        try:
+            load_driver("dide-linux", root)
+            ui.alert_success(
+                "hipercow is configured to use 'dide-linux'", indent=4
+            )
+            return Result.ok()
+        except Exception as e_linux:
+            ui.alert_danger(
+                "hipercow is not configured with a valid driver.", indent=4
+            )
+            ui.alert_info(
+                "Run 'hipercow driver configure dide-windows' or 'dide-linux' to configure the root",  # noqa: E501
+                indent=4,
+            )
+            ui.alert_see_also(f"{_DOCS}/introduction/#initialisation", indent=4)
+            combined_error = Exception(
+                f"- dide-windows exception: {e_win}\n"
+                f"- dide-linux exception: {e_linux}"
+            )
+            return Result.err(combined_error)
