@@ -39,6 +39,17 @@ def test_user_facing_check_function_failure(mocker):
         dide_check()
 
 
+def test_user_facing_check_function_config_failure(mocker):
+    ok = Result.ok()
+    err = Result.err(Exception("foo"))
+    mocker.patch("hipercow.dide.check._dide_check_credentials", return_value=ok)
+    mocker.patch("hipercow.dide.check._dide_check_connection", return_value=ok)
+    mocker.patch("hipercow.dide.check._dide_check_path", return_value=ok)
+    mocker.patch("hipercow.dide.check._dide_check_root", return_value=err)
+    with pytest.raises(Exception, match="You have issues to address"):
+        dide_check()
+
+
 def test_successful_credentials_read(mocker, capsys):
     creds = Credentials("bob", "password")
     mocker.patch("hipercow.dide.check.fetch_credentials", return_value=creds)
@@ -161,4 +172,4 @@ def test_can_report_that_dide_windows_is_not_configured(capsys, mocker):
     root = mock.Mock()
     assert not _dide_check_root_configured(root)
     out = capsys.readouterr().out
-    assert "hipercow is not configured to use 'dide-windows'" in out
+    assert "hipercow is not configured with a valid driver" in out

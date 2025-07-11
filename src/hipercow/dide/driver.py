@@ -2,7 +2,10 @@ from pathlib import Path
 
 from hipercow import ui
 from hipercow.dide.auth import fetch_credentials
-from hipercow.dide.batch_linux import write_batch_task_run_linux
+from hipercow.dide.batch_linux import (
+    _dide_provision_linux,
+    write_batch_task_run_linux,
+)
 from hipercow.dide.batch_windows import (
     _dide_provision_win,
     write_batch_task_run_win,
@@ -130,8 +133,7 @@ class LinuxWindowsDriver(HipercowDriver):
             f.write(dide_id)
 
     def provision(self, name: str, id: str, root: Root) -> None:
-        err = "Linux provision not implemented yet"
-        raise NotImplementedError(err)
+        _dide_provision_linux(name, id, self.config, _web_client(), root)
 
     def resources(self) -> ClusterResources:
         # We should get this from the cluster itself but with caching
