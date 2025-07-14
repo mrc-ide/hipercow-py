@@ -1,6 +1,5 @@
 import datetime
 import platform
-from pathlib import Path
 from string import Template
 
 from taskwait import taskwait
@@ -112,7 +111,7 @@ def write_batch_task_run_linux(
 ) -> str:
     data = _template_data_task_run_linux(task_id, config)
     path = root.path_task(task_id, relative=True)
-    Path(root.path / path).mkdir(parents=True, exist_ok=True)
+    (root.path / path).mkdir(parents=True, exist_ok=True)
     path = path / "task_run.sh"
     with (root.path / path).open("w", newline="\n") as f:
         f.write(TASK_RUN_SH.substitute(data))
@@ -124,7 +123,7 @@ def write_batch_provision_linux(
 ) -> str:
     data = _template_data_provision_linux(name, provision_id, config)
     path = root.path_provision(name, provision_id, relative=True)
-    Path(root.path / path).mkdir(parents=True, exist_ok=True)
+    (root.path / path).mkdir(parents=True, exist_ok=True)
     path = path / "run.sh"
     with (root.path / path).open("w", newline="\n") as f:
         f.write(PROVISION_SH.substitute(data))
