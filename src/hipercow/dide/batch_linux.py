@@ -2,9 +2,15 @@ import datetime
 import platform
 from string import Template
 
+from taskwait import taskwait
+
+from hipercow import ui
 from hipercow.__about__ import __version__ as version
 from hipercow.dide.configuration import DideConfiguration
 from hipercow.dide.mounts import PathMap, _forward_slash
+from hipercow.dide.provision import ProvisionWaitWrapper
+from hipercow.dide.web import DideWebClient
+from hipercow.resources import TaskResources
 from hipercow.root import Root
 
 TASK_RUN_SH = Template(
@@ -63,14 +69,65 @@ fi
 )
 
 
+PROVISION_SH = Template(
+    r"""#!/bin/bash
+# automatically generated
+
+echo generated on host: ${hostname}
+echo generated on date: ${date}
+echo hipercow-py version: ${hipercow_version}
+echo running on: $$(hostname -f)
+
+export PATH=/opt/apps/lmod/lmod/libexec:$$PATH
+source /opt/apps/lmod/lmod/init/bash
+export LMOD_CMD=/opt/apps/lmod/lmod/libexec/lmod
+module use /modules-share/modules/all
+
+module load Python/${python_version}
+
+cd ${hipercow_root_path}
+echo working directory: $$(pwd)
+
+echo this is a provisioning task
+
+/wpia-hn/Hipercow/bootstrap-py-linux/python-${python_version}/bin/hipercow environment provision-run ${environment_name} ${provision_id}
+
+ErrorCode=$$?
+
+echo ERRORLEVEL was $$ErrorCode
+
+if [ $$ErrorCode -ne 0 ]; then
+  echo Error running provisioning
+  exit $$ErrorCode
+fi
+
+echo Quitting
+"""  # noqa: E501
+)
+
+
 def write_batch_task_run_linux(
     task_id: str, config: DideConfiguration, root: Root
 ) -> str:
     data = _template_data_task_run_linux(task_id, config)
-    path = root.path_task(task_id, relative=True) / "task_run.sh"
+    path = root.path_task(task_id, relative=True)
+    (root.path / path).mkdir(parents=True, exist_ok=True)
+    path = path / "task_run.sh"
     with (root.path / path).open("w", newline="\n") as f:
         f.write(TASK_RUN_SH.substitute(data))
-    return data["hipercow_root_path"] + "/" + _forward_slash(str(path))
+    return data["hipercow_root_path"] + _forward_slash(str(path))
+
+
+def write_batch_provision_linux(
+    name: str, provision_id: str, config: DideConfiguration, root: Root
+) -> str:
+    data = _template_data_provision_linux(name, provision_id, config)
+    path = root.path_provision(name, provision_id, relative=True)
+    (root.path / path).mkdir(parents=True, exist_ok=True)
+    path = path / "run.sh"
+    with (root.path / path).open("w", newline="\n") as f:
+        f.write(PROVISION_SH.substitute(data))
+    return data["hipercow_root_path"] + _forward_slash(str(path))
 
 
 def _template_data_core_linux(config: DideConfiguration) -> dict[str, str]:
@@ -94,21 +151,13 @@ def _template_data_task_run_linux(
     }
 
 
-# Here we are converting a fully-qualified path into
-# how they appear on the linux nodes. Specifically:-
-
-# \\wpia-san04\homes\wrh1 => /didehomes/wrh1
-# \\wpia-san04.dide.local\homes\wrh1 => /didehomes/wrh1
-# \\wpia-san04.dide.ic.ac.uk\homes\wrh1 => /didehomes/wrh1
-
-# \\qdrive\homes\wrh1 => /didehomes/wrh1
-# \\qdrive.dide.ic.ac.uk\homes\wrh1 => /didehomes/wrh1
-
-# \\wpia-hn\alice => /wpia-hn/alice
-# \\wpia-hn.hpc.dide.ic.ac.uk\alice => /wpia-hn/alice
-
-# \\wpia-hn2\bob => /wpia-hn2/bob
-# \\wpia-hn2.hpc.dide.ic.ac.uk\bob => /wpia-hn2/bob
+def _template_data_provision_linux(
+    name: str, id: str, config: DideConfiguration
+) -> dict[str, str]:
+    return _template_data_core_linux(config) | {
+        "environment_name": name,
+        "provision_id": id,
+    }
 
 
 class NoLinuxMountPointError(Exception):
@@ -117,15 +166,67 @@ class NoLinuxMountPointError(Exception):
 
 def _linux_dide_path(path_map: PathMap) -> str:
     host = path_map.mount.host.lower()
-    if host in {"wpia-san04", "qdrive"}:
-        linux_base = "/didehomes" + "/" + path_map.mount.remote.split("/")[-1]
-    elif host in {"wpia-hn", "wpia-hn.hpc"}:
-        linux_base = "/wpia-hn" + "/" + path_map.mount.remote
-    elif host in {"wpia-hn2", "wpia-hn2.hpc"}:
-        linux_base = "/wpia-hn2" + "/" + path_map.mount.remote
-    else:
+
+    # Map from a server name, to the name of the host
+    # when mapped on the linux nodes
+
+    linux_hosts = {
+        "wpia-san04": "didehomes",
+        "qdrive": "didehomes",
+        "wpia-hn": "wpia-hn",
+        "wpia-hn.hpc": "wpia-hn",
+        "wpia-hn2": "wpia-hn2",
+        "wpia-hn2.hpc": "wpia-hn2",
+    }
+
+    try:
+        linux_host = linux_hosts[host]
+    except KeyError:
         err = f"Can't resolve {host} on linux node"
-        raise NoLinuxMountPointError(err)
+        raise NoLinuxMountPointError(err) from None
+
+    # Now the sharename within that host. This is
+    # usually path.map.mount.remote, except in the
+    # special case of wpia-san04 / qdrive, where we
+    # have to remove "homes/"
+
+    linux_share = path_map.mount.remote
+    if host in {"wpia-san04", "qdrive"}:
+        linux_share = linux_share.split("/")[-1]
+
+    # The folder relative to that share is
+    # path_map.relative - if it's ".", then we don't
+    # add anything, otherwise we need to add "/"
+
     rel = path_map.relative
     rel = "" if rel == "." else rel + "/"
-    return linux_base + "/" + rel
+
+    # Final path - note that it ends in a trailing slash,
+    # because rel is either empty, or itself ends in `/`
+
+    return f"/{linux_host}/{linux_share}/{rel}"
+
+
+def _dide_provision_linux(
+    name: str, id: str, config: DideConfiguration, cl: DideWebClient, root: Root
+):
+    unc = write_batch_provision_linux(name, id, config, root)
+    resources = TaskResources(queue="LinuxNodes")
+    dide_id = cl.submit(unc, f"{name}/{id}", resources=resources)
+    task = ProvisionWaitWrapper(root, name, id, cl, dide_id)
+    res = taskwait(task)
+    dt = round(res.end - res.start, 2)
+    if res.status == "failure":
+        path_log = root.path_provision_log(name, id, relative=True)
+        ui.alert_danger(f"Provisioning failed after {dt}s!")
+        ui.blank_line()
+        ui.text("Logs, if produced, may be visible above")
+        ui.text("A copy of all logs is available at:")
+        ui.text(f"    {path_log}")
+        ui.blank_line()
+        dide_log = cl.log(dide_id)
+        ui.logs("Logs from the cluster", dide_log)
+        msg = "Provisioning failed"
+        raise Exception(msg)
+    else:
+        ui.alert_success(f"Provisioning completed in {dt}s")

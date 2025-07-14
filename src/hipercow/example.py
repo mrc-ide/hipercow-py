@@ -36,7 +36,8 @@ class ExampleDriver(HipercowDriver):
 
     @staticmethod
     def configure(
-        root: Root, **kwargs  # noqa: ARG004
+        root: Root,  # noqa: ARG004
+        **kwargs,
     ) -> ExampleDriverConfiguration:
         return example_configuration(**kwargs)
 
