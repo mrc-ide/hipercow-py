@@ -29,7 +29,7 @@ def test_can_check_user_queue():
     assert x.validate_queue(None) == "d"
     assert x.validate_queue(".default") == "d"
     assert x.validate_queue(".test") == "c"
-    with pytest.raises(ValueError, match="Invalid special queue '.foo'"):
+    with pytest.raises(ValueError, match=r"Invalid special queue '.foo'"):
         x.validate_queue(".foo")
     with pytest.raises(ValueError, match="'foo' is not in valid queue list"):
         x.validate_queue("foo")

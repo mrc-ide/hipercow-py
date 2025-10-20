@@ -165,28 +165,28 @@ class NoLinuxMountPointError(Exception):
 
 def _unify_host(host) -> str:
     host = host.lower()
-    if host in ['wpia-san04',
-                'wpia-san04.dide.ic.ac.uk',
-                'wpia-san04.dide.local',
-                'qdrive',
-                'qdrive.dide.ic.ac.uk',
-                'qdrive.dide.local']:
+    if host in ["wpia-san04",
+                "wpia-san04.dide.ic.ac.uk",
+                "wpia-san04.dide.local",
+                "qdrive",
+                "qdrive.dide.ic.ac.uk",
+                "qdrive.dide.local"]:
         return "qdrive"
 
-    if host in ['wpia-hn',
-                'wpia-hn.dide.ic.ac.uk',
-                'wpia-hn.hpc',
-                'wpia-hn.hpc.dide.ic.ac.uk',
-                'wpia-hn.dide.local',
-                'wpia-hn.hpc.dide.local']:
+    if host in ["wpia-hn",
+                "wpia-hn.dide.ic.ac.uk",
+                "wpia-hn.hpc",
+                "wpia-hn.hpc.dide.ic.ac.uk",
+                "wpia-hn.dide.local",
+                "wpia-hn.hpc.dide.local"]:
         return "wpia-hn"
 
-    if host in ['wpia-hn2',
-                'wpia-hn2.dide.ic.ac.uk',
-                'wpia-hn2.hpc',
-                'wpia-hn2.hpc.dide.ic.ac.uk',
-                'wpia-hn2.dide.local',
-                'wpia-hn2.hpc.dide.local']:
+    if host in ["wpia-hn2",
+                "wpia-hn2.dide.ic.ac.uk",
+                "wpia-hn2.hpc",
+                "wpia-hn2.hpc.dide.ic.ac.uk",
+                "wpia-hn2.dide.local",
+                "wpia-hn2.hpc.dide.local"]:
         return "wpia-hn2"
 
     err = f"Unrecognised host: {host} on linux node"
@@ -228,7 +228,7 @@ def _linux_dide_path(path_map: PathMap) -> str:
 
     host = _unify_host(path_map.mount.host)
 
-    # Separate the first part of the rest of the mount, from 
+    # Separate the first part of the rest of the mount, from
     # the remaining directories - we want it to end with /
 
     rest_of_path = path_map.mount.remote
@@ -236,10 +236,10 @@ def _linux_dide_path(path_map: PathMap) -> str:
     share_head = head_tail[0]
     share_tail = head_tail[1] if len(head_tail) > 1 else None
     share_tail = (share_tail.rstrip("/") + "/") if share_tail else ""
-    
+
     # If the relative path (rel) is `.` then we ignore it.
     # If it has more folders, then append, and add trailing /
-   
+
     rel = path_map.relative
     rel = "" if rel == "." else f"{rel}/"
 
@@ -267,14 +267,14 @@ def _linux_dide_path(path_map: PathMap) -> str:
     # We can check whether the network path exists on windows, but not
     # so easily on other operating sytems where we'd need it already
     # mounted.
-    
+
     if host == "wpia-hn":
         unc = f"\\\\wpia-hn.hpc.dide.ic.ac.uk\\cluster-storage\\{share_head}"
         if _attempt_check_exists_unc(unc):
             return f"/mnt/cluster/{share_head}{rel}"
 
     # If we reach here, we've failed to return a valid linux cluster mount.
-    
+
     err = f"Can't resolve path {rest_of_path} on host {host} on linux node."
     raise NoLinuxMountPointError(err) from None
 

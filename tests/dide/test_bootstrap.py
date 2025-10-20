@@ -168,7 +168,7 @@ def test_can_launch_bootstrap(mocker):
 
 
 def test_error_if_no_pipx_pyz(tmp_path):
-    with pytest.raises(Exception, match="Expected 'pipx.pyz' to be found"):
+    with pytest.raises(Exception, match=r"Expected 'pipx.pyz' to be found"):
         _bootstrap_check_pipx_pyz(tmp_path)
     file_create(tmp_path / "pipx.pyz")
     assert _bootstrap_check_pipx_pyz(tmp_path) is None
