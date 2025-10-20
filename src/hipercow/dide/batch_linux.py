@@ -171,7 +171,7 @@ def _unify_host(host) -> str:
         "wpia-san04.dide.local",
         "qdrive",
         "qdrive.dide.ic.ac.uk",
-        "qdrive.dide.local"
+        "qdrive.dide.local",
     ]:
         return "qdrive"
 
@@ -181,7 +181,7 @@ def _unify_host(host) -> str:
         "wpia-hn.hpc",
         "wpia-hn.hpc.dide.ic.ac.uk",
         "wpia-hn.dide.local",
-        "wpia-hn.hpc.dide.local"
+        "wpia-hn.hpc.dide.local",
     ]:
         return "wpia-hn"
 
@@ -191,7 +191,7 @@ def _unify_host(host) -> str:
         "wpia-hn2.hpc",
         "wpia-hn2.hpc.dide.ic.ac.uk",
         "wpia-hn2.dide.local",
-        "wpia-hn2.hpc.dide.local"
+        "wpia-hn2.hpc.dide.local",
     ]:
         return "wpia-hn2"
 
