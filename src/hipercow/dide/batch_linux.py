@@ -165,28 +165,34 @@ class NoLinuxMountPointError(Exception):
 
 def _unify_host(host) -> str:
     host = host.lower()
-    if host in ["wpia-san04",
-                "wpia-san04.dide.ic.ac.uk",
-                "wpia-san04.dide.local",
-                "qdrive",
-                "qdrive.dide.ic.ac.uk",
-                "qdrive.dide.local"]:
+    if host in [
+        "wpia-san04",
+        "wpia-san04.dide.ic.ac.uk",
+        "wpia-san04.dide.local",
+        "qdrive",
+        "qdrive.dide.ic.ac.uk",
+        "qdrive.dide.local"
+    ]:
         return "qdrive"
 
-    if host in ["wpia-hn",
-                "wpia-hn.dide.ic.ac.uk",
-                "wpia-hn.hpc",
-                "wpia-hn.hpc.dide.ic.ac.uk",
-                "wpia-hn.dide.local",
-                "wpia-hn.hpc.dide.local"]:
+    if host in [
+        "wpia-hn",
+        "wpia-hn.dide.ic.ac.uk",
+        "wpia-hn.hpc",
+        "wpia-hn.hpc.dide.ic.ac.uk",
+        "wpia-hn.dide.local",
+        "wpia-hn.hpc.dide.local"
+    ]:
         return "wpia-hn"
 
-    if host in ["wpia-hn2",
-                "wpia-hn2.dide.ic.ac.uk",
-                "wpia-hn2.hpc",
-                "wpia-hn2.hpc.dide.ic.ac.uk",
-                "wpia-hn2.dide.local",
-                "wpia-hn2.hpc.dide.local"]:
+    if host in [
+        "wpia-hn2",
+        "wpia-hn2.dide.ic.ac.uk",
+        "wpia-hn2.hpc",
+        "wpia-hn2.hpc.dide.ic.ac.uk",
+        "wpia-hn2.dide.local",
+        "wpia-hn2.hpc.dide.local"
+    ]:
         return "wpia-hn2"
 
     err = f"Unrecognised host: {host} on linux node"
