@@ -27,8 +27,8 @@ def test_can_write_batch(tmp_path):
     root.init(path)
     r = root.open_root(path)
     m = Mount(
-        host="wpia-hn", 
-        remote="cluster-storage/project/bob", 
+        host="wpia-hn",
+        remote="cluster-storage/project/bob",
         local=tmp_path
     )
     config = dide_configuration(
