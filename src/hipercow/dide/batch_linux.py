@@ -235,10 +235,8 @@ def _linux_dide_path(path_map: PathMap) -> str:
     head_tail = path_map.mount.remote.split("/", 1)
     share_head = head_tail[0]
     share_tail = head_tail[1] if len(head_tail) > 1 else None
+    share_tail = (share_tail.rstrip("/") + "/") if share_tail else ""
     
-    if share_tail:
-        share_tail = share_tail.rstrip("/") + "/"
-        
     # If the relative path (rel) is `.` then we ignore it.
     # If it has more folders, then append, and add trailing /
    
