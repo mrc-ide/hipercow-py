@@ -199,9 +199,7 @@ def _unify_host(host) -> str:
     raise NoLinuxMountPointError(err) from None
 
 
-def _attempt_check_exists_unc(unc_path):
-    if platform.system() != "Windows":
-        return True
+def _check_exists_unc_windows(unc_path):
     try:
         return Path(unc_path).exists()
     except OSError:
@@ -275,8 +273,8 @@ def _linux_dide_path(path_map: PathMap) -> str:
     # mounted.
 
     if host == "wpia-hn":
-        unc = f"\\\\wpia-hn.hpc.dide.ic.ac.uk\\cluster-storage\\{share_head}"
-        if _attempt_check_exists_unc(unc):
+        unc = f"//wpia-hn.hpc.dide.ic.ac.uk/cluster-storage/{share_head}"
+        if platform.system() != "Windows" or _check_exists_unc_windows(unc):
             return f"/mnt/cluster/{share_head}{rel}"
 
     # If we reach here, we've failed to return a valid linux cluster mount.
