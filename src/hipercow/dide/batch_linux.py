@@ -215,7 +215,7 @@ def _linux_dide_path(path_map: PathMap) -> str:
     # (1) There are aliases of mount.host for the same machine
 
     # (2) For the host wpia-hn2, the linux mount to use
-    #     (vimc-cc1 or vimc-cc2) depends also on the first part of 
+    #     (vimc-cc1 or vimc-cc2) depends also on the first part of
     #     mount.remote
 
     # (3) We have some folders which exist in the
@@ -227,7 +227,7 @@ def _linux_dide_path(path_map: PathMap) -> str:
 
     # (4) The above is just about the local mount. We then also have a
     #     `rel` - relative path within that mount, which might be `.` or
-    #     might a deeper path. 
+    #     might a deeper path.
 
     # First, get an unambiguous hostname, wpia-hn, wpia-hn2 or qdrive
 
@@ -267,7 +267,7 @@ def _linux_dide_path(path_map: PathMap) -> str:
         return f"/mnt/vimc-cc2/{share_tail}{rel}"
 
     # On wpia-hn we can also have \\wpia-hn\share for a number of
-    # paths where \\wpia-hn\cluster-storage\share exists, with the 
+    # paths where \\wpia-hn\cluster-storage\share exists, with the
     # two pointing to the same place. Do this translation if we can.
     # We can check whether the network path exists on windows, but not
     # so easily on other operating sytems where we'd need the share to
