@@ -13,25 +13,14 @@ from typing import Any
 
 def find_file_descend(filename: str, path: str | Path) -> Path | None:
     path = Path(path)
-
-    # If we are already in the root of a windows drive-map, check
-    # if the file exists in there.
-
-    attempt = path / filename
-    if attempt.exists():
-        return path
-
-    # Otherwise, keep looking in the parent directory, until we reach
-    # the root.
-
     root = Path(path.anchor)
-    while path != root:
+    while True:
         attempt = path / filename
         if attempt.exists():
             return attempt.parent
         path = path.parent
-
-    return None
+        if path == root:
+            return None
 
 
 def relative_workdir(path: str | Path, base: None | str | Path = None) -> Path:

@@ -25,6 +25,8 @@ def test_find_descend(tmp_path):
         == (tmp_path / "a" / "b").resolve()
     )
     assert find_file_descend(".foo", tmp_path / "a") is None
+    root = Path(tmp_path.anchor)
+    assert find_file_descend(".", root) == Path(root).resolve()
 
 
 def test_transient_working_directory(tmp_path):
