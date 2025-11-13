@@ -214,21 +214,22 @@ def _linux_dide_path(path_map: PathMap) -> str:
 
     # (1) There are aliases of mount.host for the same machine
 
-    # (2) For the host wpia-hn2, which linux mount to use
-    #     also depends on the first part of mount.remote.
+    # (2) For the host wpia-hn2, the linux mount to use
+    #     (vimc-cc1 or vimc-cc2) depends also on the first part of 
+    #     mount.remote
 
-    # (3) We have some share users which exist in the
-    #     multi-user share, but they refer to them as if
-    #     they are not. For example,
+    # (3) We have some folders which exist in the
+    #     multi-user share, but there are also legacy shares that
+    #     point to that inner folder directly. For example:
     #     \\wpia-hn\Hipercow actually points to
-    #     \\wpia-hn\cluster-storage\Hipercow - and for
-    #     linux are only using multi-user - so /mnt/cluster/Hipercow
+    #     \\wpia-hn\cluster-storage\Hipercow - both of these
+    #     are valid, and should be translated to /mnt/cluster/Hipercow
 
     # (4) The above is just about the local mount. We then also have a
     #     `rel` - relative path within that mount, which might be `.` or
-    #     might be more folders.
+    #     might a deeper path. 
 
-    # Get an unambiguous hostname, wpia-hn, wpia-hn2 or qdrive
+    # First, get an unambiguous hostname, wpia-hn, wpia-hn2 or qdrive
 
     host = _unify_host(path_map.mount.host)
 
@@ -266,11 +267,11 @@ def _linux_dide_path(path_map: PathMap) -> str:
         return f"/mnt/vimc-cc2/{share_tail}{rel}"
 
     # On wpia-hn we can also have \\wpia-hn\share for a number of
-    # paths where \\wpia-hn\cluster-storage\share exists, and is what
-    # the first link also points to. Do this translation if we can.
+    # paths where \\wpia-hn\cluster-storage\share exists, with the 
+    # two pointing to the same place. Do this translation if we can.
     # We can check whether the network path exists on windows, but not
-    # so easily on other operating sytems where we'd need it already
-    # mounted.
+    # so easily on other operating sytems where we'd need the share to
+    # be mounted, rather than poking at it from afar.
 
     if host == "wpia-hn":
         unc = f"//wpia-hn.hpc.dide.ic.ac.uk/cluster-storage/{share_head}"
