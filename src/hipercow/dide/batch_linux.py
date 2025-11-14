@@ -227,7 +227,7 @@ def _linux_dide_path(path_map: PathMap) -> str:
 
     # (4) The above is just about the local mount. We then also have a
     #     `rel` - relative path within that mount, which might be `.` or
-    #     might a deeper path.
+    #     might be a deeper path.
 
     # First, get an unambiguous hostname, wpia-hn, wpia-hn2 or qdrive
 
