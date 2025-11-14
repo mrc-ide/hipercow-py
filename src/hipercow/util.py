@@ -14,14 +14,13 @@ from typing import Any
 def find_file_descend(filename: str, path: str | Path) -> Path | None:
     path = Path(path)
     root = Path(path.anchor)
-
-    while path != root:
+    while True:
         attempt = path / filename
         if attempt.exists():
             return attempt.parent
         path = path.parent
-
-    return None
+        if path == root:
+            return None
 
 
 def relative_workdir(path: str | Path, base: None | str | Path = None) -> Path:

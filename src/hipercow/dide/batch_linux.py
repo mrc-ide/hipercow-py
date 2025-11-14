@@ -1,5 +1,6 @@
 import datetime
 import platform
+from pathlib import Path
 from string import Template
 
 from taskwait import taskwait
@@ -22,10 +23,9 @@ echo generated on date: ${date}
 echo hipercow-py version: ${hipercow_version}
 echo running on: $$(hostname -f)
 
-export PATH=/opt/apps/lmod/lmod/libexec:$$PATH
-source /opt/apps/lmod/lmod/init/bash
-export LMOD_CMD=/opt/apps/lmod/lmod/libexec/lmod
-module use /modules-share/modules/all
+source /etc/profile
+
+module use /modules/modules/all
 
 module load Python/${python_version}
 
@@ -38,7 +38,7 @@ export REDIS_URL=10.0.2.254
 
 echo this is a single task
 
-/wpia-hn/Hipercow/bootstrap-py-linux/python-${python_version}/bin/hipercow task eval --capture ${task_id}
+/mnt/cluster/Hipercow/bootstrap-py-linux/python-${python_version}/bin/hipercow task eval --capture ${task_id}
 
 ErrorCode=$$?
 
@@ -78,10 +78,9 @@ echo generated on date: ${date}
 echo hipercow-py version: ${hipercow_version}
 echo running on: $$(hostname -f)
 
-export PATH=/opt/apps/lmod/lmod/libexec:$$PATH
-source /opt/apps/lmod/lmod/init/bash
-export LMOD_CMD=/opt/apps/lmod/lmod/libexec/lmod
-module use /modules-share/modules/all
+source /etc/profile
+
+module use /modules/modules/all
 
 module load Python/${python_version}
 
@@ -90,7 +89,7 @@ echo working directory: $$(pwd)
 
 echo this is a provisioning task
 
-/wpia-hn/Hipercow/bootstrap-py-linux/python-${python_version}/bin/hipercow environment provision-run ${environment_name} ${provision_id}
+/mnt/cluster/Hipercow/bootstrap-py-linux/python-${python_version}/bin/hipercow environment provision-run ${environment_name} ${provision_id}
 
 ErrorCode=$$?
 
@@ -164,47 +163,125 @@ class NoLinuxMountPointError(Exception):
     pass
 
 
-def _linux_dide_path(path_map: PathMap) -> str:
-    host = path_map.mount.host.lower()
+def _unify_host(host) -> str:
+    host = host.lower()
+    if host in [
+        "wpia-san04",
+        "wpia-san04.dide.ic.ac.uk",
+        "wpia-san04.dide.local",
+        "qdrive",
+        "qdrive.dide.ic.ac.uk",
+        "qdrive.dide.local",
+    ]:
+        return "qdrive"
 
-    # Map from a server name, to the name of the host
-    # when mapped on the linux nodes
+    if host in [
+        "wpia-hn",
+        "wpia-hn.dide.ic.ac.uk",
+        "wpia-hn.hpc",
+        "wpia-hn.hpc.dide.ic.ac.uk",
+        "wpia-hn.dide.local",
+        "wpia-hn.hpc.dide.local",
+    ]:
+        return "wpia-hn"
 
-    linux_hosts = {
-        "wpia-san04": "didehomes",
-        "qdrive": "didehomes",
-        "wpia-hn": "wpia-hn",
-        "wpia-hn.hpc": "wpia-hn",
-        "wpia-hn2": "wpia-hn2",
-        "wpia-hn2.hpc": "wpia-hn2",
-    }
+    if host in [
+        "wpia-hn2",
+        "wpia-hn2.dide.ic.ac.uk",
+        "wpia-hn2.hpc",
+        "wpia-hn2.hpc.dide.ic.ac.uk",
+        "wpia-hn2.dide.local",
+        "wpia-hn2.hpc.dide.local",
+    ]:
+        return "wpia-hn2"
 
+    err = f"Unrecognised host: {host} on linux node"
+    raise NoLinuxMountPointError(err) from None
+
+
+def _check_exists_unc_windows(unc_path):
     try:
-        linux_host = linux_hosts[host]
-    except KeyError:
-        err = f"Can't resolve {host} on linux node"
-        raise NoLinuxMountPointError(err) from None
+        return Path(unc_path).exists()
+    except OSError:
+        return False
 
-    # Now the sharename within that host. This is
-    # usually path.map.mount.remote, except in the
-    # special case of wpia-san04 / qdrive, where we
-    # have to remove "homes/"
 
-    linux_share = path_map.mount.remote
-    if host in {"wpia-san04", "qdrive"}:
-        linux_share = linux_share.split("/")[-1]
+def _linux_dide_path(path_map: PathMap) -> str:
 
-    # The folder relative to that share is
-    # path_map.relative - if it's ".", then we don't
-    # add anything, otherwise we need to add "/"
+    # This is quite a fiddly function to convert from the local
+    # mount.host and mount.remote into the mount on a
+    # linux node. It is fiddly because...
+
+    # (1) There are aliases of mount.host for the same machine
+
+    # (2) For the host wpia-hn2, the linux mount to use
+    #     (vimc-cc1 or vimc-cc2) depends also on the first part of
+    #     mount.remote
+
+    # (3) We have some folders which exist in the
+    #     multi-user share, but there are also legacy shares that
+    #     point to that inner folder directly. For example:
+    #     \\wpia-hn\Hipercow actually points to
+    #     \\wpia-hn\cluster-storage\Hipercow - both of these
+    #     are valid, and should be translated to /mnt/cluster/Hipercow
+
+    # (4) The above is just about the local mount. We then also have a
+    #     `rel` - relative path within that mount, which might be `.` or
+    #     might be a deeper path.
+
+    # First, get an unambiguous hostname, wpia-hn, wpia-hn2 or qdrive
+
+    host = _unify_host(path_map.mount.host)
+
+    # Separate the first part of the rest of the mount, from
+    # the remaining directories - we want it to end with /
+
+    rest_of_path = path_map.mount.remote
+    head_tail = path_map.mount.remote.split("/", 1)
+    share_head = head_tail[0]
+    share_tail = head_tail[1] if len(head_tail) > 1 else None
+    share_tail = (share_tail.rstrip("/") + "/") if share_tail else ""
+
+    # If the relative path (rel) is `.` then we ignore it.
+    # If it has more folders, then append, and add trailing /
 
     rel = path_map.relative
-    rel = "" if rel == "." else rel + "/"
+    rel = "" if rel == "." else f"{rel}/"
 
-    # Final path - note that it ends in a trailing slash,
-    # because rel is either empty, or itself ends in `/`
+    # First deal with qdrive, which always has `homes/username` as
+    # the remote path, which we translate to /mnt/homes/username
 
-    return f"/{linux_host}/{linux_share}/{rel}"
+    if host == "qdrive" and share_head == "homes":
+        return f"/mnt/homes/{share_tail}{rel}"
+
+    # Now deal with wpia-hn and wpia-hn2 when the multi-user share
+    # is mounted.
+
+    if host == "wpia-hn" and share_head == "cluster-storage":
+        return f"/mnt/cluster/{share_tail}{rel}"
+
+    if host == "wpia-hn2" and share_head == "climate-storage":
+        return f"/mnt/vimc-cc1/{share_tail}{rel}"
+
+    if host == "wpia-hn2" and share_head == "vimc-cc2-storage":
+        return f"/mnt/vimc-cc2/{share_tail}{rel}"
+
+    # On wpia-hn we can also have \\wpia-hn\share for a number of
+    # paths where \\wpia-hn\cluster-storage\share exists, with the
+    # two pointing to the same place. Do this translation if we can.
+    # We can check whether the network path exists on windows, but not
+    # so easily on other operating sytems where we'd need the share to
+    # be mounted, rather than poking at it from afar.
+
+    if host == "wpia-hn":
+        unc = f"//wpia-hn.hpc.dide.ic.ac.uk/cluster-storage/{share_head}"
+        if platform.system() != "Windows" or _check_exists_unc_windows(unc):
+            return f"/mnt/cluster/{share_head}{rel}"
+
+    # If we reach here, we've failed to return a valid linux cluster mount.
+
+    err = f"Can't resolve path {rest_of_path} on host {host} on linux node."
+    raise NoLinuxMountPointError(err) from None
 
 
 def _dide_provision_linux(

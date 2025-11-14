@@ -63,7 +63,7 @@ def test_that_missing_tasks_error_on_log_read(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     task_id = "a" * 32
-    with pytest.raises(Exception, match="Task '.+' does not exist"):
+    with pytest.raises(Exception, match=r"Task '.+' does not exist"):
         task_log(task_id, root=r)
 
 
@@ -89,7 +89,7 @@ def test_that_missing_tasks_error_on_task_info(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
     task_id = "a" * 32
-    with pytest.raises(Exception, match="Task '.+' does not exist"):
+    with pytest.raises(Exception, match=r"Task '.+' does not exist"):
         task_info(task_id, r)
 
 
@@ -159,7 +159,7 @@ def test_refuse_to_wait_for_created_task(tmp_path):
     r = root.open_root(tmp_path)
     with transient_working_directory(tmp_path):
         tid = tc.task_create_shell(["echo", "hello world"], root=r)
-    with pytest.raises(Exception, match="Cannot wait .+ not been submitted"):
+    with pytest.raises(Exception, match=r"Cannot wait .+ not been submitted"):
         task_wait(tid, root=r)
 
 
