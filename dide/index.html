@@ -1,0 +1,1124 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://mrc-ide.github.io/hipercow-py/dide/">
+      
+      
+        <link rel="prev" href="../introduction/">
+      
+      
+        <link rel="next" href="../environments/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+    
+    
+      
+        <title>DIDE cluster - hipercow</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.618322db.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#dide-cluster" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="hipercow" class="md-header__button md-logo" aria-label="hipercow" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            hipercow
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              DIDE cluster
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/mrc-ide/hipercow-py" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    mrc-ide/hipercow-py
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="hipercow" class="md-nav__button md-logo" aria-label="hipercow" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    hipercow
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/mrc-ide/hipercow-py" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    mrc-ide/hipercow-py
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../introduction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DIDE cluster
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DIDE cluster
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#authentication-with-dide" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentication with DIDE
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Authentication with DIDE">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#about-our-usernames-and-passwords" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        About our usernames and passwords
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#networks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Networks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#filesystems-and-paths" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filesystems and paths
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Filesystems and paths">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#project-shares-and-home-directories" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Project shares and home directories
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mapping-network-drives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mapping network drives
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Mapping network drives">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#windows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Windows
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#macos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        macOS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#linux" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Linux
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#working-on-a-network-share" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Working on a network share
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#python-versions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Python versions
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../environments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Environments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The CLI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Details
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Details
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tlo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TLO model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../administration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Administration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#authentication-with-dide" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentication with DIDE
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Authentication with DIDE">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#about-our-usernames-and-passwords" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        About our usernames and passwords
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#networks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Networks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#filesystems-and-paths" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filesystems and paths
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Filesystems and paths">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#project-shares-and-home-directories" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Project shares and home directories
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mapping-network-drives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mapping network drives
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Mapping network drives">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#windows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Windows
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#macos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        macOS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#linux" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Linux
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#working-on-a-network-share" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Working on a network share
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#python-versions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Python versions
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/mrc-ide/hipercow-py/edit/main/docs/dide.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="dide-cluster">DIDE cluster</h1>
+<p>This page tries to capture information on the most common pain points people hit when first starting out.</p>
+<p>We support one cluster at present (the so-called windows cluster) but will support more in future; in particular we aim to support a Linux cluster within DIDE, as well as submission to the the central ICT/RCS cluster. In future we may support others, but we have no immediate plans to.</p>
+<p>In short, you will need:</p>
+<ul>
+<li>to know your DIDE username and password</li>
+<li>to have been added as a cluster user</li>
+<li>to be on the DIDE network, probably using ZScaler</li>
+<li>to be on a network share that the cluster can see</li>
+</ul>
+<p>These are all explained in detail below.</p>
+<h2 id="authentication-with-dide">Authentication with DIDE</h2>
+<p>After installing <code>hipercow</code>, try running</p>
+<pre><code class="language-console">hipercow dide authenticate
+</code></pre>
+<p>which will ask you for your DIDE username and password.</p>
+<p>If you hit problems, try going to <a href="https://mrcdata.dide.ic.ac.uk/hpc"><code>mrcdata.dide.ic.ac.uk/hpc</code></a> and trying a few combinations until you remember what it should be. Once done update this in your password manager (perhaps BitWarden?) so you can find it easily next time.</p>
+<p>It is possible that you do not have access to the cluster, even if your username is correct. Try logging onto the portal; if it reports that you don't have access then please request access by messaging Wes. If you don't know your username and password, read on.</p>
+<h3 id="about-our-usernames-and-passwords">About our usernames and passwords</h3>
+<p>For historical reasons DIDE exists on its own domain (DIDE) separate from Imperial's domain (IC). This means that you may have a different DIDE username to your imperial username (though usually the same) and you may have a different password (though most people set these to be the same).</p>
+<p>The overall situation is summarised in this infographic:</p>
+<p><img alt="" src="../passwords.png" /></p>
+<p>If you need to change your DIDE password you can do this from any DIDE domain machine by pressing Ctrl-Alt-Delete and following the prompts. If it has already expired, such that you can't login, you need to contact Chris or Paul.</p>
+<p>We store credentials using the <a href="https://pypi.org/project/keyring/">keyring</a> package.  This saves your username and password securely in your system keyring, which will be unlocked on login for at least Windows and macOS.  You will need to rerun <code>hipercow dide authenticate</code> whenever you change your DIDE password.</p>
+<p>The username and password that you might have submitted with the <a href="https://mrc-ide.github.io/hipercow/articles/windows.html">R version of hipercow</a> are not currently visible to the Python version, but we hope to address this soon.</p>
+<h2 id="networks">Networks</h2>
+<p>Ensure you have connected to the DIDE network by using ZScaler; see <a href="https://www.imperial.ac.uk/admin-services/ict/self-service/connect-communicate/remote-access/unified-access/">instructions from ICT</a>, or by being on a desktop PC or virtual machine within the building that is plugged in by Ethernet (this is less common now).</p>
+<h2 id="filesystems-and-paths">Filesystems and paths</h2>
+<p>For anything to work with <code>hipercow</code> on the DIDE cluster, your working directory must be on a network share.  If you are not sure if you are on a network share, then run</p>
+<pre><code class="language-console">pwd
+</code></pre>
+<p>Interpreting this depends on your platform (the machine you are typing commands into):</p>
+<ul>
+<li><strong>Windows</strong>: A drive like <code>C:</code> or <code>D:</code> will be local. You should recognise the drive letter as one like <code>Q:</code> that was mapped by default as your home or <code>M:</code> that you mapped yourself as a project share.</li>
+<li><strong>macOS</strong>: The path will likely be below <code>/Volumes</code> (but not one that corresponds to a USB stick of course!)</li>
+<li><strong>Linux</strong>: The path should start at one of the mount points you have configured in <code>/etc/fstab</code> as a network path.</li>
+</ul>
+<h3 id="project-shares-and-home-directories">Project shares and home directories</h3>
+<p>In general we <strong>strongly recommend</strong> that you use project shares for any serious work, rather than your home directory.  To organise these you should talk to your PI (or if you are a PI, talk to Chris).  The advantages of the project shares are that they are larger (so you will run out of disk space more slowly) and faster than the home shares.  If you launch many tasks at once that use your home share you can get unexpected failures as the disk can't keep up with amount of data being read and written.  Don't use your home directory (generally <code>Q:</code> on windows) for anything more intensive than casual experimentation.  We have seen many people with jobs that fail mysteriously on their network home directory when launched in parallel, and this is generally fixed by using a project share.</p>
+<p>If you don't know if you have a project share, talk to your PI about if one exists. If you are a PI, talk to Chris (and/or Wes) about getting one set up.</p>
+<p>See below about the current state of the Windows cluster, and some fast storage that you might want to use.</p>
+<h3 id="mapping-network-drives">Mapping network drives</h3>
+<p>For all operating systems, if you are on the wireless network you
+will need to connect to the department network using ZScaler; see the <a href="https://www.imperial.ac.uk/admin-services/ict/self-service/connect-communicate/remote-access/unified-access/">ICT documentation</a> for details. If you can get on a wired network you'll likely have a better time because the VPN and wireless network seems less stable in general (it is not clear how this will be in the new building at White City, or indeed how many wired points there will be).</p>
+<p>Below, instructions for setting up depend on the sort of computer you are typing commands into at the moment (not the cluster type).</p>
+<h4 id="windows">Windows</h4>
+<p>If you are using a windows machine in the DIDE domain, then
+your network drives are likely already mapped for you.  In fact you
+should not even need to map drives as fully qualified network names
+(e.g. <code>//projects/tmp</code>) should work for you.</p>
+<h4 id="macos">macOS</h4>
+<p>In Finder, go to <code>Go -&gt; Connect to Server...</code> or press <code>Command-K</code>.
+In the address field write the name of the share you want to
+connect to.  You will likely want to mount:</p>
+<pre><code>smb://qdrive.dide.ic.ac.uk/homes/&lt;username&gt;
+</code></pre>
+<p>which is your home share.</p>
+<p>At some point in the process you should get prompted for your
+username and password, but I can't remember what that looks like.</p>
+<p>This directory will be mounted at <code>/Volumes/&lt;username&gt;</code> (so the last bit of the filename will be used as the mount point within <code>Volumes</code>).  There may be a better way of doing this, and the connection will not be reestablished automatically so if anyone has a better way let me know.</p>
+<h4 id="linux">Linux</h4>
+<p>This is what Rich has done on his computer and it seems to work,
+though it's not incredibly fast.  Full instructions are <a href="https://help.ubuntu.com/community/MountWindowsSharesPermanently">on the Ubuntu community wiki</a>.</p>
+<p>First, install <code>cifs-utils</code></p>
+<pre><code>sudo apt-get install cifs-utils
+</code></pre>
+<p>In your <code>/etc/fstab</code> file, add</p>
+<pre><code>//qdrive.dide.ic.ac.uk/homes/&lt;dide-username&gt; &lt;home-mount-point&gt; cifs uid=&lt;local-userid&gt;,gid=&lt;local-groupid&gt;,credentials=/home/&lt;local-username&gt;/.smbcredentials,domain=DIDE,sec=ntlmssp,iocharset=utf8,mfsymlinks 0  0
+</code></pre>
+<p>where:</p>
+<ul>
+<li><code>&lt;dide-username&gt;</code> is your DIDE username without the <code>DIDE\</code> bit.</li>
+<li><code>&lt;local-username&gt;</code> is your local username (i.e., <code>echo $USER</code>).</li>
+<li><code>&lt;local-userid&gt;</code> is your local numeric user id (i.e. <code>id -u $USER</code>)</li>
+<li><code>&lt;local-groupid&gt;</code> is your local numeric group id (i.e. <code>id -g $USER</code>)</li>
+<li><code>&lt;home-mount-point&gt;</code> is where you want your DIDE home directory mounted</li>
+</ul>
+<p><strong>please back this file up before editing</strong>.</p>
+<p>So for example, I have:</p>
+<pre><code>//qdrive.dide.ic.ac.uk/homes/rfitzjoh /home/rich/net/home cifs uid=1000,gid=1000,credentials=/home/rich/.smbcredentials,domain=DIDE,sec=ntlmssp,iocharset=utf8 0  0
+</code></pre>
+<p>The file <code>.smbcredentials</code> contains</p>
+<pre><code>username=&lt;dide-username&gt;
+password=&lt;dide-password&gt;
+</code></pre>
+<p>and set this to be <code>chmod 600</code> for a modicum of security, but be
+aware your password is stored in plain text.</p>
+<p>This set up is clearly insecure.  I believe if you omit the
+credentials line you can have the system prompt you for a password
+interactively, but I'm not sure how that works with automatic
+mounting.</p>
+<p>Finally, run</p>
+<pre><code>sudo mount -a
+</code></pre>
+<p>to mount all drives and with any luck it will all work and you
+don't have to do this until you get a new computer.</p>
+<p>If you are on a laptop that will not regularly be connected to the internal network, you might want to add the option <code>noauto</code> to the above</p>
+<pre><code>//qdrive.dide.ic.ac.uk/homes/rfitzjoh /home/rich/net/home cifs uid=1000,gid=1000,credentials=/home/rich/.smbcredentials,domain=DIDE,sec=ntlmssp,iocharset=utf8,noauto,mfsymlinks 0  0
+</code></pre>
+<p>and then explicitly mount the drive as required with</p>
+<pre><code>sudo mount ~/net/home
+</code></pre>
+<h3 id="working-on-a-network-share">Working on a network share</h3>
+<p>The virtual environment you create on your share is different to the one that your jobs will use.  You can install <code>hipercow</code> into this virtual environment:</p>
+<pre><code class="language-console">python -m venv env
+. env/bin/activate # or env\Scripts\activate on Windows
+pip install hipercow
+</code></pre>
+<p>This might be quite slow in practice, as loading python modules from the network filesystem is a bit painful.</p>
+<p>Alternatively you could install globally (e.g., with <code>pipx</code>).</p>
+<p>Sometimes creating a virtual environment on a network share will fail</p>
+<pre><code class="language-console">python -m venv env
+Error: [Errno 5] Input/output error: 'lib' -&gt; '/home/you/net/home/path/env/lib64
+</code></pre>
+<p>This should not happen, and does not always, but you can resolve it by disabling use of symlinks:</p>
+<pre><code class="language-console">virtualenv --copies env
+</code></pre>
+<p>It looks like this approach does not work with <code>venv</code> even with <code>--copies</code>.</p>
+<p>Alternatively (if on Linux), check to see if the <code>mfsymlinks</code> option is in your <code>/etc/fstab</code> entry; this was not included in previous versions of our instructions.  Remount your home directory and try again.</p>
+<h2 id="python-versions">Python versions</h2>
+<p>By default, we try and run the version of python on the cluster that you are running locally, to the minor version level.  So if you are running any version of 3.13 (e.g., 3.13.2) we will use a version of 3.13 for your jobs.  It is not possible to set the patch version and usually it does not matter.  We'll try and keep the versions on the cluster up to date.</p>
+<p>You can select the python version that will be run on the cluster by passing <code>--python-version</code> through to <code>hipercow driver configure</code>, for example:</p>
+<pre><code class="language-console">hipercow driver configure dide-windows --python-version=3.11
+</code></pre>
+<p>will use python version 3.11 regardless of what your local version of python is.  This might be useful if you need to run software that depends on an older version of python.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.action.edit", "content.code.copy", "content.code.annotate", "toc.follow"], "search": "../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      
+    
+  </body>
+</html>
