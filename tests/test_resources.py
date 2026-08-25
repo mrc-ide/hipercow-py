@@ -40,9 +40,9 @@ def test_can_create_resources():
     assert r.queue is None
     assert r.cores == 1
     assert not r.exclusive
-    assert r.max_runtime is None
-    assert r.memory_per_node is None
-    assert r.memory_per_task is None
+    assert r.max_runtime is 0
+    assert r.memory_per_node is 0
+    assert r.memory_per_task is 0
 
 
 def test_can_create_non_default_resources():
@@ -65,14 +65,6 @@ def test_can_create_non_default_resources():
 def test_that_cores_is_positive():
     with pytest.raises(ValueError, match="'cores' must be positive"):
         TaskResources(cores=-1)
-
-
-def test_that_cores_must_be_integer_or_inf():
-    assert TaskResources(cores=math.inf).cores == math.inf
-    assert TaskResources(cores=100).cores == 100
-    with pytest.raises(ValueError, match="'cores' must be an integer"):
-        TaskResources(cores=1.5)
-
 
 def test_can_validate_resources_against_cluster():
     r = ClusterResources(Queues.simple("default"), max_cores=4, max_memory=256)

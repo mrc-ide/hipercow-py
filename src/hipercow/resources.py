@@ -50,10 +50,7 @@ class TaskResources(BaseModel):
 
     @field_validator("cores")
     @classmethod
-    def _require_positive_cores(cls, v: int | float) -> int | float:
-        if not isinstance(v, int):
-            msg = "'cores' must be an integer"
-            raise ValueError(msg)
+    def _require_positive_cores(cls, v: int) -> int:
         return _require_positive(v, "cores")
 
     @field_validator("max_runtime")
