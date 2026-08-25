@@ -211,7 +211,7 @@ def _client_body_submit(
         "ver": encode64(f"hipercow-py/{hipercow_version}"),
     }
 
-    if resources.cores == math.inf:
+    if resources.cores == 0:
         data["rc"] = encode64("1")
         data["rt"] = encode64("Nodes")
     else:
@@ -221,13 +221,13 @@ def _client_body_submit(
     if resources.exclusive:
         data["exc"] = encode64("1")
 
-    if resources.memory_per_task is not None:
+    if resources.memory_per_task != 0:
         data["epm"] = encode64(str(1000 * resources.memory_per_task))
 
-    if resources.memory_per_node is not None:
+    if resources.memory_per_node != 0:
         data["mpn"] = encode64(str(1000 * resources.memory_per_node))
 
-    if resources.max_runtime is not None:
+    if resources.max_runtime != 0:
         data["rnt"] = encode64(str(resources.max_runtime))
 
     # Still missing:
