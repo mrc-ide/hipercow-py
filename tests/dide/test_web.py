@@ -1,6 +1,5 @@
 import datetime
 import json
-import math
 
 import pytest
 import responses

@@ -22,7 +22,7 @@ class ProvisioningData(BaseModel):
 # encoded data representing the pickle-dumped exception.  Or we can
 # run it through rich and save the text.
 class ProvisioningResult(BaseModel):
-    error: None | str
+    error: str | None
     start: float
     end: float = Field(default_factory=time.time, init=False)
 

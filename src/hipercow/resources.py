@@ -1,6 +1,5 @@
 """Specify and interact with resources."""
 
-import math
 from dataclasses import dataclass
 
 from pydantic import BaseModel, field_validator

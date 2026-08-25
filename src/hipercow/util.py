@@ -23,7 +23,7 @@ def find_file_descend(filename: str, path: str | Path) -> Path | None:
             return None
 
 
-def relative_workdir(path: str | Path, base: None | str | Path = None) -> Path:
+def relative_workdir(path: str | Path, base: str | Path = None | None) -> Path:
     return Path(path).relative_to(Path(base) if base else Path.cwd())
 
 

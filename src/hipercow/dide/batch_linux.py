@@ -207,7 +207,6 @@ def _check_exists_unc_windows(unc_path):
 
 
 def _linux_dide_path(path_map: PathMap) -> str:
-
     # This is quite a fiddly function to convert from the local
     # mount.host and mount.remote into the mount on a
     # linux node. It is fiddly because...
