@@ -5,8 +5,7 @@ from hipercow.dide.mounts import Mount, _forward_slash
 from hipercow.dide.web import DideWebClient
 from hipercow.resources import TaskResources
 
-BOOTSTRAP_LINUX = Template(
-    r"""#!/bin/bash
+BOOTSTRAP_LINUX = Template(r"""#!/bin/bash
 echo working directory: $$(pwd)
 
 source /etc/profile
@@ -29,8 +28,7 @@ else
   echo Installation failed
   exit $$ErrorCode
 fi
-"""  # noqa: E501
-)
+""")  # noqa: E501
 
 
 def bootstrap_linux_submit(

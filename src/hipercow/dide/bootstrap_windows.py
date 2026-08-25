@@ -5,8 +5,7 @@ from hipercow.dide.mounts import Mount, _backward_slash
 from hipercow.dide.web import DideWebClient
 from hipercow.resources import TaskResources
 
-BOOTSTRAP_WINDOWS = Template(
-    r"""@ECHO on
+BOOTSTRAP_WINDOWS = Template(r"""@ECHO on
 ECHO working directory: %CD%
 call set_python_${version2}_64
 set PIPX_HOME=\\wpia-hn-app\hipercow\bootstrap-py-windows\python-${version}\pipx
@@ -22,8 +21,7 @@ if %ErrorCode% == 0 (
   @ECHO Installation failed
   EXIT /b %ErrorCode%
 )
-"""  # noqa: E501
-)
+""")  # noqa: E501
 
 
 def bootstrap_windows_submit(

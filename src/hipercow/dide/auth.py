@@ -12,28 +12,22 @@ from hipercow.dide.web import Credentials, check_access
 
 def authenticate():
     ui.h1("Please enter your DIDE credentials")
-    ui.text(
-        """
+    ui.text("""
 We need to know your DIDE username and password in order to log you into
 the cluster. This will be shared across all projects on this machine, with
 the username and password stored securely in your system keychain. You will
-have to run this command again on other computers."""
-    )
+have to run this command again on other computers.""")
 
-    ui.text(
-        """
+    ui.text("""
 Your DIDE password may differ from your Imperial password, and in some
 cases your username may also differ. If in doubt, perhaps try logging in
 at https://mrcdata.dide.ic.ac.uk/hpc" and use the combination that works
-for you there."""
-    )
+for you there.""")
 
-    ui.text(
-        """
+    ui.text("""
 If you are unsure, please see our documentation about passwords:
 https://mrc-ide.github.io/hipercow-py/dide/#about-our-usernames-and-passwords\
-"""
-    )
+""")
 
     ui.blank_line()
     username = _get_username(_default_username())
@@ -43,11 +37,9 @@ https://mrc-ide.github.io/hipercow-py/dide/#about-our-usernames-and-passwords\
     ui.blank_line()
     password = _get_password()
 
-    ui.text(
-        """
+    ui.text("""
 I am going to to try and log in with your password now.
-If this fails we can always try again."""
-    )
+If this fails we can always try again.""")
 
     credentials = Credentials(username, password)
     check_access(credentials)

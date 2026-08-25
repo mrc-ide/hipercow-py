@@ -15,8 +15,7 @@ from hipercow.dide.web import DideWebClient
 from hipercow.resources import TaskResources
 from hipercow.root import Root
 
-TASK_RUN_BAT = Template(
-    r"""@echo off
+TASK_RUN_BAT = Template(r"""@echo off
 REM automatically generated
 ECHO generated on host: ${hostname}
 ECHO generated on date: ${date}
@@ -71,11 +70,10 @@ if %TaskStatus% == 0 (
 ) else (
   ECHO Task did not complete successfully
   EXIT /b 1
-)"""  # noqa: E501
-)
+)""")  # noqa: E501
 
-PROVISION_BAT = Template(
-    r"""@echo off
+
+PROVISION_BAT = Template(r"""@echo off
 REM automatically generated
 ECHO generated on host: ${hostname}
 ECHO generated on date: ${date}
@@ -117,8 +115,7 @@ if %ERRORLEVEL% neq 0 (
 )
 
 @ECHO Quitting
-"""  # noqa: E501
-)
+""")  # noqa: E501
 
 
 # In a future version, we might prefer to use a configuration object,
