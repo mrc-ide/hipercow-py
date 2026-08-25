@@ -288,15 +288,20 @@ def cli_task_recent(limit: int, *, rebuild: bool):
 )
 @click.option("--queue", help="Queue to submit the task to")
 @click.option("--wait", is_flag=True, help="Wait for the task to complete")
-@click.option("--cores", type=int, default=1, help="Request a number of CPU cores for running your task." +
-  "Only use more than one core if your code can explicitly use it. " +
+@click.option("--cores", type=int, default=1, help="Request a number of CPU cores for "
+  "running your task."
+  "Only use more than one core if your code can explicitly use it. "
   "Otherwise it will take the same time, but prevent others using those cores.")
-@click.option("--exclusive", is_flag=True, help="Request exclusive access to a whole compute node.")
-@click.option("--max_runtime", default=0, help="Specify a maximum runtime (seconds), after which your task will abort.")
-@click.option("--memory_per_node", default=0, help="Ensure a minimum RAM (Gb) on the node to run your task on.")
-@click.option("--memory_per_task", default=0, help="You can provide an estimate of how much memory (Gb) your task needs. "+
-  "The cluster will then try to best-fit your tasks and avoid them together using too much memory for a node.")
-      
+@click.option("--exclusive", is_flag=True, help="Request exclusive access to a "
+  "whole compute node.")
+@click.option("--max_runtime", default=0, help="Specify a maximum runtime "
+  "(seconds), after which your task will abort.")
+@click.option("--memory_per_node", default=0, help="Ensure a minimum RAM "
+  "(Gb) on the node to run your task on.")
+@click.option("--memory_per_task", default=0, help="You can provide an estimate "
+  "of how much memory (Gb) your task needs. The cluster will then try to "
+  "best-fit your tasks and avoid them together using too much memory for a node.")
+
 def cli_task_create(
     cmd: tuple[str], environment: str | None, *, queue: str | None, wait: bool,
                      cores: int, exclusive: bool, max_runtime: int,

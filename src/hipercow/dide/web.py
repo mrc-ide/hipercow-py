@@ -1,6 +1,5 @@
 import base64
 import datetime
-import math
 import re
 from dataclasses import dataclass
 from subprocess import list2cmdline
