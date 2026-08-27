@@ -220,13 +220,13 @@ def _client_body_submit(
     if resources.exclusive:
         data["exc"] = encode64("1")
 
-    if resources.memory_per_task != 0:
+    if resources.memory_per_task is not None:
         data["epm"] = encode64(str(1000 * resources.memory_per_task))
 
-    if resources.memory_per_node != 0:
+    if resources.memory_per_node is not None:
         data["mpn"] = encode64(str(1000 * resources.memory_per_node))
 
-    if resources.max_runtime != 0:
+    if resources.max_runtime is not None:
         data["rnt"] = encode64(str(resources.max_runtime))
 
     # Still missing:

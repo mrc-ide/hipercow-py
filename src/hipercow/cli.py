@@ -305,18 +305,15 @@ def cli_task_recent(limit: int, *, rebuild: bool):
 )
 @click.option(
     "--max_runtime",
-    default=0,
     help="Specify a maximum runtime "
     "(seconds), after which your task will abort.",
 )
 @click.option(
     "--memory_per_node",
-    default=0,
     help="Ensure a minimum RAM (Gb) on the node to run your task on.",
 )
 @click.option(
     "--memory_per_task",
-    default=0,
     help="You can provide an "
     "estimate of how much memory (Gb) your task needs. The cluster will "
     "then try to best-fit your tasks and avoid their combined usage running "
@@ -330,9 +327,9 @@ def cli_task_create(
     wait: bool,
     cores: int,
     exclusive: bool,
-    max_runtime: int,
-    memory_per_node: int,
-    memory_per_task: int,
+    max_runtime: int | None,
+    memory_per_node: int | None,
+    memory_per_task: int | None,
 ):
     """Create a task.
 

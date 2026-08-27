@@ -43,9 +43,9 @@ class TaskResources(BaseModel):
     queue: str | None = None
     cores: int = 1
     exclusive: bool = False
-    max_runtime: int = 0
-    memory_per_node: int = 0
-    memory_per_task: int = 0
+    max_runtime: int | None = None
+    memory_per_node: int | None = None
+    memory_per_task: int | None = None
 
     @field_validator("cores")
     @classmethod

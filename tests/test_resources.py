@@ -38,9 +38,9 @@ def test_can_create_resources():
     assert r.queue is None
     assert r.cores == 1
     assert not r.exclusive
-    assert r.max_runtime == 0
-    assert r.memory_per_node == 0
-    assert r.memory_per_task == 0
+    assert r.max_runtime is None
+    assert r.memory_per_node is None
+    assert r.memory_per_task is None
 
 
 def test_can_create_non_default_resources():
