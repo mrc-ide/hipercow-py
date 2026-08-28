@@ -1,6 +1,5 @@
 import datetime
 import json
-import math
 
 import pytest
 import responses
@@ -340,7 +339,7 @@ def test_can_set_resources():
 
     default = build()
     assert build(cores=2) == default | {"rc": web.encode64("2")}
-    assert build(cores=math.inf) == default | {
+    assert build(cores=0) == default | {
         "rc": web.encode64("1"),
         "rt": web.encode64("Nodes"),
     }

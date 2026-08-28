@@ -160,7 +160,7 @@ ignore = [
   # Ignore checks for possible passwords
   "S105", "S106", "S107",
   # Ignore complexity
-  "C901", "PLR0911", "PLR0912", "PLR0913", "PLR0915",
+  "C901", "PLR0911", "PLR0912", "PLR0913", "PLR0915", "PLR0917",
   # Don't require docstrings everywhere for now
   "D100", "D101", "D102", "D103", "D104", "D105", "D107",
   # Ignore shadowing

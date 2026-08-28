@@ -8,6 +8,7 @@ entrypoint
 eval
 filesystem
 filesystems
+gb
 hipercow
 infographic
 installable
@@ -17,6 +18,7 @@ programmatically
 pythonic
 repl
 roadmap
+runtime
 smbcredentials
 stacktrace
 subcommands

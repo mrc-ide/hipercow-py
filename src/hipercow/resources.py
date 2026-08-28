@@ -1,6 +1,5 @@
 """Specify and interact with resources."""
 
-import math
 from dataclasses import dataclass
 
 from pydantic import BaseModel, field_validator
@@ -24,7 +23,7 @@ class TaskResources(BaseModel):
             have some mechanism to exploit this parallelism (e.g.,
             using the
             [`multiprocessing`](https://docs.python.org/3/library/multiprocessing.html)
-            package).  Specify `math.inf` if you want to request all
+            package).  Specify 0` if you want to request all
             the cores on a single node.
 
         exclusive: Request exclusive access to a node.
@@ -42,7 +41,7 @@ class TaskResources(BaseModel):
     """
 
     queue: str | None = None
-    cores: int | float = 1
+    cores: int = 1
     exclusive: bool = False
     max_runtime: int | None = None
     memory_per_node: int | None = None
@@ -50,12 +49,7 @@ class TaskResources(BaseModel):
 
     @field_validator("cores")
     @classmethod
-    def _require_positive_cores(cls, v: int | float) -> int | float:
-        if not isinstance(v, int):
-            if v == math.inf:
-                return v
-            msg = "'cores' must be an integer (or inf)"
-            raise ValueError(msg)
+    def _require_positive_cores(cls, v: int) -> int:
         return _require_positive(v, "cores")
 
     @field_validator("max_runtime")

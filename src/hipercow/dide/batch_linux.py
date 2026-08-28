@@ -14,8 +14,7 @@ from hipercow.dide.web import DideWebClient
 from hipercow.resources import TaskResources
 from hipercow.root import Root
 
-TASK_RUN_SH = Template(
-    r"""#!/bin/bash
+TASK_RUN_SH = Template(r"""#!/bin/bash
 # automatically generated
 
 echo generated on host: ${hostname}
@@ -65,12 +64,10 @@ else
   exit 1
 fi
 
-"""  # noqa: E501
-)
+""")  # noqa: E501
 
 
-PROVISION_SH = Template(
-    r"""#!/bin/bash
+PROVISION_SH = Template(r"""#!/bin/bash
 # automatically generated
 
 echo generated on host: ${hostname}
@@ -101,8 +98,7 @@ if [ $$ErrorCode -ne 0 ]; then
 fi
 
 echo Quitting
-"""  # noqa: E501
-)
+""")  # noqa: E501
 
 
 def write_batch_task_run_linux(
@@ -207,7 +203,6 @@ def _check_exists_unc_windows(unc_path):
 
 
 def _linux_dide_path(path_map: PathMap) -> str:
-
     # This is quite a fiddly function to convert from the local
     # mount.host and mount.remote into the mount on a
     # linux node. It is fiddly because...

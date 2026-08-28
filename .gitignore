@@ -5,3 +5,5 @@ coverage.xml
 .idea
 /dist
 /site
+*.bak
+

@@ -33,10 +33,12 @@ def test_can_create_task(tmp_path):
     with runner.isolated_filesystem(temp_dir=tmp_path):
         root.init(".")
         r = root.open_root()
+        res = runner.invoke(cli.cli_driver_configure, ["example"])
+        assert res.exit_code == 0
         res = runner.invoke(cli.cli_task_create, ["echo", "hello", "world"])
         assert res.exit_code == 0
-        task_id = res.stdout.strip()
-        assert task.task_status(task_id, r) == task.TaskStatus.CREATED
+        task_id = res.stdout.strip().splitlines()[-1].strip()
+        assert task.task_status(task_id, r) == task.TaskStatus.SUBMITTED
 
 
 def test_can_run_task(tmp_path):
@@ -44,13 +46,15 @@ def test_can_run_task(tmp_path):
     with runner.isolated_filesystem(temp_dir=tmp_path):
         root.init(".")
         r = root.open_root()
+        res = runner.invoke(cli.cli_driver_configure, ["example"])
+        assert res.exit_code == 0
         res = runner.invoke(cli.cli_task_create, ["echo", "hello", "world"])
         assert res.exit_code == 0
-        task_id = res.stdout.strip()
+        task_id = res.stdout.strip().splitlines()[-1].strip()
 
         res = runner.invoke(cli.cli_task_status, task_id)
         assert res.exit_code == 0
-        assert res.output.strip() == "created"
+        assert res.output.strip() == "submitted"
 
         res = runner.invoke(cli.cli_task_eval, task_id)
         assert res.exit_code == 0
@@ -66,8 +70,10 @@ def test_can_save_and_read_log(tmp_path):
     runner = CliRunner()
     with runner.isolated_filesystem(temp_dir=tmp_path):
         root.init(".")
+        res = runner.invoke(cli.cli_driver_configure, ["example"])
+        assert res.exit_code == 0
         res = runner.invoke(cli.cli_task_create, ["echo", "hello", "world"])
-        task_id = res.stdout.strip()
+        task_id = res.stdout.strip().splitlines()[-1].strip()
 
         res = runner.invoke(cli.cli_task_log, task_id)
         assert res.exit_code == 0
@@ -81,8 +87,7 @@ def test_can_save_and_read_log(tmp_path):
         assert res.output == "hello world\n\n"
 
         res = runner.invoke(cli.cli_task_log, [task_id, "--outer"])
-        assert res.exit_code == 1
-        assert "outer logs are only available" in str(res.exception)
+        assert res.exit_code == 0
 
 
 def test_can_process_with_status_args():
@@ -98,21 +103,23 @@ def test_can_list_tasks(tmp_path):
     runner = CliRunner()
     with runner.isolated_filesystem(temp_dir=tmp_path):
         root.init(".")
+        res = runner.invoke(cli.cli_driver_configure, ["example"])
+        assert res.exit_code == 0
         res = runner.invoke(cli.cli_task_create, ["echo", "hello", "world"])
         assert res.exit_code == 0
-        task_id = res.stdout.strip()
+        task_id = res.stdout.strip().splitlines()[-1].strip()
 
         res = runner.invoke(cli.cli_task_list, [])
         assert res.exit_code == 0
-        assert res.output.strip() == task_id
+        assert res.stdout.strip().splitlines()[-1].strip() == task_id
 
-        res = runner.invoke(cli.cli_task_list, ["--with-status", "created"])
+        res = runner.invoke(cli.cli_task_list, ["--with-status", "submitted"])
         assert res.exit_code == 0
-        assert res.output.strip() == task_id
+        assert res.stdout.strip().splitlines()[-1].strip() == task_id
 
         res = runner.invoke(cli.cli_task_list, ["--with-status", "running"])
         assert res.exit_code == 0
-        assert res.output.strip() == ""
+        assert res.stdout.strip() == ""
 
 
 def test_can_call_cli_dide_authenticate(mocker):
@@ -205,6 +212,8 @@ def test_can_create_task_in_environment(tmp_path):
     with runner.isolated_filesystem(temp_dir=tmp_path):
         root.init(".")
         r = root.open_root()
+        res = runner.invoke(cli.cli_driver_configure, ["example"])
+        assert res.exit_code == 0
 
         runner.invoke(cli.init, ".")
         res = runner.invoke(cli.cli_environment_new, ["--name", "other"])
@@ -215,7 +224,7 @@ def test_can_create_task_in_environment(tmp_path):
             ["echo", "hello", "world", "--environment", "other"],
         )
         assert res.exit_code == 0
-        task_id = res.stdout.strip()
+        task_id = res.stdout.strip().splitlines()[-1].strip()
         data = task_data_read(task_id, r)
         assert data.environment == "other"
 
@@ -224,6 +233,7 @@ def test_can_provision_environment(tmp_path, mocker):
     runner = CliRunner()
     with runner.isolated_filesystem(temp_dir=tmp_path):
         runner.invoke(cli.init, ".")
+        runner.invoke(cli.cli_driver_configure, ["example"])
         runner.invoke(cli.cli_environment_new, [])
 
         mock_provision = mock.MagicMock()
@@ -271,9 +281,10 @@ def test_can_wait_on_task(tmp_path, mocker):
     runner = CliRunner()
     with runner.isolated_filesystem(temp_dir=tmp_path):
         runner.invoke(cli.init, ".")
+        runner.invoke(cli.cli_driver_configure, ["example"])
         res = runner.invoke(cli.cli_task_create, ["echo", "hello", "world"])
         assert res.exit_code == 0
-        task_id = res.stdout.strip()
+        task_id = res.stdout.strip().splitlines()[-1].strip()
 
         mocker.patch("hipercow.cli.task_wait")
 
@@ -325,12 +336,13 @@ def test_can_create_on_task_and_wait(tmp_path, mocker):
     runner = CliRunner()
     with runner.isolated_filesystem(temp_dir=tmp_path):
         runner.invoke(cli.init, ".")
+        runner.invoke(cli.cli_driver_configure, ["example"])
         mocker.patch("hipercow.cli.task_wait")
         res = runner.invoke(
             cli.cli_task_create, ["--wait", "echo", "hello", "world"]
         )
         assert res.exit_code == 0
-        task_id = res.stdout.strip()
+        task_id = res.stdout.strip().splitlines()[-1].strip()
         assert cli.task_wait.call_count == 1
         assert cli.task_wait.mock_calls[0] == mock.call(
             task_id,

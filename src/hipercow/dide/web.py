@@ -1,6 +1,5 @@
 import base64
 import datetime
-import math
 import re
 from dataclasses import dataclass
 from subprocess import list2cmdline
@@ -211,7 +210,7 @@ def _client_body_submit(
         "ver": encode64(f"hipercow-py/{hipercow_version}"),
     }
 
-    if resources.cores == math.inf:
+    if resources.cores == 0:
         data["rc"] = encode64("1")
         data["rt"] = encode64("Nodes")
     else:

@@ -129,7 +129,7 @@ class Root:
         return self.path_base() / "bundles" / (name or ".")
 
 
-OptionalRoot: TypeAlias = None | str | Path | Root
+OptionalRoot: TypeAlias = str | Path | Root | None
 """Optional root type, for user-facing functions.
 
 Represents different inputs to the user-facing functions in hipercow,
