@@ -34,6 +34,7 @@ echo working directory: $$(pwd)
 export HIPERCOW_NO_DRIVERS=1
 export HIPERCOW_CORES=$$CCP_NUMCPUS
 export REDIS_URL=10.0.2.254
+export HIPERCOW_MICROMAMBA=/mnt/cluster/Hipercow/bootstrap-py-linux/micromamba/micromamba
 
 echo this is a single task
 
@@ -83,6 +84,8 @@ module load Python/${python_version}
 
 cd ${hipercow_root_path}
 echo working directory: $$(pwd)
+
+export HIPERCOW_MICROMAMBA=/mnt/cluster/Hipercow/bootstrap-py-linux/micromamba/micromamba
 
 echo this is a provisioning task
 

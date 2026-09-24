@@ -256,6 +256,27 @@ def test_can_provision_environment(tmp_path, mocker):
         )
 
 
+def test_can_provision_conda_environment(tmp_path, mocker):
+    runner = CliRunner()
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        runner.invoke(cli.init, ".")
+        runner.invoke(cli.cli_driver_configure, ["example"])
+        res = runner.invoke(cli.cli_environment_new, ["--engine", "conda"])
+        assert res.exit_code == 0
+        assert "Creating environment 'default' using 'conda'" in res.output
+
+        mock_provision = mock.MagicMock()
+        mocker.patch("hipercow.cli.provision", mock_provision)
+
+        cmd = ["conda", "install", "-c", "bioconda", "samtools"]
+        res = runner.invoke(cli.cli_environment_provision, cmd)
+        assert res.exit_code == 0
+        assert mock_provision.call_count == 1
+        assert mock_provision.mock_calls[0] == mock.call(
+            "default", cmd, root=mock.ANY
+        )
+
+
 def test_can_delete_environment(tmp_path):
     runner = CliRunner()
     with runner.isolated_filesystem(temp_dir=tmp_path):

@@ -86,8 +86,18 @@ def test_cant_delete_unknown_environment(tmp_path):
         environment_delete("other", r)
 
 
-def test_require_pip_environment_engine(tmp_path):
+def test_require_known_environment_engine(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
-    with pytest.raises(Exception, match="Only the 'pip' and 'empty'"):
-        environment_new("default", "conda", r)
+    with pytest.raises(Exception, match="Only the 'pip', 'conda' and 'empty'"):
+        environment_new("default", "renv", r)
+
+
+def test_create_conda_environment(tmp_path):
+    root.init(tmp_path)
+    r = root.open_root(tmp_path)
+    environment_new("default", "conda", r)
+    assert environment_list(r) == ["default", "empty"]
+    with r.path_environment_config("default").open() as f:
+        cfg = EnvironmentConfiguration.model_validate_json(f.read())
+    assert cfg.engine == "conda"
