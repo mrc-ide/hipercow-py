@@ -41,30 +41,29 @@ Conda environments (`hipercow environment new --engine conda`) are created and r
 | Platform | Path on the node | Path on the share |
 | --- | --- | --- |
 | Linux | `/mnt/cluster/Hipercow/bootstrap-py-linux/micromamba/micromamba` | `\\wpia-hn\hipercow\bootstrap-py-linux\micromamba\micromamba` |
-| Windows | `I:\bootstrap-py-windows\micromamba\micromamba.exe` | `\\wpia-hn\hipercow\bootstrap-py-windows\micromamba\micromamba.exe` |
+| Windows | `I:\bootstrap-py-windows\micromamba\micromamba.bat` | `\\wpia-hn\hipercow\bootstrap-py-windows\micromamba\micromamba.bat` |
 
-To install or update micromamba, download the binaries from the [micromamba releases](https://github.com/mamba-org/micromamba-releases/releases) page, picking a specific version (these instructions were tested with `2.9.0-0`; you need at least version 2).  With the `hipercow` share mounted (here at `/path/to/hipercow`) run:
+To install or update micromamba for the linux bootstrap, download the binaries from the [micromamba releases](https://github.com/mamba-org/micromamba-releases/releases) page, picking a specific version (these instructions were tested with `2.9.0-0`; you need at least version 2).  With the `hipercow` share mounted (here at `/path/to/hipercow`) run:
 
 ```command
 VERSION=2.9.0-0
 URL=https://github.com/mamba-org/micromamba-releases/releases/download/$VERSION
 mkdir -p /path/to/hipercow/bootstrap-py-linux/micromamba
-mkdir -p /path/to/hipercow/bootstrap-py-windows/micromamba
 curl -L -o /path/to/hipercow/bootstrap-py-linux/micromamba/micromamba $URL/micromamba-linux-64
-curl -L -o /path/to/hipercow/bootstrap-py-windows/micromamba/micromamba.exe $URL/micromamba-win-64
 chmod +x /path/to/hipercow/bootstrap-py-linux/micromamba/micromamba
 ```
 
-Note that the Windows download is called `micromamba-win-64` and must be renamed to `micromamba.exe`.  Windows will not let you replace an executable that is in use, so update the Windows copy when no conda jobs are running.
+For Windows, mamba only works on a physical disk and silently fails when run from a network share such as a home directory. `micromamba.exe` is therefore on each cluster node in the path in `C:\Windows`, so use HPC Cluster Manager on the headnode to copy the exe to all nodes in one go. The bootstrap `micromamba.bat` expects `C:\Windows\micromamba.exe` to exist and simply wraps
+it sending all arguments.
 
-Then check that both platforms can run it, from any directory that is set up for the cluster:
+Check that both platforms can run it, from any directory that is set up for the cluster:
 
 ```command
 hipercow driver configure dide-linux
 hipercow task create --wait -- /mnt/cluster/Hipercow/bootstrap-py-linux/micromamba/micromamba --version
 hipercow driver unconfigure dide-linux
 hipercow driver configure dide-windows
-hipercow task create --wait -- 'I:\bootstrap-py-windows\micromamba\micromamba.exe' --version
+hipercow task create --wait -- 'I:\bootstrap-py-windows\micromamba\micromamba' --version
 ```
 
 If the Linux job fails with "Permission denied", the executable bit was not preserved on the share; run the `chmod +x` above from a Linux node.
