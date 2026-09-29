@@ -53,7 +53,7 @@ curl -L -o /path/to/hipercow/bootstrap-py-linux/micromamba/micromamba $URL/micro
 chmod +x /path/to/hipercow/bootstrap-py-linux/micromamba/micromamba
 ```
 
-For Windows, mamba only works on a physical disk and silently fails when run from a network share such as a home directory. `micromamba.exe` is therefore on each cluster node in the path in `C:\Windows`, so use HPC Cluster Manager on the headnode to copy the exe to all nodes in one go. The bootstrap `micromamba.bat` expects `C:\Windows\micromamba.exe` to exist and simply wraps
+For Windows, mamba only works on a physical disk and silently fails when run from a network share such as a home directory. `micromamba.exe` is therefore on each cluster node in the path in `C:\Windows`, so use HPC Cluster Manager on the headnode to copy the binary to all nodes in one go. The bootstrap `micromamba.bat` expects `C:\Windows\micromamba.exe` to exist and simply wraps
 it sending all arguments.
 
 Check that both platforms can run it, from any directory that is set up for the cluster:

@@ -7,9 +7,11 @@ ctrl
 dide
 entrypoint
 eval
+exe
 filesystem
 filesystems
 gb
+headnode
 hipercow
 infographic
 installable
