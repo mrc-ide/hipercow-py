@@ -343,7 +343,7 @@ Both the task and the provisioning templates now set the location of micromamba:
 
 ```text
 export HIPERCOW_MICROMAMBA=/mnt/cluster/Hipercow/bootstrap-py-linux/micromamba/micromamba   # Linux
-set HIPERCOW_MICROMAMBA=I:\bootstrap-py-windows\micromamba\micromamba.exe                     # Windows
+set HIPERCOW_MICROMAMBA=I:\bootstrap-py-windows\micromamba\micromamba.bat                   # Windows
 ```
 
 `I:` is already mapped to `\\wpia-hn-app\hipercow` by these scripts, and `/mnt/cluster/Hipercow` is the same share seen from Linux. The line is harmless for pip and empty environments.
@@ -379,11 +379,9 @@ Adds `mamba-org/setup-micromamba@v3` (installing only the binary, pinned to `2.9
    URL=https://github.com/mamba-org/micromamba-releases/releases/download/$VERSION
    mkdir -p <share>/bootstrap-py-linux/micromamba <share>/bootstrap-py-windows/micromamba
    curl -L -o <share>/bootstrap-py-linux/micromamba/micromamba       $URL/micromamba-linux-64
-   curl -L -o <share>/bootstrap-py-windows/micromamba/micromamba.exe $URL/micromamba-win-64
    chmod +x <share>/bootstrap-py-linux/micromamba/micromamba
    ```
 
-   The Windows asset has no `.exe` extension, so it must be renamed as above.
 3. **Smoke-test both platforms** with a `hipercow task create --wait -- <path-to-micromamba> --version` job on each driver. If Linux gives "Permission denied", run `chmod +x` from a Linux node, because CIFS mount options may drop the exec bit.
 4. **Full test on Linux**: create an environment, provision `conda install -c bioconda samtools`, and run `samtools --version` as a task. This also confirms the nodes can reach `conda.anaconda.org`, which is a different host from PyPI and may need allowing through the firewall.
 5. **Tell users** to prefer `dide-linux` for conda work: bioconda has no Windows builds.
