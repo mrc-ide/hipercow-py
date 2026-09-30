@@ -451,7 +451,9 @@ def cli_environment_delete(name: str):
 
 @environment.command("new")
 @click.option("--name", default="default", help="Name of the environment")
-@click.option("--engine", default="pip", help="Engine to use")
+@click.option(
+    "--engine", default="pip", help="Engine to use ('pip' or 'conda')"
+)
 def cli_environment_new(name: str, engine: str):
     """Create a new environment.
 

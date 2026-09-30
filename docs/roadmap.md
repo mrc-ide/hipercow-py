@@ -19,7 +19,6 @@ Many of these are features that will feel familiar to users of the R version.
 * Support multiple mounted windows shares at once
 * Run on our new Linux cluster
 * Retrieve information about the cluster that you are running on
-* Support for setting up [conda environments](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html), particularly to support bioinformatics workflows.
 
 There are also many rough edges:
 

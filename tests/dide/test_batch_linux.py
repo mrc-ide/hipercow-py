@@ -40,6 +40,9 @@ def test_can_write_batch(tmp_path):
     path_rel = f"hipercow/py/tasks/{tid[:2]}/{tid[2:]}/task_run.sh"
     assert run_sh == f"/mnt/cluster/project/bob/my/project/{path_rel}"
     assert (r.path / path_rel).exists()
+    mm = "/mnt/cluster/Hipercow/bootstrap-py-linux/micromamba/micromamba"
+    with (r.path / path_rel).open() as f:
+        assert f"export HIPERCOW_MICROMAMBA={mm}\n" in f.read()
 
 
 def test_can_create_provision_data(tmp_path):
@@ -72,3 +75,6 @@ def test_can_write_provision_batch(tmp_path):
     path_rel = "hipercow/py/env/myenv/provision/abcdef/run.sh"
     assert run_sh == f"/mnt/vimc-cc2/bob/my/project/{path_rel}"
     assert (r.path / path_rel).exists()
+    mm = "/mnt/cluster/Hipercow/bootstrap-py-linux/micromamba/micromamba"
+    with (r.path / path_rel).open() as f:
+        assert f"export HIPERCOW_MICROMAMBA={mm}\n" in f.read()
