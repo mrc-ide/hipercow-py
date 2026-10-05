@@ -51,16 +51,10 @@ def test_authenticate_flow(mocker):
     assert auth._get_username.call_args == unittest.mock.call("bob1")
     assert auth._get_password.call_count == 1
     assert auth.check_access.call_count == 1
-    assert auth.check_access.call_args == unittest.mock.call(
-        auth.Credentials("bob", "secret")
-    )
+    assert auth.check_access.call_args == unittest.mock.call(auth.Credentials("bob", "secret"))
     assert auth.keyring.set_password.call_count == 2
-    assert auth.keyring.set_password.call_args_list[0] == unittest.mock.call(
-        "hipercow/dide/username", "", "bob"
-    )
-    assert auth.keyring.set_password.call_args_list[1] == unittest.mock.call(
-        "hipercow/dide/password", "bob", "secret"
-    )
+    assert auth.keyring.set_password.call_args_list[0] == unittest.mock.call("hipercow/dide/username", "", "bob")
+    assert auth.keyring.set_password.call_args_list[1] == unittest.mock.call("hipercow/dide/password", "bob", "secret")
 
 
 def test_check_flow(mocker):
@@ -77,12 +71,8 @@ def test_can_fetch_credentials_from_thekey_ring(mocker):
     mocker.patch("keyring.get_password", side_effect=["bob", "secret"])
     assert auth.fetch_credentials() == auth.Credentials("bob", "secret")
     assert auth.keyring.get_password.call_count == 2
-    assert auth.keyring.get_password.call_args_list[0] == unittest.mock.call(
-        "hipercow/dide/username", ""
-    )
-    assert auth.keyring.get_password.call_args_list[1] == unittest.mock.call(
-        "hipercow/dide/password", "bob"
-    )
+    assert auth.keyring.get_password.call_args_list[0] == unittest.mock.call("hipercow/dide/username", "")
+    assert auth.keyring.get_password.call_args_list[1] == unittest.mock.call("hipercow/dide/password", "bob")
 
 
 def test_can_error_if_username_not_found(mocker):
@@ -103,12 +93,8 @@ def test_can_clear_credentials(mocker):
     auth.clear()
     assert auth.keyring.get_password.call_count == 1
     assert auth._delete_password_silently.call_count == 2
-    assert auth._delete_password_silently.call_args_list[
-        0
-    ] == unittest.mock.call("hipercow/dide/username", "")
-    assert auth._delete_password_silently.call_args_list[
-        1
-    ] == unittest.mock.call("hipercow/dide/password", "bob")
+    assert auth._delete_password_silently.call_args_list[0] == unittest.mock.call("hipercow/dide/username", "")
+    assert auth._delete_password_silently.call_args_list[1] == unittest.mock.call("hipercow/dide/password", "bob")
 
 
 def test_dont_clear_password_if_no_username_found(mocker):
@@ -134,9 +120,7 @@ def test_can_get_default_username(mocker):
     assert auth._default_username() == "alice"
     assert auth.getpass.getuser.call_count == 1
     assert auth.keyring.get_password.call_count == 1
-    assert auth.keyring.get_password.call_args == unittest.mock.call(
-        "hipercow/dide/username", ""
-    )
+    assert auth.keyring.get_password.call_args == unittest.mock.call("hipercow/dide/username", "")
     assert auth._default_username() == "bob"
     assert auth.getpass.getuser.call_count == 1
     assert auth.keyring.get_password.call_count == 2

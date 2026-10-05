@@ -93,10 +93,7 @@ def test_can_save_and_read_log(tmp_path):
 def test_can_process_with_status_args():
     assert cli._process_with_status([]) is None
     assert cli._process_with_status(["success"]) == TaskStatus.SUCCESS
-    assert (
-        cli._process_with_status(["success", "running"])
-        == TaskStatus.RUNNING | TaskStatus.SUCCESS
-    )
+    assert cli._process_with_status(["success", "running"]) == TaskStatus.RUNNING | TaskStatus.SUCCESS
 
 
 def test_can_list_tasks(tmp_path):
@@ -242,18 +239,12 @@ def test_can_provision_environment(tmp_path, mocker):
         res = runner.invoke(cli.cli_environment_provision, [])
         assert res.exit_code == 0
         assert mock_provision.call_count == 1
-        assert mock_provision.mock_calls[0] == mock.call(
-            "default", [], root=mock.ANY
-        )
+        assert mock_provision.mock_calls[0] == mock.call("default", [], root=mock.ANY)
 
-        res = runner.invoke(
-            cli.cli_environment_provision, ["--name=foo", "pip", "install", "."]
-        )
+        res = runner.invoke(cli.cli_environment_provision, ["--name=foo", "pip", "install", "."])
         assert res.exit_code == 0
         assert mock_provision.call_count == 2
-        assert mock_provision.mock_calls[1] == mock.call(
-            "foo", ["pip", "install", "."], root=mock.ANY
-        )
+        assert mock_provision.mock_calls[1] == mock.call("foo", ["pip", "install", "."], root=mock.ANY)
 
 
 def test_can_provision_conda_environment(tmp_path, mocker):
@@ -272,9 +263,7 @@ def test_can_provision_conda_environment(tmp_path, mocker):
         res = runner.invoke(cli.cli_environment_provision, cmd)
         assert res.exit_code == 0
         assert mock_provision.call_count == 1
-        assert mock_provision.mock_calls[0] == mock.call(
-            "default", cmd, root=mock.ANY
-        )
+        assert mock_provision.mock_calls[0] == mock.call("default", cmd, root=mock.ANY)
 
 
 def test_can_delete_environment(tmp_path):
@@ -343,14 +332,10 @@ def test_can_build_environment(tmp_path, mocker):
         mock_provision = mock.MagicMock()
         mocker.patch("hipercow.cli.provision_run", mock_provision)
 
-        res = runner.invoke(
-            cli.cli_environment_provision_run, ["example", "abcdef"]
-        )
+        res = runner.invoke(cli.cli_environment_provision_run, ["example", "abcdef"])
         assert res.exit_code == 0
         assert mock_provision.call_count == 1
-        assert mock_provision.mock_calls[0] == mock.call(
-            "example", "abcdef", mock.ANY
-        )
+        assert mock_provision.mock_calls[0] == mock.call("example", "abcdef", mock.ANY)
 
 
 def test_can_create_on_task_and_wait(tmp_path, mocker):
@@ -359,9 +344,7 @@ def test_can_create_on_task_and_wait(tmp_path, mocker):
         runner.invoke(cli.init, ".")
         runner.invoke(cli.cli_driver_configure, ["example"])
         mocker.patch("hipercow.cli.task_wait")
-        res = runner.invoke(
-            cli.cli_task_create, ["--wait", "echo", "hello", "world"]
-        )
+        res = runner.invoke(cli.cli_task_create, ["--wait", "echo", "hello", "world"])
         assert res.exit_code == 0
         task_id = res.stdout.strip().splitlines()[-1].strip()
         assert cli.task_wait.call_count == 1
@@ -423,9 +406,7 @@ def test_can_rebuild_recent_list(tmp_path):
         res = runner.invoke(cli.cli_task_recent, [])
         assert res.exit_code == 1
         assert res.stdout == ""
-        assert (
-            str(res.exception) == "Recent data list is corrupt, please rebuild"
-        )
+        assert str(res.exception) == "Recent data list is corrupt, please rebuild"
 
         res = runner.invoke(cli.cli_task_recent, ["--rebuild"])
         assert res.exit_code == 0
@@ -444,9 +425,7 @@ def test_can_call_cli_dide_bootstrap(mocker):
         None, force=False, verbose=True, python_versions=[], platforms=[]
     )
 
-    res = runner.invoke(
-        cli.cli_dide_bootstrap, ["myfile", "--verbose", "--force"]
-    )
+    res = runner.invoke(cli.cli_dide_bootstrap, ["myfile", "--verbose", "--force"])
     assert res.exit_code == 0
     assert res.output.strip() == ""
     assert cli.dide_bootstrap.call_count == 2
@@ -471,9 +450,7 @@ def test_show_small_error_only(capsys, mocker):
     mock_console = mock.MagicMock()
     mocker.patch("sys.exit", mock_sys_exit)
     mocker.patch("hipercow.cli.console", mock_console)
-    with transient_envvars(
-        {"HIPERCOW_RAW_ERROR": None, "HIPERCOW_TRACEBACK": None}
-    ):
+    with transient_envvars({"HIPERCOW_RAW_ERROR": None, "HIPERCOW_TRACEBACK": None}):
         cli._handle_error(e)
     assert mock_sys_exit.call_count == 1
     assert mock_sys_exit.mock_calls[0] == mock.call(1)
@@ -489,9 +466,7 @@ def test_show_nice_traceback(capsys, mocker):
     mock_console = mock.MagicMock()
     mocker.patch("sys.exit", mock_sys_exit)
     mocker.patch("hipercow.cli.console", mock_console)
-    with transient_envvars(
-        {"HIPERCOW_RAW_ERROR": None, "HIPERCOW_TRACEBACK": "1"}
-    ):
+    with transient_envvars({"HIPERCOW_RAW_ERROR": None, "HIPERCOW_TRACEBACK": "1"}):
         cli._handle_error(e)
     assert mock_sys_exit.call_count == 1
     assert mock_sys_exit.mock_calls[0] == mock.call(1)
@@ -499,9 +474,7 @@ def test_show_nice_traceback(capsys, mocker):
     assert len(out) == 1
     assert out[0] == "Error: some error"
     assert len(mock_console.method_calls) == 1
-    assert mock_console.method_calls[0] == mock.call.print_exception(
-        show_locals=True, suppress=[click]
-    )
+    assert mock_console.method_calls[0] == mock.call.print_exception(show_locals=True, suppress=[click])
 
 
 def test_cli_wrapper_passes_to_exception_handler_on_error(mocker):
@@ -523,16 +496,12 @@ def test_can_set_python_version(tmp_path):
         v_ok = ".".join(platform.python_version_tuple()[:2])
         v_err = "3.11" if v_ok == "3.10" else "3.10"
 
-        res = runner.invoke(
-            cli.cli_driver_configure, ["example", "--python-version", v_err]
-        )
+        res = runner.invoke(cli.cli_driver_configure, ["example", "--python-version", v_err])
         assert res.exit_code == 1
         assert "not the same as the local version" in str(res.exception)
         assert list_drivers(r) == []
 
-        res = runner.invoke(
-            cli.cli_driver_configure, ["example", "--python-version", v_ok]
-        )
+        res = runner.invoke(cli.cli_driver_configure, ["example", "--python-version", v_ok])
         assert res.exit_code == 0
         assert list_drivers(r) == ["example"]
 
@@ -667,20 +636,13 @@ def test_can_get_bundle_status(tmp_path):
         res = runner.invoke(cli.cli_bundle_status, ["mybundle"])
         assert res.exit_code == 0
         status = ["created", "created", "created", "success", "created"]
-        assert res.output == "".join(
-            f"{id}: {status}\n"
-            for id, status in zip(bundle.task_ids, status, strict=False)
-        )
+        assert res.output == "".join(f"{id}: {status}\n" for id, status in zip(bundle.task_ids, status, strict=False))
 
-        res = runner.invoke(
-            cli.cli_bundle_status, ["mybundle", "--summary", "group"]
-        )
+        res = runner.invoke(cli.cli_bundle_status, ["mybundle", "--summary", "group"])
         assert res.exit_code == 0
         assert res.output == "created: 4\nsuccess: 1\n"
 
-        res = runner.invoke(
-            cli.cli_bundle_status, ["mybundle", "--summary", "single"]
-        )
+        res = runner.invoke(cli.cli_bundle_status, ["mybundle", "--summary", "single"])
         assert res.exit_code == 0
         assert res.output == "created\n"
 

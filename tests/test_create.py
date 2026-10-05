@@ -16,9 +16,7 @@ def test_create_simple_task(tmp_path):
     with transient_working_directory(tmp_path):
         tid = tc.task_create_shell(["echo", "hello world"], root=r)
     assert re.match("^[0-9a-f]{32}$", tid)
-    path_data = (
-        tmp_path / "hipercow" / "py" / "tasks" / tid[:2] / tid[2:] / "data"
-    )
+    path_data = tmp_path / "hipercow" / "py" / "tasks" / tid[:2] / tid[2:] / "data"
     assert path_data.exists()
     d = task_data_read(tid, root.open_root(tmp_path))
     assert isinstance(d, TaskData)
@@ -56,9 +54,7 @@ def test_resources_require_configured_driver(tmp_path):
     resources = TaskResources(queue="foo")
     with transient_working_directory(tmp_path):
         with pytest.raises(Exception, match="Can't specify resources"):
-            tc.task_create_shell(
-                ["echo", "hello world"], resources=resources, root=r
-            )
+            tc.task_create_shell(["echo", "hello world"], resources=resources, root=r)
 
 
 def test_resources_validated_on_submission(tmp_path):
@@ -67,12 +63,8 @@ def test_resources_validated_on_submission(tmp_path):
     configure("example", root=r)
     resources = TaskResources(queue="foo")
     with transient_working_directory(tmp_path):
-        with pytest.raises(
-            Exception, match="Queue 'foo' is not in valid queue list"
-        ):
-            tc.task_create_shell(
-                ["echo", "hello world"], resources=resources, root=r
-            )
+        with pytest.raises(Exception, match="Queue 'foo' is not in valid queue list"):
+            tc.task_create_shell(["echo", "hello world"], resources=resources, root=r)
 
 
 def test_can_save_resources_on_submission(tmp_path):
@@ -81,8 +73,6 @@ def test_can_save_resources_on_submission(tmp_path):
     configure("example", root=r)
     resources = TaskResources(memory_per_task=1)
     with transient_working_directory(tmp_path):
-        tid = tc.task_create_shell(
-            ["echo", "hello world"], resources=resources, root=r
-        )
+        tid = tc.task_create_shell(["echo", "hello world"], resources=resources, root=r)
     d = task_data_read(tid, root.open_root(tmp_path))
     assert d.resources == TaskResources(queue="default", memory_per_task=1)

@@ -12,9 +12,7 @@ from hipercow.task_create import task_create_shell
 from hipercow.task_eval import task_eval
 from hipercow.util import transient_working_directory
 
-has_micromamba = bool(
-    os.environ.get("HIPERCOW_MICROMAMBA") or shutil.which("micromamba")
-)
+has_micromamba = bool(os.environ.get("HIPERCOW_MICROMAMBA") or shutil.which("micromamba"))
 
 
 @pytest.mark.slow

@@ -18,10 +18,7 @@ def example_configuration(**kwargs) -> ExampleDriverConfiguration:
         requested = check_python_version(version)
         local = check_python_version(None)
         if local != requested:
-            msg = (
-                f"Requested python version {version}"
-                f"is not the same as the local version {local}"
-            )
+            msg = f"Requested python version {version}is not the same as the local version {local}"
             raise Exception(msg)
     return ExampleDriverConfiguration()
 

@@ -37,9 +37,7 @@ def bootstrap(
     args = _bootstrap_args(force=force, verbose=verbose)
 
     tasks = [
-        _bootstrap_submit(client, mount, bootstrap_id, v, p, target, args)
-        for v in python_versions
-        for p in platforms
+        _bootstrap_submit(client, mount, bootstrap_id, v, p, target, args) for v in python_versions for p in platforms
     ]
     _bootstrap_wait(tasks)
     # We could clean up here with 'shutil.rmtree(path)' but wait until
@@ -63,9 +61,7 @@ class BootstrapTask(Task):
         self.platform = platform
         self.status_waiting = {"created", "submitted"}
         self.status_running = {"running"}
-        self.path_log = Path(
-            mount.local / _bootstrap_path(bootstrap_id) / f"{version}.log"
-        )
+        self.path_log = Path(mount.local / _bootstrap_path(bootstrap_id) / f"{version}.log")
 
     def log(self) -> None:
         pass
@@ -89,22 +85,14 @@ def _bootstrap_submit(
     name = f"bootstrap/{bootstrap_id}/{version}"
 
     if platform == "windows":
-        dide_id = bootstrap_windows_submit(
-            bootstrap_id, version, mount, client, target, args, name
-        )
+        dide_id = bootstrap_windows_submit(bootstrap_id, version, mount, client, target, args, name)
     elif platform == "linux":
-        dide_id = bootstrap_linux_submit(
-            bootstrap_id, version, mount, client, target, args, name
-        )
+        dide_id = bootstrap_linux_submit(bootstrap_id, version, mount, client, target, args, name)
 
-    return BootstrapTask(
-        mount, bootstrap_id, client, dide_id, version, platform
-    )
+    return BootstrapTask(mount, bootstrap_id, client, dide_id, version, platform)
 
 
-def _bootstrap_target(
-    target: str | None, mount: Mount, bootstrap_id: str
-) -> str:
+def _bootstrap_target(target: str | None, mount: Mount, bootstrap_id: str) -> str:
     if target is None:
         return "hipercow"
     if not Path(target).exists():
@@ -166,9 +154,7 @@ def _bootstrap_path(bootstrap_id: str) -> Path:
 def _bootstrap_check_pipx_pyz(path: Path) -> None:
     if not (path / "pipx.pyz").exists():
         url = "https://github.com/pypa/pipx/releases"
-        msg = (
-            f"Expected 'pipx.pyz' to be found at '{path}'; download from {url}"
-        )
+        msg = f"Expected 'pipx.pyz' to be found at '{path}'; download from {url}"
         raise Exception(msg)
 
 

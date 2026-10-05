@@ -86,9 +86,7 @@ def bulk_create_shell(
     return bundle_create(task_ids, name=name, validate=False, root=root)
 
 
-def bulk_create_shell_commands(
-    cmd_template: list[str], data: BulkDataInput
-) -> list[list[str]]:
+def bulk_create_shell_commands(cmd_template: list[str], data: BulkDataInput) -> list[list[str]]:
     """Create a list of commands from a template and data.
 
     Creates the list of commands (each of which is a list of strings)
@@ -154,6 +152,4 @@ def _check_template_data(data: BulkDataInput) -> list[dict[str, str]]:
 def _bulk_data_combine(
     data: dict[str, str | list[str]],
 ) -> list[dict[str, str]]:
-    return expand_grid(
-        {k: v if isinstance(v, list) else [v] for k, v in data.items()}
-    )
+    return expand_grid({k: v if isinstance(v, list) else [v] for k, v in data.items()})

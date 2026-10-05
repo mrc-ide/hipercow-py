@@ -49,9 +49,7 @@ def unconfigure(name: str, root: OptionalRoot = None) -> None:
         path.unlink()
         ui.alert_success(f"Removed configuration for '{name}'")
     else:
-        ui.alert_warning(
-            f"Did not remove configuration for '{name}' as it was not enabled"
-        )
+        ui.alert_warning(f"Did not remove configuration for '{name}' as it was not enabled")
 
 
 def _write_configuration(name: str, config: BaseModel, root: Root) -> None:

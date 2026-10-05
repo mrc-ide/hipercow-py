@@ -93,9 +93,7 @@ def subprocess_run(
         return subprocess.CompletedProcess(cmd, -1)
 
 
-def check_python_version(
-    version: str | None, valid: list[str] | None = None
-) -> str:
+def check_python_version(version: str | None, valid: list[str] | None = None) -> str:
     if valid is None:
         valid = ["3.10", "3.11", "3.12", "3.13"]
     if not version:
@@ -147,10 +145,7 @@ class Result:
 
 
 def expand_grid(data: dict) -> list[dict]:
-    return [
-        dict(zip(data.keys(), el, strict=False))
-        for el in product(*data.values())
-    ]
+    return [dict(zip(data.keys(), el, strict=False)) for el in product(*data.values())]
 
 
 # Probably some more work here to get the name to str here?
