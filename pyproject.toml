@@ -32,6 +32,7 @@ dependencies = [
   "rich",
   "taskwait",
   "typing_extensions",
+  "uv>=0.8",
 ]
 dynamic = ["version"]
 

@@ -4,7 +4,7 @@ We use the term "environment" to refer to the context in which a task runs, cont
 
 There are two key sorts of environments we support:
 
-* [Python virtual environments](https://docs.python.org/3/tutorial/venv.html), generally installed via `pip`.  This is effectively a directory of installed python packages, plus some machinery to set the `PATH` environment variable (where the operating system looks for programs) and the python search path (`sys.path`: where Python looks for packages).
+* [Python virtual environments](https://docs.python.org/3/tutorial/venv.html), which we create and install into with [`uv`](https://docs.astral.sh/uv/) (or, if you prefer, `pip`).  This is effectively a directory of installed python packages, plus some machinery to set the `PATH` environment variable (where the operating system looks for programs) and the python search path (`sys.path`: where Python looks for packages).
 * [Conda environments](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html), generally installed by `conda`, `miniconda`, `mamba` or `micromamba`.  This is a framework popular in bioinformatics and can be used to create a self-consistent installation of a great many tools, isolated from system libraries.  We use `micromamba` to manage these on the cluster (see [below](#provisioning-an-environment-with-conda)).
 
 Environments are necessary because we aim to keep globally installed software on the cluster to a minimum.  This reduces the number of times you have to wait for someone else to install or update some piece of software that you depend on for your work.
@@ -34,16 +34,78 @@ $ hipercow environment list
 empty
 ```
 
-You can initialise a more interesting environment using `new`, this will by default initialise the environment `default` using the `pip` engine:
+You can initialise a more interesting environment using `new`, this will by default initialise the environment `default` using the `uv` engine:
 
 ```command
 $ hipercow environment new
-Creating environment 'default' using 'pip'
+Creating environment 'default' using 'uv'
+```
+
+## Provisioning an environment with `uv`
+
+To provision an environment, use `hipercow environment provision`; this runs on the cluster and installs the packages you need to run your tasks.  This is needed because the cluster cannot see the packages you have installed locally, and the cluster nodes might be a different operating system type to your computer anyway.
+
+The `uv` engine creates a Python virtual environment using [`uv`](https://docs.astral.sh/uv/), which comes with `hipercow`; you do not need to install it yourself.  `uv` also downloads Python itself into your environment, so your tasks can use whichever version of Python you like, regardless of what is installed on the cluster.
+
+### Choosing a Python version
+
+Choose the version when you create the environment:
+
+```command
+$ hipercow environment new --python 3.13
+Creating environment 'default' using 'uv' with Python 3.13
+```
+
+You can give a minor version (`3.13`), an exact version (`3.13.2`) or anything else that [`uv` understands](https://docs.astral.sh/uv/concepts/python-versions/#requesting-a-version).  If you do not give `--python`, the version comes from your project instead, in this order:
+
+1. a `.python-version` file (as written by `uv python pin`)
+2. the `requires-python` field in `pyproject.toml`
+3. otherwise, the latest stable version of Python
+
+Python is downloaded when the environment is first provisioned.  To change version later, delete the environment and create it again.
+
+### Installing packages
+
+**The automatic installation** follows these rules:
+
+* If `uv.lock` exists, we install exactly what it lists using `uv sync --locked`
+* If `pyproject.toml` exists, we install the project using `pip install .`
+* If `requirements.txt` exists, we install from it using `pip install -r requirements.txt`
+* Otherwise we error.
+
+so for most projects you can run
+
+```command
+$ hipercow environment provision
+```
+
+If you use `uv` to manage your project, `uv sync --locked` fails if `uv.lock` is out of date with `pyproject.toml`; run `uv lock` on your computer and provision again.  Note that `uv sync` makes the environment match the lockfile exactly, removing anything else you installed into it.
+
+**The manual installation** takes a `pip` command, which we run using `uv pip`:
+
+```command
+$ hipercow environment provision pip install cowsay fortune-python
+```
+
+You can also write `uv pip ...`, `uv sync ...` (e.g., `uv sync --locked --no-dev`) or `uv cache clean`.  We add the location of the environment for you; do not pass `--python`, `--system`, `--prefix` or `--target`.
+
+### Disk space
+
+Each environment contains its own copy of Python (around 100MB), and `uv` keeps a cache of downloaded packages.  These all live within the environment on the network share, and are removed when you delete the environment.  Once your environment is working, you can delete the cache with:
+
+```command
+$ hipercow environment provision uv cache clean
 ```
 
 ## Provisioning an environment with `pip`
 
-To provision an environment, use `hipercow environment provision`; this runs on the cluster and installs the packages you need to run your tasks.  This is needed because the cluster cannot see the packages you have installed locally, and the cluster nodes might be a different operating system type to your computer anyway.  You can install packages automatically or manually.
+The `pip` engine was the default before `uv` was added, and environments created with it continue to work.  It uses the Python installed on the cluster (the same version as the one running `hipercow`), so you cannot choose the version.  Select it with:
+
+```command
+$ hipercow environment new --engine pip
+```
+
+You can install packages automatically or manually.
 
 **The automatic installation** will get better over time, but we hope this is enough to get at least some people going.  The rules are:
 
@@ -155,7 +217,7 @@ You can have multiple environments configured within a single `hipercow` root.  
 You can run
 
 ```command
-$ hipercow environment create --name dev
+$ hipercow environment new --name dev
 ```
 
 to create a new `dev` environment.  You can provision this the same way as above, but passing `--name dev` through to `provision`
@@ -173,5 +235,6 @@ $ hipercow task create --environment dev <your command here>
 Possible use cases of this functionality are:
 
 * trying out a different version of a package side-by-side with a previous installation to compare results
+* trying out a different version of Python (`hipercow environment new --name py314 --python 3.14`)
 * installing an update without disrupting tasks that are already queued up
-* mixing `pip`- and `conda`-based environments in one project
+* mixing `uv`- and `conda`-based environments in one project

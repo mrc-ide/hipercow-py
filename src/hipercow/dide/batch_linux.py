@@ -14,6 +14,9 @@ from hipercow.dide.web import DideWebClient
 from hipercow.resources import TaskResources
 from hipercow.root import Root
 
+# The bootstrap (see 'hipercow dide bootstrap'), as seen from linux nodes
+BOOTSTRAP_ROOT_LINUX = "/mnt/cluster/Hipercow/bootstrap-py-linux"
+
 TASK_RUN_SH = Template(r"""#!/bin/bash
 # automatically generated
 
@@ -24,6 +27,9 @@ echo running on: $$(hostname -f)
 
 source /etc/profile
 
+# hipercow brings its own python, so this is only for tasks that use
+# the cluster's python: those in 'pip' environments, and those that run
+# 'python' in the empty environment.
 module use /modules/modules/all
 
 module load Python/${python_version}
@@ -34,11 +40,13 @@ echo working directory: $$(pwd)
 export HIPERCOW_NO_DRIVERS=1
 export HIPERCOW_CORES=$$CCP_NUMCPUS
 export REDIS_URL=10.0.2.254
-export HIPERCOW_MICROMAMBA=/mnt/cluster/Hipercow/bootstrap-py-linux/micromamba/micromamba
+export HIPERCOW_MICROMAMBA=${bootstrap_root}/micromamba/micromamba
+HIPERCOW_BOOTSTRAP=$$(cat ${bootstrap_root}/python-${python_version}/current)
+echo hipercow bootstrap: $$HIPERCOW_BOOTSTRAP
 
 echo this is a single task
 
-/mnt/cluster/Hipercow/bootstrap-py-linux/python-${python_version}/bin/hipercow task eval --capture ${task_id}
+${bootstrap_root}/python-${python_version}/installs/$${HIPERCOW_BOOTSTRAP}/bin/hipercow task eval --capture ${task_id}
 
 ErrorCode=$$?
 
@@ -78,6 +86,9 @@ echo running on: $$(hostname -f)
 
 source /etc/profile
 
+# hipercow brings its own python, so this is only for tasks that use
+# the cluster's python: those in 'pip' environments, and those that run
+# 'python' in the empty environment.
 module use /modules/modules/all
 
 module load Python/${python_version}
@@ -85,11 +96,13 @@ module load Python/${python_version}
 cd ${hipercow_root_path}
 echo working directory: $$(pwd)
 
-export HIPERCOW_MICROMAMBA=/mnt/cluster/Hipercow/bootstrap-py-linux/micromamba/micromamba
+export HIPERCOW_MICROMAMBA=${bootstrap_root}/micromamba/micromamba
+HIPERCOW_BOOTSTRAP=$$(cat ${bootstrap_root}/python-${python_version}/current)
+echo hipercow bootstrap: $$HIPERCOW_BOOTSTRAP
 
 echo this is a provisioning task
 
-/mnt/cluster/Hipercow/bootstrap-py-linux/python-${python_version}/bin/hipercow environment provision-run ${environment_name} ${provision_id}
+${bootstrap_root}/python-${python_version}/installs/$${HIPERCOW_BOOTSTRAP}/bin/hipercow environment provision-run ${environment_name} ${provision_id}
 
 ErrorCode=$$?
 
@@ -135,6 +148,7 @@ def _template_data_core_linux(config: DideConfiguration) -> dict[str, str]:
         "date": str(datetime.datetime.now(tz=datetime.timezone.utc)),
         "python_version": config.python_version,
         "hipercow_version": version,
+        "bootstrap_root": BOOTSTRAP_ROOT_LINUX,
         "hipercow_root_path": _linux_dide_path(path_map),
     }
 

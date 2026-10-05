@@ -45,7 +45,13 @@ def test_can_write_batch(tmp_path):
     assert (r.path / path_rel.replace("\\", "/")).exists()
     mm = "I:\\bootstrap-py-windows\\micromamba\\micromamba.bat"
     with (r.path / path_rel.replace("\\", "/")).open() as f:
-        assert f"set HIPERCOW_MICROMAMBA={mm}\n" in f.read()
+        contents = f.read()
+    assert f"set HIPERCOW_MICROMAMBA={mm}\n" in contents
+    v = config.python_version
+    bootstrap = f"I:\\bootstrap-py-windows\\python-{v}"
+    assert f"set /p HIPERCOW_BOOTSTRAP=<{bootstrap}\\current\n" in contents
+    hipercow = f"{bootstrap}\\installs\\%HIPERCOW_BOOTSTRAP%\\Scripts\\hipercow"
+    assert f"\n{hipercow} task eval --capture {tid}\n" in contents
 
 
 def test_can_create_provision_data(tmp_path):
@@ -83,4 +89,10 @@ def test_can_write_provision_batch(tmp_path):
     assert (r.path / path_rel.replace("\\", "/")).exists()
     mm = "I:\\bootstrap-py-windows\\micromamba\\micromamba.bat"
     with (r.path / path_rel.replace("\\", "/")).open() as f:
-        assert f"set HIPERCOW_MICROMAMBA={mm}\n" in f.read()
+        contents = f.read()
+    assert f"set HIPERCOW_MICROMAMBA={mm}\n" in contents
+    v = config.python_version
+    bootstrap = f"I:\\bootstrap-py-windows\\python-{v}"
+    assert f"set /p HIPERCOW_BOOTSTRAP=<{bootstrap}\\current\n" in contents
+    hipercow = f"{bootstrap}\\installs\\%HIPERCOW_BOOTSTRAP%\\Scripts\\hipercow"
+    assert f"\n{hipercow} environment provision-run myenv abcdef\n" in contents
