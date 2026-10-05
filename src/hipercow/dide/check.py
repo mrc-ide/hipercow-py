@@ -139,7 +139,7 @@ def _dide_check_root_configured(root: Root) -> Result:
                 "hipercow is not configured with a valid driver.", indent=4
             )
             ui.alert_info(
-                "Run 'hipercow driver configure dide-windows' or 'dide-linux' to configure the root",  # noqa: E501
+                "Run 'hipercow driver configure dide-windows' or 'dide-linux' to configure the root",
                 indent=4,
             )
             ui.alert_see_also(f"{_DOCS}/introduction/#initialisation", indent=4)

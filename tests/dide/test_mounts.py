@@ -43,7 +43,7 @@ def test_can_parse_mounts_on_windows(mocker):
 "Status","LocalPath","RemotePath","RequireIntegrity","RequirePrivacy","UseWriteThrough","PSComputerName"
 "OK","I:","\\\\wpia-hn\\hipercow","False","False","False",
 "OK","Y:","\\\\wpia-hn2.hpc.dide.ic.ac.uk\\Climate","False","False","False",
-"Disconnected","Z:","\\\\wpia-hn\\all-wpia-hn","False","False","False","""  # noqa: E501
+"Disconnected","Z:","\\\\wpia-hn\\all-wpia-hn","False","False","False","""
     response = mock.MagicMock(spec=CompletedProcess)
     response.stdout = data
     mocker.patch("subprocess.run", return_value=response)
