@@ -1,7 +1,7 @@
 import secrets
 
 from hipercow.driver import load_driver_optional
-from hipercow.environment import environment_check
+from hipercow.environment import environment_check, environment_engine
 from hipercow.resources import TaskResources
 from hipercow.root import OptionalRoot, Root, open_root
 from hipercow.task import TaskData, TaskStatus, set_task_status, task_data_write
@@ -81,6 +81,8 @@ def _task_create(
     task_id = _new_task_id()
     environment = environment_check(environment, root)
     dr = load_driver_optional(driver, root)
+    if dr:
+        dr.check_environment(environment_engine(environment, root))
     if resources:
         if not dr:
             msg = "Can't specify resources, as driver is not given"
