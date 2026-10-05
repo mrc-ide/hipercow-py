@@ -78,6 +78,7 @@ def provision(
     # and not the platform of the target.  We could know that if the
     # driver tells us it (which it could).
     env = environment_engine(name, root)
+    dr.check_environment(env)
     id = secrets.token_hex(8)
     with transient_working_directory(root.path):
         cmd = env.check_args(cmd)

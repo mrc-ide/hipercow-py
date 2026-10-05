@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from pydantic import BaseModel
 
 from hipercow import ui
+from hipercow.environment_engines import EnvironmentEngine
 from hipercow.resources import ClusterResources, TaskResources
 from hipercow.root import OptionalRoot, Root, open_root
 from hipercow.util import read_file_if_exists
@@ -46,6 +47,15 @@ class HipercowDriver(ABC):
     @abstractmethod
     def resources(self) -> ClusterResources:
         pass  # pragma: no cover
+
+    def check_environment(self, engine: EnvironmentEngine) -> None:
+        """Check that an environment can be used with this driver.
+
+        Called before provisioning an environment or submitting a
+        task that uses it; raise an error if the environment's engine
+        is not supported.  The default accepts every engine.
+        """
+        pass
 
     def task_log(
         self, task_id: str, *, outer: bool = False, root: Root

@@ -82,6 +82,14 @@ and now both the `cowsay` and `fortune` packages (and command line interfaces) a
 
 If you need software that is not a Python package (for example bioinformatics tools like `samtools` or `bcftools`, or compiled libraries like GDAL), you probably want a conda environment.  We create and manage these on the cluster using [micromamba](https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html), a small standalone implementation of `conda`, which is already available on the cluster.  You do not need conda installed on your own computer.
 
+Conda environments are only supported on the Linux cluster, so configure the `dide-linux` driver before using them:
+
+```command
+$ hipercow driver configure dide-linux
+```
+
+With the `dide-windows` driver, provisioning a conda environment or creating a task that uses one will fail with an error.  This is because micromamba cannot work with environments on network shares on Windows.  Many conda packages, including everything on bioconda, are only built for Linux and macOS in any case.
+
 Create a conda environment by passing `--engine conda` to `new`:
 
 ```command
@@ -117,16 +125,6 @@ $ hipercow environment provision pip install cowsay
 Packages come from [conda-forge](https://conda-forge.org/) by default.  Channels that you add with `-c` are *added* to conda-forge rather than replacing it, so `-c bioconda` works as [the bioconda documentation](https://bioconda.github.io/) expects.
 
 Your personal `.condarc` file is **not** used when provisioning.  This keeps environments on the cluster reproducible, and avoids accidentally mixing in Anaconda's `defaults` channel, which does not mix well with conda-forge.  If you really need to change the configuration, edit the `.mambarc` file in `hipercow/py/env/<name>/contents/mamba-<platform>/` after creating the environment.
-
-### Linux or Windows?
-
-Many conda packages, including everything on bioconda, are only built for Linux and macOS.  For example, `samtools` cannot be installed on Windows.  If you use conda for bioinformatics, use the Linux cluster:
-
-```command
-$ hipercow driver configure dide-linux
-```
-
-Environments are created separately for each platform, so if you change driver you will need to provision again.
 
 ### Running tasks in a conda environment
 

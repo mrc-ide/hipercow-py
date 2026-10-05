@@ -49,8 +49,10 @@ class Conda(EnvironmentEngine):
 
     The micromamba executable is found by looking first at the
     environment variable `HIPERCOW_MICROMAMBA`, and then for
-    `micromamba` on the `PATH`.  On the DIDE cluster the former is set
-    for you.
+    `micromamba` on the `PATH`.  On the DIDE Linux cluster the former
+    is set for you.  Conda environments are not supported with the
+    `dide-windows` driver, as micromamba cannot work with environments
+    on a network share on Windows.
 
     """
 

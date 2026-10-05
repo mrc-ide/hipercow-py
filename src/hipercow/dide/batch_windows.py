@@ -35,7 +35,6 @@ ECHO working directory: %CD%
 set HIPERCOW_NO_DRIVERS=1
 set HIPERCOW_CORES=%CCP_NUMCPUS%
 set REDIS_URL=10.0.2.254
-set HIPERCOW_MICROMAMBA=I:\bootstrap-py-windows\micromamba\micromamba.bat
 
 ECHO this is a single task
 
@@ -90,8 +89,6 @@ ${network_shares_create}
 ${hipercow_root_drive}
 cd ${hipercow_root_path}
 ECHO working directory: %CD%
-
-set HIPERCOW_MICROMAMBA=I:\bootstrap-py-windows\micromamba\micromamba.bat
 
 ECHO this is a provisioning task
 

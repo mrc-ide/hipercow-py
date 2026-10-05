@@ -1,12 +1,14 @@
 from unittest import mock
 
+import pytest
+
 from hipercow import root
 from hipercow.configure import configure
 from hipercow.dide.configuration import dide_configuration
 from hipercow.dide.mounts import Mount
 from hipercow.dide.web import Credentials, DideWebClient
 from hipercow.driver import list_drivers, load_driver, show_configuration
-from hipercow.environment import environment_new
+from hipercow.environment import environment_engine, environment_new
 from hipercow.provision import provision
 from hipercow.resources import TaskResources
 from hipercow.task import task_log
@@ -183,3 +185,44 @@ def test_get_outer_logs_from_web_client(tmp_path, mocker):
     assert res == mock_web_client.log.return_value
     assert mock_web_client.log.call_count == 1
     assert mock_web_client.log.mock_calls[0] == mock.call("1234")
+
+
+def test_windows_driver_rejects_conda_environments(tmp_path, mocker):
+    path = tmp_path / "a" / "b"
+    root.init(path)
+    r = root.open_root(path)
+    mock_mounts = [Mount(host="projects", remote="other", local=tmp_path)]
+    mock_provision = mock.MagicMock()
+    mock_web_client = mock.MagicMock(spec=DideWebClient)
+    mocker.patch("hipercow.dide.driver.detect_mounts", return_value=mock_mounts)
+    mocker.patch("hipercow.dide.driver._web_client", mock_web_client)
+    mocker.patch("hipercow.dide.driver._dide_provision_win", mock_provision)
+    configure(
+        "dide-windows", python_version=None, check_credentials=False, root=r
+    )
+    environment_new("myenv", "conda", r)
+    msg = "conda environments are only supported on 'dide-linux'"
+    with pytest.raises(Exception, match=msg):
+        provision("myenv", ["conda", "install", "samtools"], root=r)
+    assert mock_provision.call_count == 0
+    assert not (r.path_environment("myenv") / "provision").exists()
+
+    with transient_working_directory(path):
+        with pytest.raises(Exception, match=msg):
+            task_create_shell(["samtools"], environment="myenv", root=r)
+    assert mock_web_client.call_count == 0
+    assert not r.path_task(None).exists()
+
+
+def test_linux_driver_accepts_conda_environments(tmp_path, mocker):
+    path = tmp_path / "a" / "b"
+    root.init(path)
+    r = root.open_root(path)
+    mock_mounts = [Mount(host="projects", remote="other", local=tmp_path)]
+    mocker.patch("hipercow.dide.driver.detect_mounts", return_value=mock_mounts)
+    configure(
+        "dide-linux", python_version=None, check_credentials=False, root=r
+    )
+    environment_new("myenv", "conda", r)
+    dr = load_driver(None, r)
+    dr.check_environment(environment_engine("myenv", r))

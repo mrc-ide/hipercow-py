@@ -36,14 +36,11 @@ but replacing the version number (`0.0.3`) as required.  The `--force` is requir
 
 ## Installing micromamba
 
-Conda environments (`hipercow environment new --engine conda`) are created and run using [micromamba](https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html), a single self-contained executable.  We keep one copy for each platform on the `hipercow` share, next to the bootstrap libraries, and the batch files that `hipercow` writes for each job set the environment variable `HIPERCOW_MICROMAMBA` to point at it:
+Conda environments (`hipercow environment new --engine conda`) are created and run using [micromamba](https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html), a single self-contained executable.  Conda environments are only supported on the Linux cluster (`dide-linux`): on Windows, micromamba cannot work with an environment that lives on a network share, which on the cluster it always does.
 
-| Platform | Path on the node | Path on the share |
-| --- | --- | --- |
-| Linux | `/mnt/cluster/Hipercow/bootstrap-py-linux/micromamba/micromamba` | `\\wpia-hn\hipercow\bootstrap-py-linux\micromamba\micromamba` |
-| Windows | `I:\bootstrap-py-windows\micromamba\micromamba.bat` | `\\wpia-hn\hipercow\bootstrap-py-windows\micromamba\micromamba.bat` |
+We keep a copy of micromamba on the `hipercow` share, next to the bootstrap libraries, at `\\wpia-hn\hipercow\bootstrap-py-linux\micromamba\micromamba`.  The batch files that `hipercow` writes for each Linux job set the environment variable `HIPERCOW_MICROMAMBA` to point at it (`/mnt/cluster/Hipercow/bootstrap-py-linux/micromamba/micromamba` on the node).
 
-To install or update micromamba for the linux bootstrap, download the binaries from the [micromamba releases](https://github.com/mamba-org/micromamba-releases/releases) page, picking a specific version (these instructions were tested with `2.9.0-0`; you need at least version 2).  With the `hipercow` share mounted (here at `/path/to/hipercow`) run:
+To install or update micromamba, download the binaries from the [micromamba releases](https://github.com/mamba-org/micromamba-releases/releases) page, picking a specific version (these instructions were tested with `2.9.0-0`; you need at least version 2).  With the `hipercow` share mounted (here at `/path/to/hipercow`) run:
 
 ```command
 VERSION=2.9.0-0
@@ -53,26 +50,18 @@ curl -L -o /path/to/hipercow/bootstrap-py-linux/micromamba/micromamba $URL/micro
 chmod +x /path/to/hipercow/bootstrap-py-linux/micromamba/micromamba
 ```
 
-For Windows, mamba only works on a physical disk and silently fails when run from a network share such as a home directory. `micromamba.exe` is therefore on each cluster node in the path in `C:\Windows`, so use HPC Cluster Manager on the headnode to copy the binary to all nodes in one go. The bootstrap `micromamba.bat` expects `C:\Windows\micromamba.exe` to exist and simply wraps
-it sending all arguments.
-
-Check that both platforms can run it, from any directory that is set up for the cluster:
+Check that the cluster can run it, from any directory that is set up for the cluster:
 
 ```command
 hipercow driver configure dide-linux
 hipercow task create --wait -- /mnt/cluster/Hipercow/bootstrap-py-linux/micromamba/micromamba --version
-hipercow driver unconfigure dide-linux
-hipercow driver configure dide-windows
-hipercow task create --wait -- 'I:\bootstrap-py-windows\micromamba\micromamba' --version
 ```
 
-If the Linux job fails with "Permission denied", the executable bit was not preserved on the share; run the `chmod +x` above from a Linux node.
+If the job fails with "Permission denied", the executable bit was not preserved on the share; run the `chmod +x` above from a Linux node.
 
-Finally, check the whole workflow on the Linux cluster, including access to the conda-forge and bioconda channels from the nodes (these are hosted at `conda.anaconda.org`, a different site to PyPI):
+Finally, check the whole workflow, including access to the conda-forge and bioconda channels from the nodes (these are hosted at `conda.anaconda.org`, a different site to PyPI):
 
 ```command
-hipercow driver unconfigure dide-windows
-hipercow driver configure dide-linux
 hipercow environment new --name conda-test --engine conda
 hipercow environment provision --name conda-test conda install -c bioconda samtools
 hipercow task create --wait --environment conda-test -- samtools --version
