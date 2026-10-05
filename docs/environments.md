@@ -171,7 +171,7 @@ You can also install packages from PyPI into a conda environment with `pip`, onc
 
 ```command
 $ hipercow environment provision conda install python=3.12 pip
-$ hipercow environment provision pip install cowsay
+$ hipercow environment provision pip install tqdm
 ```
 
 ### Channels

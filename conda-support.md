@@ -169,7 +169,7 @@ pysam 0.24.1
 Python packages from PyPI go in with `pip`, once `python` is in the environment (as it is here):
 
 ```shell
-hipercow environment provision pip install cowsay
+hipercow environment provision pip install tqdm
 ```
 
 ### 6. A second environment (optional)
