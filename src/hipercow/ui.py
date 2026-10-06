@@ -8,9 +8,7 @@ console = Console()
 def h1(text: str) -> None:
     before = "─" * 3
     after = "─" * (max(console.width - len(before) - 3 - len(text), 0))
-    console.print(
-        f"[cyan]{before}[/cyan] [bold]{text}[/bold] [cyan]{after}[/cyan]"
-    )
+    console.print(f"[cyan]{before}[/cyan] [bold]{text}[/bold] [cyan]{after}[/cyan]")
 
 
 def text(text: str, **kwargs) -> None:
@@ -54,9 +52,7 @@ def alert_info(text: str, indent: int = 0) -> None:
     alert("i", text, "bold cyan", indent=indent)
 
 
-def alert_see_also(
-    text: str, prefix: str = "For more information, see ", indent: int = 0
-) -> None:
+def alert_see_also(text: str, prefix: str = "For more information, see ", indent: int = 0) -> None:
     alert(":books:", f"{prefix}{text}", indent=indent)
 
 
@@ -64,9 +60,7 @@ def alert_arrow(text: str, indent: int = 0) -> None:
     alert(":arrow_forward:", text, "bold yellow", indent=indent)
 
 
-def alert(
-    icon: str, text: str, style: str | None = None, indent: int = 0
-) -> None:
+def alert(icon: str, text: str, style: str | None = None, indent: int = 0) -> None:
     indent_str = " " * indent
     if style:
         console.print(f"{indent_str}[{style}]{icon}[/{style}] {text}")

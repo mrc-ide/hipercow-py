@@ -220,9 +220,7 @@ def test_can_find_micromamba_from_envvar(micromamba):
     assert _micromamba() == micromamba
 
 
-def test_error_if_micromamba_envvar_points_to_missing_file(
-    tmp_path, monkeypatch
-):
+def test_error_if_micromamba_envvar_points_to_missing_file(tmp_path, monkeypatch):
     path = str(tmp_path / "micromamba")
     monkeypatch.setenv("HIPERCOW_MICROMAMBA", path)
     with pytest.raises(Exception, match="but this does not exist"):

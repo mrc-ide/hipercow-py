@@ -35,9 +35,7 @@ class HipercowDriver(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
-    def submit(
-        self, task_id: str, resources: TaskResources | None, root: Root
-    ) -> None:
+    def submit(self, task_id: str, resources: TaskResources | None, root: Root) -> None:
         pass  # pragma: no cover
 
     @abstractmethod
@@ -57,17 +55,13 @@ class HipercowDriver(ABC):
         """
         pass
 
-    def task_log(
-        self, task_id: str, *, outer: bool = False, root: Root
-    ) -> str | None:
+    def task_log(self, task_id: str, *, outer: bool = False, root: Root) -> str | None:
         if outer:
             return None
         return read_file_if_exists(root.path_task_log(task_id))
 
 
-def show_configuration(
-    name: str | None = None, root: OptionalRoot = None
-) -> None:
+def show_configuration(name: str | None = None, root: OptionalRoot = None) -> None:
     """Show a driver configuration.
 
     Args:

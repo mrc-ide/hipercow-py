@@ -142,10 +142,7 @@ class Conda(EnvironmentEngine):
         if cmd[0] == "pip":
             return cmd
         if cmd[0] not in _CONDA_COMMANDS:
-            msg = (
-                "Expected first element of 'cmd' to be one of 'conda', "
-                "'mamba', 'micromamba' or 'pip'"
-            )
+            msg = "Expected first element of 'cmd' to be one of 'conda', 'mamba', 'micromamba' or 'pip'"
             raise Exception(msg)
         if len(cmd) == 1 or cmd[1] not in _CONDA_SUBCOMMANDS:
             valid = ", ".join(f"'{x}'" for x in sorted(_CONDA_SUBCOMMANDS))
@@ -154,10 +151,7 @@ class Conda(EnvironmentEngine):
         for arg in cmd[2:]:
             # split to catch the '--prefix=/path' form too
             if arg.split("=")[0] in _CONDA_FORBIDDEN_ARGS:
-                msg = (
-                    f"Don't use '{arg}' when provisioning; hipercow "
-                    "manages the location of the environment"
-                )
+                msg = f"Don't use '{arg}' when provisioning; hipercow manages the location of the environment"
                 raise Exception(msg)
         return cmd
 
@@ -238,10 +232,7 @@ def _micromamba() -> str:
     path = os.environ.get("HIPERCOW_MICROMAMBA")
     if path:
         if not Path(path).exists():
-            msg = (
-                f"'HIPERCOW_MICROMAMBA' is set to '{path}', but this "
-                "does not exist"
-            )
+            msg = f"'HIPERCOW_MICROMAMBA' is set to '{path}', but this does not exist"
             raise Exception(msg)
         return path
     path = shutil.which("micromamba")

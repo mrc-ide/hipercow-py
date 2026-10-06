@@ -89,10 +89,7 @@ def test_can_get_status_for_user():
 
     assert status.call_count == 1
     req = status.calls[0].request
-    assert (
-        req.body
-        == "user=&scheduler=d3BpYS1obg%3D%3D&state=Kg%3D%3D&jobs=LTE%3D"
-    )
+    assert req.body == "user=&scheduler=d3BpYS1obg%3D%3D&state=Kg%3D%3D&jobs=LTE%3D"
 
 
 @responses.activate
@@ -297,9 +294,7 @@ def test_no_error_if_access_is_ok(mocker):
 def test_create_basic_submit_data():
     path = r"\\server\share\script.bat"
     resources = TaskResources(queue="AllNodes")
-    data = web._client_body_submit(
-        path, "job", "windows", resources=resources, workdir=None
-    )
+    data = web._client_body_submit(path, "job", "windows", resources=resources, workdir=None)
     assert data == {
         "cluster": web.encode64("windows"),
         "template": web.encode64("AllNodes"),
@@ -320,12 +315,8 @@ def test_can_set_template():
     path = r"\\server\share\script.bat"
     r = TaskResources(queue="BuildQueue")
     r_cmp = TaskResources(queue="AllNodes")
-    data = web._client_body_submit(
-        path, "job", "windows", resources=r, workdir=None
-    )
-    data_cmp = web._client_body_submit(
-        path, "job", "windows", resources=r_cmp, workdir=None
-    )
+    data = web._client_body_submit(path, "job", "windows", resources=r, workdir=None)
+    data_cmp = web._client_body_submit(path, "job", "windows", resources=r_cmp, workdir=None)
     assert data == data_cmp | {"template": web.encode64("BuildQueue")}
 
 
@@ -333,9 +324,7 @@ def test_can_set_resources():
     def build(**kwargs):
         path = r"\\server\share\script.bat"
         resources = TaskResources(queue="AllNodes", **kwargs)
-        return web._client_body_submit(
-            path, "job", "windows", resources=resources, workdir=None
-        )
+        return web._client_body_submit(path, "job", "windows", resources=resources, workdir=None)
 
     default = build()
     assert build(cores=2) == default | {"rc": web.encode64("2")}
@@ -353,10 +342,6 @@ def test_can_set_workdir():
     path = r"\\server\share\script.bat"
     workdir = r"r\\server\share\some\path"
     resources = TaskResources(queue="AllNodes")
-    data = web._client_body_submit(
-        path, "job", "windows", resources=resources, workdir=workdir
-    )
-    data_cmp = web._client_body_submit(
-        path, "job", "windows", resources=resources, workdir=None
-    )
+    data = web._client_body_submit(path, "job", "windows", resources=resources, workdir=workdir)
+    data_cmp = web._client_body_submit(path, "job", "windows", resources=resources, workdir=None)
     assert data == data_cmp | {"wd": web.encode64(workdir)}

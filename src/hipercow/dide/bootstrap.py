@@ -125,10 +125,7 @@ def bootstrap(
         bootstrap_uv(mount, p, uv)
         target_p = _bootstrap_prepare(mount, bootstrap_id, p, target)
         tasks += [
-            _bootstrap_submit(
-                client, mount, bootstrap_id, name, v, p, target_p, args, uv
-            )
-            for v in python_versions
+            _bootstrap_submit(client, mount, bootstrap_id, name, v, p, target_p, args, uv) for v in python_versions
         ]
     # The scripts and logs in 'bootstrap-py-<platform>/in/<id>' are
     # left on the share, in case they are needed for debugging.
@@ -151,11 +148,7 @@ class BootstrapTask(Task):
         self.platform = platform
         self.status_waiting = {"created", "submitted"}
         self.status_running = {"running"}
-        self.path_log = (
-            mount.local
-            / _bootstrap_path(bootstrap_id, platform)
-            / f"{version}.log"
-        )
+        self.path_log = mount.local / _bootstrap_path(bootstrap_id, platform) / f"{version}.log"
 
     def log(self) -> None:
         pass
@@ -182,9 +175,7 @@ def _bootstrap_submit(
         msg = f"Unsupported platform '{platform}'"
         raise ValueError(msg)
 
-    script = _bootstrap_script(
-        platform, bootstrap_id, name, version, target, args, uv_version
-    )
+    script = _bootstrap_script(platform, bootstrap_id, name, version, target, args, uv_version)
     if platform == "windows":
         path = _bootstrap_path(bootstrap_id, platform) / f"{version}.bat"
         newline = None
@@ -204,9 +195,7 @@ def _bootstrap_submit(
     job_name = f"bootstrap/{bootstrap_id}/{platform}/{version}"
     resources = TaskResources(queue=queue)
     dide_id = client.submit(submit_path, job_name, resources)
-    return BootstrapTask(
-        mount, bootstrap_id, client, dide_id, version, platform
-    )
+    return BootstrapTask(mount, bootstrap_id, client, dide_id, version, platform)
 
 
 def _bootstrap_script(
@@ -241,9 +230,7 @@ def _bootstrap_script(
 # local file is given as the target, it is copied alongside the
 # installer and we return its file name, which the batch file turns
 # into a full path on the node.
-def _bootstrap_prepare(
-    mount: Mount, bootstrap_id: str, platform: str, target: str | None
-) -> str | None:
+def _bootstrap_prepare(mount: Mount, bootstrap_id: str, platform: str, target: str | None) -> str | None:
     dest = mount.local / _bootstrap_path(bootstrap_id, platform)
     dest.mkdir(parents=True, exist_ok=True)
     shutil.copy(bootstrap_install.__file__, dest / "bootstrap_install.py")
@@ -276,9 +263,7 @@ def _bootstrap_wait(tasks: list[BootstrapTask]) -> None:
             ui.alert_success(result_str)
         else:
             ui.alert_danger(result_str)
-        ui.logs(
-            "Logs from bootstrap:", read_file_if_exists(t.path_log), indent=4
-        )
+        ui.logs("Logs from bootstrap:", read_file_if_exists(t.path_log), indent=4)
         if res.status != "success":
             ui.logs(
                 f"Additional logs from cluster for task '{t.dide_id}':",

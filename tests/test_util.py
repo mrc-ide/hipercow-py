@@ -20,10 +20,7 @@ from hipercow.util import (
 def test_find_descend(tmp_path):
     (tmp_path / "a" / "b" / "c" / "d").mkdir(parents=True)
     (tmp_path / "a" / "b" / ".foo").mkdir(parents=True)
-    assert (
-        find_file_descend(".foo", tmp_path / "a/b/c/d")
-        == (tmp_path / "a" / "b").resolve()
-    )
+    assert find_file_descend(".foo", tmp_path / "a/b/c/d") == (tmp_path / "a" / "b").resolve()
     assert find_file_descend(".foo", tmp_path / "a") is None
     root = Path(tmp_path.anchor)
     assert find_file_descend(".", root) == Path(root).resolve()

@@ -179,9 +179,7 @@ def environment_exists(name: str, root: OptionalRoot = None) -> bool:
 
 # TODO: move this somewhere less user-facing
 def environment_engine(name: str, root: Root) -> EnvironmentEngine:
-    use_empty_environment = name == "empty" or (
-        name == "default" and not environment_exists(name, root)
-    )
+    use_empty_environment = name == "empty" or (name == "default" and not environment_exists(name, root))
     if use_empty_environment:
         cfg = EnvironmentConfiguration(engine="empty")
     else:

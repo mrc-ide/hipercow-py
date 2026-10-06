@@ -77,7 +77,7 @@ if %TaskStatus% == 0 (
 ) else (
   ECHO Task did not complete successfully
   EXIT /b 1
-)""")  # noqa: E501
+)""")
 
 
 PROVISION_BAT = Template(r"""@echo off

@@ -11,9 +11,7 @@ def test_can_create_batch_data(tmp_path):
     root.init(path)
     r = root.open_root(path)
     m = Mount(host="wpia-san04", remote="homes/bob", local=tmp_path)
-    config = dide_configuration(
-        r, mounts=[m], python_version=None, check_credentials=False
-    )
+    config = dide_configuration(r, mounts=[m], python_version=None, check_credentials=False)
 
     res = batch_linux._template_data_task_run_linux("abcde", config)
     assert res["task_id"] == "abcde"
@@ -26,12 +24,8 @@ def test_can_write_batch(tmp_path):
     path = tmp_path / "my/project"
     root.init(path)
     r = root.open_root(path)
-    m = Mount(
-        host="wpia-hn", remote="cluster-storage/project/bob", local=tmp_path
-    )
-    config = dide_configuration(
-        r, mounts=[m], python_version=None, check_credentials=False
-    )
+    m = Mount(host="wpia-hn", remote="cluster-storage/project/bob", local=tmp_path)
+    config = dide_configuration(r, mounts=[m], python_version=None, check_credentials=False)
 
     with transient_working_directory(path):
         tid = tc.task_create_shell(["echo", "hello world"], root=r)
@@ -56,9 +50,7 @@ def test_can_create_provision_data(tmp_path):
     root.init(path)
     r = root.open_root(path)
     m = Mount(host="wpia-hn2", remote="climate-storage", local=tmp_path)
-    config = dide_configuration(
-        r, mounts=[m], python_version=None, check_credentials=False
-    )
+    config = dide_configuration(r, mounts=[m], python_version=None, check_credentials=False)
 
     res = batch_linux._template_data_provision_linux("env", "abcde", config)
     assert res["environment_name"] == "env"
@@ -71,13 +63,9 @@ def test_can_write_provision_batch(tmp_path):
     root.init(path)
     r = root.open_root(path)
     m = Mount(host="wpia-hn2", remote="vimc-cc2-storage/bob", local=tmp_path)
-    config = dide_configuration(
-        r, mounts=[m], python_version=None, check_credentials=False
-    )
+    config = dide_configuration(r, mounts=[m], python_version=None, check_credentials=False)
 
-    run_sh = batch_linux.write_batch_provision_linux(
-        "myenv", "abcdef", config, r
-    )
+    run_sh = batch_linux.write_batch_provision_linux("myenv", "abcdef", config, r)
     path_rel = "hipercow/py/env/myenv/provision/abcdef/run.sh"
     assert run_sh == f"/mnt/vimc-cc2/bob/my/project/{path_rel}"
     assert (r.path / path_rel).exists()

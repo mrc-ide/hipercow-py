@@ -23,18 +23,12 @@ def test_can_provision_with_dide_win(tmp_path, mocker):
         f.write("cowsay\n")
 
     m = mounts.Mount(host="host", remote="hostmount", local=Path("/local"))
-    path_map = mounts.PathMap(
-        path=tmp_path, mount=m, remote="Q:", relative="path/to/dir"
-    )
+    path_map = mounts.PathMap(path=tmp_path, mount=m, remote="Q:", relative="path/to/dir")
 
     mock_client = mock.MagicMock(spec=DideWebClient)
     mocker.patch("hipercow.dide.batch_windows.taskwait")
-    mocker.patch(
-        "hipercow.dide.configuration.remap_path", return_value=path_map
-    )
-    config = dide_configuration(
-        r, mounts=[m], python_version=None, check_credentials=False
-    )
+    mocker.patch("hipercow.dide.configuration.remap_path", return_value=path_map)
+    config = dide_configuration(r, mounts=[m], python_version=None, check_credentials=False)
 
     _dide_provision_win("myenv", "abcdef", config, mock_client, r)
     resources = TaskResources(queue="BuildQueue")
@@ -47,9 +41,7 @@ def test_can_provision_with_dide_win(tmp_path, mocker):
     )
 
     assert hipercow.dide.batch_windows.taskwait.call_count == 1
-    assert hipercow.dide.batch_windows.taskwait.mock_calls[0] == mock.call(
-        mock.ANY
-    )
+    assert hipercow.dide.batch_windows.taskwait.mock_calls[0] == mock.call(mock.ANY)
     task = hipercow.dide.batch_windows.taskwait.mock_calls[0].args[0]
     assert isinstance(task, ProvisionWaitWrapper)
     assert task.client == mock_client
@@ -88,20 +80,14 @@ def test_throw_after_failed_provision_with_dide_win(tmp_path, mocker, capsys):
         f.write("cowsay\n")
 
     m = mounts.Mount(host="host", remote="hostmount", local=Path("/local"))
-    path_map = mounts.PathMap(
-        path=tmp_path, mount=m, remote="Q:", relative="path/to/dir"
-    )
+    path_map = mounts.PathMap(path=tmp_path, mount=m, remote="Q:", relative="path/to/dir")
 
     mock_client = mock.MagicMock(spec=DideWebClient)
     mock_client.log.return_value = "more logs"
     result = Result("failure", 100, 123)
     mocker.patch("hipercow.dide.batch_windows.taskwait", return_value=result)
-    mocker.patch(
-        "hipercow.dide.configuration.remap_path", return_value=path_map
-    )
-    config = dide_configuration(
-        r, mounts=[m], python_version=None, check_credentials=False
-    )
+    mocker.patch("hipercow.dide.configuration.remap_path", return_value=path_map)
+    config = dide_configuration(r, mounts=[m], python_version=None, check_credentials=False)
 
     capsys.readouterr()
     with pytest.raises(Exception, match="Provisioning failed"):
@@ -113,7 +99,5 @@ def test_throw_after_failed_provision_with_dide_win(tmp_path, mocker, capsys):
 
     assert mock_client.submit.call_count == 1
     assert mock_client.log.call_count == 1
-    assert mock_client.log.mock_calls[0] == mock.call(
-        mock_client.submit.return_value
-    )
+    assert mock_client.log.mock_calls[0] == mock.call(mock_client.submit.return_value)
     assert hipercow.dide.batch_windows.taskwait.call_count == 1

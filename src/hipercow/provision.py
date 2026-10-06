@@ -127,16 +127,13 @@ def provision_run(name: str, id: str, root: Root) -> None:
 
 def provision_history(name: str, root: Root) -> list[ProvisioningRecord]:
     results = [
-        _read_provisioning_record(name, x.name, root)
-        for x in (root.path_environment(name) / "provision").glob("*")
+        _read_provisioning_record(name, x.name, root) for x in (root.path_environment(name) / "provision").glob("*")
     ]
     results.sort(key=lambda x: x.data.time)
     return results
 
 
-def _read_provisioning_record(
-    name: str, id: str, root: Root
-) -> ProvisioningRecord:
+def _read_provisioning_record(name: str, id: str, root: Root) -> ProvisioningRecord:
     with root.path_provision_data(name, id).open() as f:
         data = ProvisioningData.model_validate_json(f.read())
     try:

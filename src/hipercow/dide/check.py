@@ -21,12 +21,7 @@ class DideCheckResult:
     root: Result
 
     def __bool__(self) -> bool:
-        return (
-            bool(self.credentials)
-            and bool(self.connection)
-            and bool(self.path)
-            and bool(self.root)
-        )
+        return bool(self.credentials) and bool(self.connection) and bool(self.path) and bool(self.root)
 
 
 def dide_check(path: Path | None = None) -> None:
@@ -79,9 +74,7 @@ def _dide_check_connection() -> Result:
         ui.alert_success("Connection to private network is working", indent=4)
         return Result.ok()
     except Exception as e:
-        ui.alert_danger(
-            "Failed to make connection to the private network", indent=4
-        )
+        ui.alert_danger("Failed to make connection to the private network", indent=4)
         ui.alert_info("Please check that you have ZScalar enabled", indent=4)
         ui.alert_see_also(f"{_DOCS}/dide/#networks", indent=4)
         return Result.err(e)
@@ -94,9 +87,7 @@ def _dide_check_path(path: Path) -> Result:
         map = remap_path(path, mounts)
         ui.alert_success("Path looks like it is on a network share", indent=4)
         ui.alert_info(f"Using '{path}'", indent=4)
-        ui.alert_info(
-            f"This is '{map.mount.remote}' on '{map.mount.host}'", indent=4
-        )
+        ui.alert_info(f"This is '{map.mount.remote}' on '{map.mount.host}'", indent=4)
         return Result.ok()
     except Exception as e:
         ui.alert_danger("Failed to map path to a network share", indent=4)
@@ -113,9 +104,7 @@ def _dide_check_root(path: Path) -> Result:
         return _dide_check_root_configured(root)
     except Exception as e:
         ui.alert_danger("hipercow is not initialised", indent=4)
-        ui.alert_info(
-            "You can run 'hipercow init' to initialise the root", indent=4
-        )
+        ui.alert_info("You can run 'hipercow init' to initialise the root", indent=4)
         ui.alert_see_also(f"{_DOCS}/introduction/#initialisation", indent=4)
         return Result.err(e)
 
@@ -123,28 +112,19 @@ def _dide_check_root(path: Path) -> Result:
 def _dide_check_root_configured(root: Root) -> Result:
     try:
         load_driver("dide-windows", root)
-        ui.alert_success(
-            "hipercow is configured to use 'dide-windows'", indent=4
-        )
+        ui.alert_success("hipercow is configured to use 'dide-windows'", indent=4)
         return Result.ok()
     except Exception as e_win:
         try:
             load_driver("dide-linux", root)
-            ui.alert_success(
-                "hipercow is configured to use 'dide-linux'", indent=4
-            )
+            ui.alert_success("hipercow is configured to use 'dide-linux'", indent=4)
             return Result.ok()
         except Exception as e_linux:
-            ui.alert_danger(
-                "hipercow is not configured with a valid driver.", indent=4
-            )
+            ui.alert_danger("hipercow is not configured with a valid driver.", indent=4)
             ui.alert_info(
-                "Run 'hipercow driver configure dide-windows' or 'dide-linux' to configure the root",  # noqa: E501
+                "Run 'hipercow driver configure dide-windows' or 'dide-linux' to configure the root",
                 indent=4,
             )
             ui.alert_see_also(f"{_DOCS}/introduction/#initialisation", indent=4)
-            combined_error = Exception(
-                f"- dide-windows exception: {e_win}\n"
-                f"- dide-linux exception: {e_linux}"
-            )
+            combined_error = Exception(f"- dide-windows exception: {e_win}\n- dide-linux exception: {e_linux}")
             return Result.err(combined_error)

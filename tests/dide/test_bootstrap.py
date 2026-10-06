@@ -60,9 +60,7 @@ def test_can_prepare_bootstrap_from_file(tmp_path):
 def test_can_submit_windows_bootstrap_task(tmp_path):
     client = mock.MagicMock(spec=DideWebClient)
     mount = Mount(host="wpia-hn.hpc", remote="hipercow", local=tmp_path)
-    t = _bootstrap_submit(
-        client, mount, "abcdef", "name", "3.11", "windows", None, "", "0.9.9"
-    )
+    t = _bootstrap_submit(client, mount, "abcdef", "name", "3.11", "windows", None, "", "0.9.9")
     resources = TaskResources(queue="AllNodes")
     assert t.client == client
     assert client.submit.call_count == 1
@@ -140,9 +138,7 @@ def test_cant_submit_bootstrap_to_unknown_platform(tmp_path):
     client = mock.MagicMock(spec=DideWebClient)
     mount = Mount(host="wpia-hn.hpc", remote="hipercow", local=tmp_path)
     with pytest.raises(ValueError, match="Unsupported platform 'macos'"):
-        _bootstrap_submit(
-            client, mount, "abcdef", "name", "3.11", "macos", None, "", "0.9.9"
-        )
+        _bootstrap_submit(client, mount, "abcdef", "name", "3.11", "macos", None, "", "0.9.9")
     assert client.submit.call_count == 0
 
 
@@ -216,18 +212,12 @@ def test_can_launch_bootstrap(mocker):
         mock.call(mount, "windows", "0.9.9"),
         mock.call(mount, "linux", "0.9.9"),
     ]
-    assert mock_prepare.mock_calls[0] == mock.call(
-        mount, mock.ANY, "windows", None
-    )
-    assert mock_prepare.mock_calls[1] == mock.call(
-        mount, mock.ANY, "linux", None
-    )
+    assert mock_prepare.mock_calls[0] == mock.call(mount, mock.ANY, "windows", None)
+    assert mock_prepare.mock_calls[1] == mock.call(mount, mock.ANY, "linux", None)
     assert mock_submit.mock_calls[0] == mock.call(
         client, mount, mock.ANY, mock.ANY, "3.10", "windows", None, "", "0.9.9"
     )
-    assert mock_submit.mock_calls[4] == mock.call(
-        client, mount, mock.ANY, mock.ANY, "3.10", "linux", None, "", "0.9.9"
-    )
+    assert mock_submit.mock_calls[4] == mock.call(client, mount, mock.ANY, mock.ANY, "3.10", "linux", None, "", "0.9.9")
     # All tasks share a single installation name
     names = {c.args[3] for c in mock_submit.mock_calls}
     assert len(names) == 1

@@ -73,8 +73,7 @@ else
   exit 1
 fi
 
-""")  # noqa: E501
-
+""")
 
 PROVISION_SH = Template(r"""#!/bin/bash
 # automatically generated
@@ -117,9 +116,7 @@ echo Quitting
 """)  # noqa: E501
 
 
-def write_batch_task_run_linux(
-    task_id: str, config: DideConfiguration, root: Root
-) -> str:
+def write_batch_task_run_linux(task_id: str, config: DideConfiguration, root: Root) -> str:
     data = _template_data_task_run_linux(task_id, config)
     path = root.path_task(task_id, relative=True)
     (root.path / path).mkdir(parents=True, exist_ok=True)
@@ -129,9 +126,7 @@ def write_batch_task_run_linux(
     return data["hipercow_root_path"] + _forward_slash(str(path))
 
 
-def write_batch_provision_linux(
-    name: str, provision_id: str, config: DideConfiguration, root: Root
-) -> str:
+def write_batch_provision_linux(name: str, provision_id: str, config: DideConfiguration, root: Root) -> str:
     data = _template_data_provision_linux(name, provision_id, config)
     path = root.path_provision(name, provision_id, relative=True)
     (root.path / path).mkdir(parents=True, exist_ok=True)
@@ -153,9 +148,7 @@ def _template_data_core_linux(config: DideConfiguration) -> dict[str, str]:
     }
 
 
-def _template_data_task_run_linux(
-    task_id, config: DideConfiguration
-) -> dict[str, str]:
+def _template_data_task_run_linux(task_id, config: DideConfiguration) -> dict[str, str]:
     return _template_data_core_linux(config) | {
         "task_id": task_id,
         "task_id_1": task_id[:2],
@@ -163,9 +156,7 @@ def _template_data_task_run_linux(
     }
 
 
-def _template_data_provision_linux(
-    name: str, id: str, config: DideConfiguration
-) -> dict[str, str]:
+def _template_data_provision_linux(name: str, id: str, config: DideConfiguration) -> dict[str, str]:
     return _template_data_core_linux(config) | {
         "environment_name": name,
         "provision_id": id,
@@ -296,9 +287,7 @@ def _linux_dide_path(path_map: PathMap) -> str:
     raise NoLinuxMountPointError(err) from None
 
 
-def _dide_provision_linux(
-    name: str, id: str, config: DideConfiguration, cl: DideWebClient, root: Root
-):
+def _dide_provision_linux(name: str, id: str, config: DideConfiguration, cl: DideWebClient, root: Root):
     unc = write_batch_provision_linux(name, id, config, root)
     resources = TaskResources(queue="LinuxNodes")
     dide_id = cl.submit(unc, f"{name}/{id}", resources=resources)
