@@ -16,6 +16,7 @@ hipercow
 infographic
 installable
 keychain
+lockfile
 micromamba
 onse
 programmatically
@@ -25,8 +26,10 @@ roadmap
 runtime
 smbcredentials
 stacktrace
+subcommand
 subcommands
 symlinks
 thanzi
 unconfigure
+uv
 wes

@@ -440,8 +440,12 @@ def cli_environment_delete(name: str):
 
 @environment.command("new")
 @click.option("--name", default="default", help="Name of the environment")
-@click.option("--engine", default="pip", help="Engine to use ('pip' or 'conda')")
-def cli_environment_new(name: str, engine: str):
+@click.option("--engine", default="uv", help="Engine to use ('uv', 'pip' or 'conda')")
+@click.option(
+    "--python",
+    help="Python version to use, e.g., '3.12' ('uv' engine only)",
+)
+def cli_environment_new(name: str, engine: str, python: str | None):
     """Create a new environment.
 
     Note that this does not actually install anything; you will need to use
@@ -454,7 +458,7 @@ def cli_environment_new(name: str, engine: str):
 
     """
     r = root.open_root()
-    environment_new(name, engine, r)
+    environment_new(name, engine, r, python=python)
 
 
 @environment.command("provision", context_settings={"ignore_unknown_options": True})
@@ -721,14 +725,9 @@ def cli_dide_check():
 @dide.command("bootstrap", hidden=True)
 @click.argument("target", required=False)
 @click.option(
-    "--force/--no-force",
-    default=False,
-    help="Force reinstallation; passed through to pip",
-)
-@click.option(
     "--verbose/--no-verbose",
     default=True,
-    help="Verbose output from pip; default is verbose output",
+    help="Verbose output from uv; default is verbose output",
 )
 @click.option(
     "--python-version",
@@ -743,16 +742,20 @@ def cli_dide_check():
 def cli_dide_bootstrap(
     target: str,
     *,
-    force: bool,
     verbose: bool,
     python_version: list[str],
     platform: list[str],
 ):
     r"""Update the bootstrap.
 
-    You will need `--force` much more often than expected at present,
-    because pip won't always reinstall if only the patch version has
-    changed.
+    Installs hipercow from PyPI, or from TARGET if given (e.g., a
+    wheel built with `hatch build`), into a fresh installation for
+    each python version and platform.  The cluster does not need
+    python installed: each installation contains its own copy,
+    downloaded by uv, which is itself downloaded onto the share the
+    first time it is needed.  Jobs switch to the new installation
+    once it has installed successfully; existing jobs keep running
+    against the previous one.
 
     This only works if you have write access to
     `\\wpia-hn\hipercow`.  See the administration guide on the
@@ -763,7 +766,6 @@ def cli_dide_bootstrap(
     """
     dide_bootstrap(
         target,
-        force=force,
         verbose=verbose,
         python_versions=list(python_version),
         platforms=list(platform),

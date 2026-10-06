@@ -11,6 +11,7 @@ from click.testing import CliRunner
 from hipercow import cli, root, task
 from hipercow.bundle import bundle_load
 from hipercow.driver import list_drivers
+from hipercow.environment import EnvironmentConfiguration
 from hipercow.resources import TaskResources
 from hipercow.task import TaskStatus, set_task_status, task_data_read
 from hipercow.task_create import task_create_shell
@@ -198,7 +199,7 @@ def test_can_list_environments(tmp_path):
         runner.invoke(cli.cli_driver_configure, ["example"])
         res = runner.invoke(cli.cli_environment_new, [])
         assert res.exit_code == 0
-        assert "Creating environment 'default' using 'pip'" in res.output
+        assert "Creating environment 'default' using 'uv'" in res.output
         res = runner.invoke(cli.cli_environment_list, [])
         assert res.exit_code == 0
         assert res.output == "default\nempty\n"
@@ -266,6 +267,27 @@ def test_can_provision_conda_environment(tmp_path, mocker):
         assert mock_provision.mock_calls[0] == mock.call("default", cmd, root=mock.ANY)
 
 
+def test_can_choose_python_version_for_environment(tmp_path):
+    runner = CliRunner()
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        runner.invoke(cli.init, ".")
+        res = runner.invoke(cli.cli_environment_new, ["--python", "3.13"])
+        assert res.exit_code == 0
+        assert "Creating environment 'default' using 'uv' with Python 3.13" in res.output
+        r = root.open_root()
+        with r.path_environment_config("default").open() as f:
+            cfg = EnvironmentConfiguration.model_validate_json(f.read())
+        assert cfg.engine == "uv"
+        assert cfg.python == "3.13"
+
+        res = runner.invoke(
+            cli.cli_environment_new,
+            ["--name", "other", "--engine", "pip", "--python", "3.13"],
+        )
+        assert res.exit_code == 1
+        assert "only supported by the 'uv' engine" in str(res.exception)
+
+
 def test_can_delete_environment(tmp_path):
     runner = CliRunner()
     with runner.isolated_filesystem(temp_dir=tmp_path):
@@ -273,7 +295,7 @@ def test_can_delete_environment(tmp_path):
         runner.invoke(cli.cli_driver_configure, ["example"])
         res = runner.invoke(cli.cli_environment_new, ["--name", "other"])
         assert res.exit_code == 0
-        assert "Creating environment 'other' using 'pip'" in res.output
+        assert "Creating environment 'other' using 'uv'" in res.output
 
         res = runner.invoke(cli.cli_environment_list, [])
         assert res.exit_code == 0
@@ -421,16 +443,17 @@ def test_can_call_cli_dide_bootstrap(mocker):
     assert res.exit_code == 0
     assert res.output.strip() == ""
     assert cli.dide_bootstrap.call_count == 1
-    assert cli.dide_bootstrap.mock_calls[0] == mock.call(
-        None, force=False, verbose=True, python_versions=[], platforms=[]
-    )
+    assert cli.dide_bootstrap.mock_calls[0] == mock.call(None, verbose=True, python_versions=[], platforms=[])
 
-    res = runner.invoke(cli.cli_dide_bootstrap, ["myfile", "--verbose", "--force"])
+    res = runner.invoke(
+        cli.cli_dide_bootstrap,
+        ["myfile", "--no-verbose", "--platform", "linux"],
+    )
     assert res.exit_code == 0
     assert res.output.strip() == ""
     assert cli.dide_bootstrap.call_count == 2
     assert cli.dide_bootstrap.mock_calls[1] == mock.call(
-        "myfile", force=True, verbose=True, python_versions=[], platforms=[]
+        "myfile", verbose=False, python_versions=[], platforms=["linux"]
     )
 
 
