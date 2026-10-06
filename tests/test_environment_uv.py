@@ -32,12 +32,8 @@ def test_uv_paths_depend_on_platform(tmp_path):
     assert env_linux.path_uv() == contents / "uv-linux"
     assert env_windows.path() == contents / "venv-windows"
     assert env_windows.path_uv() == contents / "uv-windows"
-    assert env_linux.path_python() == (
-        contents / "uv-linux" / "python" / "bin" / "python3"
-    )
-    assert env_windows.path_python() == (
-        contents / "uv-windows" / "python" / "python.exe"
-    )
+    assert env_linux.path_python() == (contents / "uv-linux" / "python" / "bin" / "python3")
+    assert env_windows.path_python() == (contents / "uv-windows" / "python" / "python.exe")
 
 
 def test_uv_envvars_keep_everything_in_environment(tmp_path):
@@ -99,9 +95,7 @@ def test_uv_environment_can_be_created(tmp_path, mocker):
     assert kwargs["env"]["UV_PYTHON"] == "3.12"
     # 2. we find out where it is
     exe = "python.exe" if env.platform.system == "windows" else "python"
-    assert mock_run.mock_calls[1].args[0][0] == str(
-        tmp / "venv" / env._venv_bin_dir() / exe
-    )
+    assert mock_run.mock_calls[1].args[0][0] == str(tmp / "venv" / env._venv_bin_dir() / exe)
     # 3. the environment is created from the copy
     assert mock_run.mock_calls[2] == mock.call(
         [uv, "venv", "--python", str(env.path_python().absolute()), venv_path],
@@ -151,14 +145,10 @@ def test_uv_provision_translates_commands(tmp_path, mocker):
 
     # 'uv sync' finds the environment through UV_PROJECT_ENVIRONMENT
     env.provision(["uv", "sync", "--locked"])
-    assert mock_run.mock_calls[1] == mock.call(
-        [uv, "sync", "--locked"], check=True, env=envvars
-    )
+    assert mock_run.mock_calls[1] == mock.call([uv, "sync", "--locked"], check=True, env=envvars)
 
     env.provision(["uv", "cache", "clean"])
-    assert mock_run.mock_calls[2] == mock.call(
-        [uv, "cache", "clean"], check=True, env=envvars
-    )
+    assert mock_run.mock_calls[2] == mock.call([uv, "cache", "clean"], check=True, env=envvars)
 
 
 def test_uv_runs_tasks_like_pip(tmp_path, mocker):

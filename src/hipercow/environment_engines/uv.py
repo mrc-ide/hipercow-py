@@ -128,9 +128,7 @@ class Uv(Pip):
             probe = Path(tmp) / "venv"
             cmd = [uv, "venv", str(probe)]
             subprocess_run(cmd, check=True, env=env, **kwargs)
-            exe = (
-                "python.exe" if self.platform.system == "windows" else "python"
-            )
+            exe = "python.exe" if self.platform.system == "windows" else "python"
             home = _base_prefix(probe / self._venv_bin_dir() / exe)
             path_python = self.path_uv() / "python"
             if path_python.exists():
@@ -184,9 +182,7 @@ class Uv(Pip):
         else:
             msg = "Expected first element of 'cmd' to be 'pip' or 'uv'"
             raise Exception(msg)
-        if args[0] == "pip" and (
-            len(args) == 1 or args[1] not in _UV_PIP_SUBCOMMANDS
-        ):
+        if args[0] == "pip" and (len(args) == 1 or args[1] not in _UV_PIP_SUBCOMMANDS):
             valid = ", ".join(f"'{x}'" for x in sorted(_UV_PIP_SUBCOMMANDS))
             msg = f"Expected 'pip' to be followed by one of {valid}"
             raise Exception(msg)
@@ -260,9 +256,7 @@ class Uv(Pip):
 
 def _base_prefix(python: Path) -> Path:
     code = "import sys; print(sys.base_prefix)"
-    res = subprocess.run(
-        [str(python), "-c", code], check=True, capture_output=True, text=True
-    )
+    res = subprocess.run([str(python), "-c", code], check=True, capture_output=True, text=True)
     return Path(res.stdout.strip())
 
 

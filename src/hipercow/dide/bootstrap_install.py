@@ -69,10 +69,7 @@ def main(argv: list[str] | None = None) -> int:
 
     found = "{}.{}".format(*sys.version_info[:2])
     if found != args.python_version:
-        print(
-            f"Expected python {args.python_version} but found {found} "
-            f"at '{sys.executable}'"
-        )
+        print(f"Expected python {args.python_version} but found {found} at '{sys.executable}'")
         return 1
 
     if not RE_NAME.match(args.name):
@@ -131,9 +128,7 @@ def install(dest: Path, target: str, uv: str, *, verbose: bool) -> str:
     _run([str(scripts_path(dest, "hipercow")), "--help"], capture=True)
     code = "from importlib.metadata import version; print(version('hipercow'))"
     version = _run([python, "-c", code], capture=True).strip()
-    packages = _run(
-        [*uv_pip, "freeze", "--python", python], capture=True
-    ).splitlines()
+    packages = _run([*uv_pip, "freeze", "--python", python], capture=True).splitlines()
     print("Installed packages:")
     for p in packages:
         print(f"    {p}")
@@ -211,11 +206,7 @@ def set_current(base: Path, name: str, *, attempts: int = 10) -> None:
 def prune(installs: Path, current: str, now: datetime.datetime) -> None:
     for p in installs.glob("*.trash"):
         shutil.rmtree(p, ignore_errors=True)
-    found = sorted(
-        p.name
-        for p in installs.iterdir()
-        if p.is_dir() and RE_NAME.match(p.name)
-    )
+    found = sorted(p.name for p in installs.iterdir() if p.is_dir() and RE_NAME.match(p.name))
     complete = [x for x in found if (installs / x / METADATA).exists()]
     for x in found:
         if x == current:
@@ -250,9 +241,7 @@ def _created(name: str) -> datetime.datetime:
     if not m:
         msg = f"Invalid installation name '{name}'"
         raise ValueError(msg)
-    return datetime.datetime.strptime(m.group(1), "%Y%m%d%H%M%S").replace(
-        tzinfo=datetime.timezone.utc
-    )
+    return datetime.datetime.strptime(m.group(1), "%Y%m%d%H%M%S").replace(tzinfo=datetime.timezone.utc)
 
 
 def _now() -> datetime.datetime:

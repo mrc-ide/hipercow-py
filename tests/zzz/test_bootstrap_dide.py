@@ -83,9 +83,7 @@ def _bootstrap(tmp_path: Path, platform: str) -> tuple[Path, str]:
     else:
         path_script = path_in / f"{PYTHON_VERSION}.bat"
         cmd = ["cmd", "/c", str(path_script)]
-    with path_script.open(
-        "w", newline="\n" if platform == "linux" else None
-    ) as f:
+    with path_script.open("w", newline="\n" if platform == "linux" else None) as f:
         f.write(script)
     env = _node_env(tmp_path) if platform == "linux" else None
     res = subprocess.run(cmd, env=env, check=False)
@@ -169,9 +167,7 @@ def test_bootstrap_and_jobs_on_linux_without_python(tmp_path):
 
         # Provisioning creates the environment using uv from the
         # installation, which downloads python 3.12 for it.
-        data = ProvisioningData(
-            name="default", id="abc123", cmd=["pip", "install", "cowsay"]
-        )
+        data = ProvisioningData(name="default", id="abc123", cmd=["pip", "install", "cowsay"])
         path = r.path_provision_data("default", data.id)
         path.parent.mkdir(parents=True)
         path.write_text(data.model_dump_json())
@@ -194,8 +190,7 @@ def test_bootstrap_and_jobs_on_linux_without_python(tmp_path):
             tid = task_create_shell(cmd, root=r)
             res = _run_job(
                 TASK_RUN_SH,
-                core
-                | {"task_id": tid, "task_id_1": tid[:2], "task_id_2": tid[2:]},
+                core | {"task_id": tid, "task_id_1": tid[:2], "task_id_2": tid[2:]},
                 r.path_task(tid) / "task_run.sh",
                 env,
             )

@@ -62,30 +62,20 @@ def test_refuses_to_overwrite_existing_install(tmp_path, capsys):
 def test_successful_install_becomes_current(tmp_path, mocker, capsys):
     name = "20260101000000-abcd"
     base = tmp_path / f"python-{PYTHON_VERSION}"
-    mock_install = mocker.patch(
-        "hipercow.dide.bootstrap_install.install", return_value="1.2.3"
-    )
+    mock_install = mocker.patch("hipercow.dide.bootstrap_install.install", return_value="1.2.3")
     mock_prune = mocker.patch("hipercow.dide.bootstrap_install.prune")
 
     assert bi.main(_args(tmp_path, name, "--verbose")) == 0
 
-    assert mock_install.mock_calls == [
-        mock.call(
-            base / "installs" / name, "hipercow", "/path/to/uv", verbose=True
-        )
-    ]
+    assert mock_install.mock_calls == [mock.call(base / "installs" / name, "hipercow", "/path/to/uv", verbose=True)]
     assert bi.read_current(base) == name
-    assert mock_prune.mock_calls == [
-        mock.call(base / "installs", name, mock.ANY)
-    ]
+    assert mock_prune.mock_calls == [mock.call(base / "installs", name, mock.ANY)]
     out = capsys.readouterr().out
     assert "There is no current installation" in out
     assert f"hipercow 1.2.3 is now current for python {PYTHON_VERSION}" in out
 
 
-def test_failed_install_is_removed_and_current_unchanged(
-    tmp_path, mocker, capsys
-):
+def test_failed_install_is_removed_and_current_unchanged(tmp_path, mocker, capsys):
     base = tmp_path / f"python-{PYTHON_VERSION}"
     base.mkdir()
     bi.set_current(base, "20250101000000-abcd")
@@ -112,9 +102,7 @@ def test_failed_install_is_removed_and_current_unchanged(
 
 def test_failure_to_prune_does_not_fail_install(tmp_path, mocker, capsys):
     mocker.patch("hipercow.dide.bootstrap_install.install", return_value="1")
-    mocker.patch(
-        "hipercow.dide.bootstrap_install.prune", side_effect=OSError("oops")
-    )
+    mocker.patch("hipercow.dide.bootstrap_install.prune", side_effect=OSError("oops"))
     assert bi.main(_args(tmp_path, "20260101000000-abcd")) == 0
     assert "Failed to remove old installations: oops" in capsys.readouterr().out
 
@@ -137,9 +125,7 @@ def test_install_creates_checks_and_records_environment(tmp_path, mocker):
         "hipercow.dide.bootstrap_install.copy_python",
         side_effect=lambda home, dest: dest.mkdir(parents=True),  # noqa: ARG005
     )
-    mock_run = mocker.patch(
-        "hipercow.dide.bootstrap_install._run", side_effect=run
-    )
+    mock_run = mocker.patch("hipercow.dide.bootstrap_install._run", side_effect=run)
     assert bi.install(dest, "hipercow", uv, verbose=False) == "1.2.3"
 
     assert mock_copy.mock_calls == [mock.call(Path(sys.base_prefix), dest)]
@@ -162,9 +148,7 @@ def test_install_passes_verbose_to_uv(tmp_path, mocker):
     dest = tmp_path / "installs" / "20260101000000-abcd"
     dest.mkdir(parents=True)
     mocker.patch("hipercow.dide.bootstrap_install.copy_python")
-    mock_run = mocker.patch(
-        "hipercow.dide.bootstrap_install._run", return_value=""
-    )
+    mock_run = mocker.patch("hipercow.dide.bootstrap_install._run", return_value="")
     bi.install(dest, "/path/to/hipercow.whl", "uv", verbose=True)
     assert mock_run.mock_calls[0].args[0][-2:] == [
         "--verbose",
@@ -187,9 +171,7 @@ def test_install_stops_at_first_failure(tmp_path, mocker):
 
 def test_copy_python_copies_and_unmarks_installation(tmp_path):
     home = tmp_path / "cpython-3.12.0"
-    stdlib = Path(
-        sysconfig.get_path("stdlib", vars={"installed_base": str(home)})
-    )
+    stdlib = Path(sysconfig.get_path("stdlib", vars={"installed_base": str(home)}))
     stdlib.mkdir(parents=True)
     file_create(stdlib / "os.py")
     file_create(stdlib / "EXTERNALLY-MANAGED")
@@ -314,9 +296,7 @@ def test_remove_skips_installs_in_use(tmp_path, mocker, capsys):
 
 
 def test_created_parses_name():
-    assert bi._created("20260102030405-abcd") == datetime.datetime(
-        2026, 1, 2, 3, 4, 5, tzinfo=UTC
-    )
+    assert bi._created("20260102030405-abcd") == datetime.datetime(2026, 1, 2, 3, 4, 5, tzinfo=UTC)
     with pytest.raises(ValueError, match="Invalid installation name"):
         bi._created("foo")
 
@@ -324,9 +304,7 @@ def test_created_parses_name():
 def test_installation_paths(mocker):
     path = Path("env")
     mocker.patch.object(sys, "platform", "win32")
-    assert (
-        bi.scripts_path(path, "hipercow") == path / "Scripts" / "hipercow.exe"
-    )
+    assert bi.scripts_path(path, "hipercow") == path / "Scripts" / "hipercow.exe"
     assert bi.python_path(path) == path / "python.exe"
     mocker.patch.object(sys, "platform", "linux")
     assert bi.scripts_path(path, "hipercow") == path / "bin" / "hipercow"

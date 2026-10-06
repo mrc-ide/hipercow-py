@@ -75,9 +75,7 @@ def test_run_in_uv_environment_from_lockfile(tmp_path):
             )
         # Lock with the running Python so that this does not download
         # one into your home directory.
-        subprocess.run(
-            [find_uv_bin(), "lock", "--python", sys.executable], check=True
-        )
+        subprocess.run([find_uv_bin(), "lock", "--python", sys.executable], check=True)
         with open(".python-version", "w") as f:
             f.write("3.12\n")
 

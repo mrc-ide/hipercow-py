@@ -72,10 +72,7 @@ def environment_new(
     if python is None:
         ui.alert_info(f"Creating environment '{name}' using '{engine}'")
     else:
-        ui.alert_info(
-            f"Creating environment '{name}' using '{engine}' "
-            f"with Python {python}"
-        )
+        ui.alert_info(f"Creating environment '{name}' using '{engine}' with Python {python}")
     cfg = EnvironmentConfiguration(engine=engine, python=python)
 
     path = root.path_environment_config(name)

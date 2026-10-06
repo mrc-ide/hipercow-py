@@ -49,9 +49,7 @@ def test_uv_version_is_installed_version():
 
 def test_uv_paths_depend_on_platform():
     assert bootstrap_uv.bootstrap_uv_path("linux", "0.9.9") == "uv/0.9.9/uv"
-    assert (
-        bootstrap_uv.bootstrap_uv_path("windows", "0.9.9") == "uv/0.9.9/uv.exe"
-    )
+    assert bootstrap_uv.bootstrap_uv_path("windows", "0.9.9") == "uv/0.9.9/uv.exe"
 
 
 @responses.activate

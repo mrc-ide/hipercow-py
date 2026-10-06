@@ -89,9 +89,7 @@ def test_cant_delete_unknown_environment(tmp_path):
 def test_require_known_environment_engine(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
-    with pytest.raises(
-        Exception, match="Only the 'uv', 'pip', 'conda' and 'empty'"
-    ):
+    with pytest.raises(Exception, match="Only the 'uv', 'pip', 'conda' and 'empty'"):
         environment_new("default", "renv", r)
 
 
