@@ -83,9 +83,7 @@ def test_error_if_no_credentials_found(mocker, capsys):
 def test_error_if_credentials_fail(mocker, capsys):
     creds = Credentials("bob", "password")
     mocker.patch("hipercow.dide.check.fetch_credentials", return_value=creds)
-    mocker.patch(
-        "hipercow.dide.check.check_access", side_effect=Exception("no access")
-    )
+    mocker.patch("hipercow.dide.check.check_access", side_effect=Exception("no access"))
     res = _dide_check_credentials()
     assert not res
 
@@ -125,9 +123,7 @@ def test_successful_path_mapping(mocker, capsys):
 
 def test_failed_path_mapping(mocker, capsys):
     mocker.patch("hipercow.dide.check.detect_mounts")
-    mocker.patch(
-        "hipercow.dide.check.remap_path", side_effect=Exception("wrong path")
-    )
+    mocker.patch("hipercow.dide.check.remap_path", side_effect=Exception("wrong path"))
     assert not _dide_check_path(Path.cwd())
 
     out = capsys.readouterr().out
@@ -136,9 +132,7 @@ def test_failed_path_mapping(mocker, capsys):
 
 def test_successful_initialisation(tmp_path, capsys, mocker):
     mock_check_configured = mocker.Mock()
-    mocker.patch(
-        "hipercow.dide.check._dide_check_root_configured", mock_check_configured
-    )
+    mocker.patch("hipercow.dide.check._dide_check_root_configured", mock_check_configured)
     root.init(tmp_path)
     capsys.readouterr()
     assert _dide_check_root(tmp_path)

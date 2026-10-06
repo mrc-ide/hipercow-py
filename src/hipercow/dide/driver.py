@@ -14,6 +14,7 @@ from hipercow.dide.configuration import DideConfiguration, dide_configuration
 from hipercow.dide.mounts import detect_mounts
 from hipercow.dide.web import DideWebClient
 from hipercow.driver import HipercowDriver, hipercow_driver
+from hipercow.environment_engines import Conda, EnvironmentEngine
 from hipercow.resources import ClusterResources, Queues, TaskResources
 from hipercow.root import Root
 
@@ -49,9 +50,7 @@ class DideWindowsDriver(HipercowDriver):
         )
         ui.li(f"[bold]Python version[/bold]: {self.config.python_version}")
 
-    def submit(
-        self, task_id: str, resources: TaskResources | None, root: Root
-    ) -> None:
+    def submit(self, task_id: str, resources: TaskResources | None, root: Root) -> None:
         cl = _web_client()
         unc = write_batch_task_run_win(task_id, self.config, root)
         if not resources:
@@ -62,6 +61,15 @@ class DideWindowsDriver(HipercowDriver):
 
     def provision(self, name: str, id: str, root: Root) -> None:
         _dide_provision_win(name, id, self.config, _web_client(), root)
+
+    def check_environment(self, engine: EnvironmentEngine) -> None:
+        if isinstance(engine, Conda):
+            msg = (
+                f"Can't use conda environment '{engine.name}' with "
+                "'dide-windows'; conda environments are only supported "
+                "on 'dide-linux'"
+            )
+            raise Exception(msg)
 
     def resources(self) -> ClusterResources:
         # We should get this from the cluster itself but with caching
@@ -76,9 +84,7 @@ class DideWindowsDriver(HipercowDriver):
         )
         return ClusterResources(queues=queues, max_cores=32, max_memory=512)
 
-    def task_log(
-        self, task_id: str, *, outer: bool = False, root: Root
-    ) -> str | None:
+    def task_log(self, task_id: str, *, outer: bool = False, root: Root) -> str | None:
         if outer:
             with self._path_dide_id(task_id, root).open() as f:
                 dide_id = f.read().strip()
@@ -121,9 +127,7 @@ class LinuxWindowsDriver(HipercowDriver):
         )
         ui.li(f"[bold]Python version[/bold]: {self.config.python_version}")
 
-    def submit(
-        self, task_id: str, resources: TaskResources | None, root: Root
-    ) -> None:
+    def submit(self, task_id: str, resources: TaskResources | None, root: Root) -> None:
         cl = _web_client()
         linux_path = write_batch_task_run_linux(task_id, self.config, root)
         if not resources:
@@ -148,9 +152,7 @@ class LinuxWindowsDriver(HipercowDriver):
         )
         return ClusterResources(queues=queues, max_cores=32, max_memory=512)
 
-    def task_log(
-        self, task_id: str, *, outer: bool = False, root: Root
-    ) -> str | None:
+    def task_log(self, task_id: str, *, outer: bool = False, root: Root) -> str | None:
         if outer:
             with self._path_dide_id(task_id, root).open() as f:
                 dide_id = f.read().strip()

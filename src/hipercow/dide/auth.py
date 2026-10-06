@@ -47,10 +47,7 @@ If this fails we can always try again.""")
     ui.blank_line()
     ui.alert_success("Username and password are correct")
     ui.alert_info("I am saving these into your keyring now")
-    ui.alert_info(
-        "You can delete your credentials with "
-        "'hipercow dide authenticate clear'"
-    )
+    ui.alert_info("You can delete your credentials with 'hipercow dide authenticate clear'")
 
     keyring.set_password("hipercow/dide/username", "", username)
     keyring.set_password("hipercow/dide/password", username, password)
@@ -64,10 +61,7 @@ def fetch_credentials() -> Credentials:
         # we're within click then we should point people at at
         # 'hipercow dide authenticate' but if we are being used
         # programmatically that might not be best?
-        msg = (
-            "Did not find your DIDE credentials, "
-            "please run 'hipercow dide authenticate'"
-        )
+        msg = "Did not find your DIDE credentials, please run 'hipercow dide authenticate'"
         raise Exception(msg)
     return Credentials(username, password)
 
@@ -96,9 +90,7 @@ def _delete_password_silently(key: str, username: str):
 
 
 def _default_username() -> str:
-    return (
-        keyring.get_password("hipercow/dide/username", "") or getpass.getuser()
-    )
+    return keyring.get_password("hipercow/dide/username", "") or getpass.getuser()
 
 
 # For mocking to work
@@ -133,10 +125,7 @@ def _check_username(value) -> str:
 
 
 def _get_password() -> str:
-    msg = (
-        "Please enter your DIDE password. "
-        "You will not see characters while you type."
-    )
+    msg = "Please enter your DIDE password. You will not see characters while you type."
     ui.text(msg)
     value = getpass.getpass()
     if not value:

@@ -41,6 +41,13 @@ jobs:
       - name: Lint
         run: |
           hatch run lint:all
+      # Installs only the micromamba binary (no environment), which is
+      # used by the conda environment integration tests.
+      - name: Set up micromamba
+        uses: mamba-org/setup-micromamba@v3
+        with:
+          micromamba-version: '2.9.0-0'
+          init-shell: none
       - name: Test
         env:
           VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}

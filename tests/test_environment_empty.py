@@ -49,9 +49,7 @@ def test_can_run_command_in_empty_env(tmp_path, mocker):
     env = Empty(r, "empty")
     env.run(["some", "command"])
     assert mock_run.call_count == 1
-    assert mock_run.mock_calls[0] == mock.call(
-        ["some", "command"], env=os.environ, check=False
-    )
+    assert mock_run.mock_calls[0] == mock.call(["some", "command"], env=os.environ, check=False)
 
 
 def test_can_validate_empty_args(tmp_path):

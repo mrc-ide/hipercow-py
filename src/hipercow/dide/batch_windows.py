@@ -70,7 +70,7 @@ if %TaskStatus% == 0 (
 ) else (
   ECHO Task did not complete successfully
   EXIT /b 1
-)""")  # noqa: E501
+)""")
 
 
 PROVISION_BAT = Template(r"""@echo off
@@ -127,9 +127,7 @@ if %ERRORLEVEL% neq 0 (
 # needf the relative path and the absolute path to the task directory
 # and we build the unc base path twice (once with slash normalisation,
 # the other without).
-def write_batch_task_run_win(
-    task_id: str, config: DideConfiguration, root: Root
-) -> str:
+def write_batch_task_run_win(task_id: str, config: DideConfiguration, root: Root) -> str:
     data = _template_data_task_run_win(task_id, config)
     path_map = config.path_map
     path = root.path_task(task_id, relative=True) / "task_run.bat"
@@ -139,9 +137,7 @@ def write_batch_task_run_win(
     return unc
 
 
-def write_batch_provision_win(
-    name: str, provision_id: str, config: DideConfiguration, root: Root
-) -> str:
+def write_batch_provision_win(name: str, provision_id: str, config: DideConfiguration, root: Root) -> str:
     path_map = config.path_map
     data = _template_data_provision_win(name, provision_id, config)
     path = root.path_provision(name, provision_id, relative=True) / "run.bat"
@@ -176,9 +172,7 @@ def _template_data_core_win(config: DideConfiguration) -> dict[str, str]:
     }
 
 
-def _template_data_task_run_win(
-    task_id, config: DideConfiguration
-) -> dict[str, str]:
+def _template_data_task_run_win(task_id, config: DideConfiguration) -> dict[str, str]:
     return _template_data_core_win(config) | {
         "task_id": task_id,
         "task_id_1": task_id[:2],
@@ -186,9 +180,7 @@ def _template_data_task_run_win(
     }
 
 
-def _template_data_provision_win(
-    name: str, id: str, config: DideConfiguration
-) -> dict[str, str]:
+def _template_data_provision_win(name: str, id: str, config: DideConfiguration) -> dict[str, str]:
     return _template_data_core_win(config) | {
         "environment_name": name,
         "provision_id": id,
@@ -208,9 +200,7 @@ def _clean_host(host: str) -> str:
     return re.sub("\\.hpc$", "-app", host)
 
 
-def _dide_provision_win(
-    name: str, id: str, config: DideConfiguration, cl: DideWebClient, root: Root
-):
+def _dide_provision_win(name: str, id: str, config: DideConfiguration, cl: DideWebClient, root: Root):
     unc = write_batch_provision_win(name, id, config, root)
     resources = TaskResources(queue="BuildQueue")
     dide_id = cl.submit(unc, f"{name}/{id}", resources=resources)

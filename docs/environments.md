@@ -2,10 +2,10 @@
 
 We use the term "environment" to refer to the context in which a task runs, containing the programs and code it is able to find.  It is not quite the same as [the R `hipercow` concept](https://mrc-ide.github.io/hipercow/articles/environments.html) which considers the execution environment of an R expression, because of the way that Python code is typically run.
 
-There are two key sorts of environments we (aim to) support:
+There are two key sorts of environments we support:
 
 * [Python virtual environments](https://docs.python.org/3/tutorial/venv.html), generally installed via `pip`.  This is effectively a directory of installed python packages, plus some machinery to set the `PATH` environment variable (where the operating system looks for programs) and the python search path (`sys.path`: where Python looks for packages).
-* [Conda environments](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html), generally installed by `conda`, `miniconda`, `mamba` or `micromamba`.  This is a framework popular in bioinformatics and can be used to create a self-consistent installation of a great many tools, isolated from system libraries.
+* [Conda environments](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html), generally installed by `conda`, `miniconda`, `mamba` or `micromamba`.  This is a framework popular in bioinformatics and can be used to create a self-consistent installation of a great many tools, isolated from system libraries.  We use `micromamba` to manage these on the cluster (see [below](#provisioning-an-environment-with-conda)).
 
 Environments are necessary because we aim to keep globally installed software on the cluster to a minimum.  This reduces the number of times you have to wait for someone else to install or update some piece of software that you depend on for your work.
 
@@ -78,6 +78,74 @@ $ hipercow environment provision pip install cowsay fortune-python
 
 and now both the `cowsay` and `fortune` packages (and command line interfaces) are available.
 
+## Provisioning an environment with `conda`
+
+If you need software that is not a Python package (for example bioinformatics tools like `samtools` or `bcftools`, or compiled libraries like GDAL), you probably want a conda environment.  We create and manage these on the cluster using [micromamba](https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html), a small standalone implementation of `conda`, which is already available on the cluster.  You do not need conda installed on your own computer.
+
+Conda environments are only supported on the Linux cluster, so configure the `dide-linux` driver before using them:
+
+```command
+$ hipercow driver configure dide-linux
+```
+
+With the `dide-windows` driver, provisioning a conda environment or creating a task that uses one will fail with an error.  This is because micromamba cannot work with environments on network shares on Windows.  Many conda packages, including everything on bioconda, are only built for Linux and macOS in any case.
+
+Create a conda environment by passing `--engine conda` to `new`:
+
+```command
+$ hipercow environment new --engine conda
+Creating environment 'default' using 'conda'
+```
+
+**The automatic installation** uses an `environment.yml` (or `environment.yaml`) file if your project has one, running `conda install --file environment.yml` on the cluster:
+
+```command
+$ hipercow environment provision
+```
+
+Any `name:` or `prefix:` in the file is ignored, as `hipercow` decides where the environment lives.  A `pip:` section within the file is supported.
+
+**The manual installation** takes a `conda` command.  You can write `conda`, `mamba` or `micromamba` (these all mean the same thing here), followed by one of `install`, `update`, `remove` (or `uninstall`) or `clean`:
+
+```command
+$ hipercow environment provision conda install -c bioconda samtools
+```
+
+We add `--yes` and the location of the environment for you.  Do not pass `--name`/`-n` or `--prefix`/`-p`.
+
+You can also install packages from PyPI into a conda environment with `pip`, once you have installed `python` and `pip` into it:
+
+```command
+$ hipercow environment provision conda install python=3.12 pip
+$ hipercow environment provision pip install cowsay
+```
+
+### Channels
+
+Packages come from [conda-forge](https://conda-forge.org/) by default.  Channels that you add with `-c` are *added* to conda-forge rather than replacing it, so `-c bioconda` works as [the bioconda documentation](https://bioconda.github.io/) expects.
+
+Your personal `.condarc` file is **not** used when provisioning.  This keeps environments on the cluster reproducible, and avoids accidentally mixing in Anaconda's `defaults` channel, which does not mix well with conda-forge.  If you really need to change the configuration, edit the `.mambarc` file in `hipercow/py/env/<name>/contents/mamba-<platform>/` after creating the environment.
+
+### Running tasks in a conda environment
+
+Tasks run with the environment activated, so everything you installed can be found:
+
+```command
+$ hipercow task create -- samtools view -c data/reads.bam
+```
+
+The `--` stops `hipercow` from trying to interpret any options (like `-c`) that are meant for your program.
+
+### Disk space
+
+Conda environments can be large, and they live on the network share alongside your project.  `micromamba` also keeps a cache of downloaded packages, which may be as big as the environment itself.  Once your environment is working, you can delete this cache with:
+
+```command
+$ hipercow environment provision conda clean --all
+```
+
+This does not affect the installed environment, though later installations will need to download packages again.
+
 ## Multiple environments
 
 You can have multiple environments configured within a single `hipercow` root.  This is intended to let you work with a workflow where you need incompatible sets of conda tools, or some jobs with conda and others with pip.  It is not expected that this will be wildly useful to many people and you can generally ignore the existence of this and consider `hipercow environment new` to be simply the way that you plan on configuring a single environment.
@@ -104,4 +172,4 @@ Possible use cases of this functionality are:
 
 * trying out a different version of a package side-by-side with a previous installation to compare results
 * installing an update without disrupting tasks that are already queued up
-* mixing `pip`- and `conda`-based environments in one project (once the latter are supported)
+* mixing `pip`- and `conda`-based environments in one project

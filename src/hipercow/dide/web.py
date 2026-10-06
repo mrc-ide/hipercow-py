@@ -63,9 +63,7 @@ class DideHTTPClient(requests.Session):
         base_url = "https://mrcdata.dide.ic.ac.uk/hpc/"
         url = urljoin(base_url, path)
         headers = {"Accept": "text/plain"} if method == "POST" else {}
-        response = super().request(
-            method, url, *args, headers=headers, **kwargs
-        )
+        response = super().request(method, url, *args, headers=headers, **kwargs)
         # To debug requests, you can do:
         # from requests_toolbelt.utils import dump
         # print(dump.dump_all(response).decode("utf-8"))
@@ -126,9 +124,7 @@ class DideWebClient:
         *,
         workdir: str | None = None,
     ) -> str:
-        data = _client_body_submit(
-            path, name, self._cluster, resources=resources, workdir=workdir
-        )
+        data = _client_body_submit(path, name, self._cluster, resources=resources, workdir=workdir)
         response = self._client.request("POST", "submit_1.php", data=data)
         return _client_parse_submit(response.text)
 
@@ -143,9 +139,7 @@ class DideWebClient:
         return _client_parse_log(response.text)
 
     def status_user(self, state="*") -> list[DideTaskStatus]:
-        data = _client_body_status_user(
-            state, self._client.username(), self._cluster
-        )
+        data = _client_body_status_user(state, self._client.username(), self._cluster)
         response = self._client.request("POST", "_listalljobs.php", data=data)
         return _client_parse_status_user(response.text)
 
@@ -155,9 +149,7 @@ class DideWebClient:
         return _client_parse_status_job(response.text)
 
     def software(self):
-        response = self._client.request(
-            "GET", "api/v1/cluster_software", public=True
-        )
+        response = self._client.request("GET", "api/v1/cluster_software", public=True)
         return _client_parse_software(response.json())
 
 
@@ -329,9 +321,7 @@ def _parse_dide_status(status: str) -> TaskStatus:
 
 
 def _parse_dide_timestamp(time: str) -> datetime.datetime:
-    return datetime.datetime.strptime(time, "%Y%m%d%H%M%S").astimezone(
-        datetime.timezone.utc
-    )
+    return datetime.datetime.strptime(time, "%Y%m%d%H%M%S").astimezone(datetime.timezone.utc)
 
 
 def _call_quote_batch_path(path: str, prefix: str) -> str:

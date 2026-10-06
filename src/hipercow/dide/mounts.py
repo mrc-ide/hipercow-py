@@ -81,9 +81,7 @@ def detect_mounts() -> list[Mount]:
 
 def _detect_mounts_unix(system: str) -> list[Mount]:
     fstype = _unix_smb_mount_type(system)
-    res = subprocess.run(
-        ["mount", "-t", fstype], capture_output=True, check=True
-    )
+    res = subprocess.run(["mount", "-t", fstype], capture_output=True, check=True)
     txt = res.stdout.decode("utf-8")
     return [_parse_unix_mount_entry(x) for x in txt.splitlines()]
 
@@ -101,9 +99,7 @@ def _parse_unix_mount_entry(x: str) -> Mount:
 
     _, host, remote, local, _ = m.groups()
 
-    return Mount(
-        host=_clean_dide_hostname(host), remote=remote, local=Path(local)
-    )
+    return Mount(host=_clean_dide_hostname(host), remote=remote, local=Path(local))
 
 
 def _detect_mounts_windows() -> list[Mount]:
@@ -122,11 +118,7 @@ def _parse_windows_mount_output(txt: str) -> list[Mount]:
     i_status = header.index("Status")
     i_local = header.index("LocalPath")
     i_remote = header.index("RemotePath")
-    return [
-        _parse_windows_mount_entry(x[i_local], x[i_remote])
-        for x in d[1:]
-        if x[i_status] == "OK"
-    ]
+    return [_parse_windows_mount_entry(x[i_local], x[i_remote]) for x in d[1:] if x[i_status] == "OK"]
 
 
 def _parse_windows_mount_entry(local: str, remote: str) -> Mount:
@@ -135,9 +127,7 @@ def _parse_windows_mount_entry(local: str, remote: str) -> Mount:
         msg = "Failed to parse windows entry"
         raise Exception(msg)
     host, remote = m.groups()
-    return Mount(
-        host=_clean_dide_hostname(host), remote=remote, local=Path(local + "/")
-    )
+    return Mount(host=_clean_dide_hostname(host), remote=remote, local=Path(local + "/"))
 
 
 def _clean_dide_hostname(host: str) -> str:

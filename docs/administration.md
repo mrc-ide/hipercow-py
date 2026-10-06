@@ -33,3 +33,37 @@ hipercow dide bootstrap --force dist/hipercow-0.0.3-py3-none-any.whl
 ```
 
 but replacing the version number (`0.0.3`) as required.  The `--force` is required if you are installing the same version number for a second time.
+
+## Installing micromamba
+
+Conda environments (`hipercow environment new --engine conda`) are created and run using [micromamba](https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html), a single self-contained executable.  Conda environments are only supported on the Linux cluster (`dide-linux`): on Windows, micromamba cannot work with an environment that lives on a network share, which on the cluster it always does.
+
+We keep a copy of micromamba on the `hipercow` share, next to the bootstrap libraries, at `\\wpia-hn\hipercow\bootstrap-py-linux\micromamba\micromamba`.  The batch files that `hipercow` writes for each Linux job set the environment variable `HIPERCOW_MICROMAMBA` to point at it (`/mnt/cluster/Hipercow/bootstrap-py-linux/micromamba/micromamba` on the node).
+
+To install or update micromamba, download the binaries from the [micromamba releases](https://github.com/mamba-org/micromamba-releases/releases) page, picking a specific version (these instructions were tested with `2.9.0-0`; you need at least version 2).  With the `hipercow` share mounted (here at `/path/to/hipercow`) run:
+
+```command
+VERSION=2.9.0-0
+URL=https://github.com/mamba-org/micromamba-releases/releases/download/$VERSION
+mkdir -p /path/to/hipercow/bootstrap-py-linux/micromamba
+curl -L -o /path/to/hipercow/bootstrap-py-linux/micromamba/micromamba $URL/micromamba-linux-64
+chmod +x /path/to/hipercow/bootstrap-py-linux/micromamba/micromamba
+```
+
+Check that the cluster can run it, from any directory that is set up for the cluster:
+
+```command
+hipercow driver configure dide-linux
+hipercow task create --wait -- /mnt/cluster/Hipercow/bootstrap-py-linux/micromamba/micromamba --version
+```
+
+If the job fails with "Permission denied", the executable bit was not preserved on the share; run the `chmod +x` above from a Linux node.
+
+Finally, check the whole workflow, including access to the conda-forge and bioconda channels from the nodes (these are hosted at `conda.anaconda.org`, a different site to PyPI):
+
+```command
+hipercow environment new --name conda-test --engine conda
+hipercow environment provision --name conda-test conda install -c bioconda samtools
+hipercow task create --wait --environment conda-test -- samtools --version
+hipercow environment delete --name conda-test
+```

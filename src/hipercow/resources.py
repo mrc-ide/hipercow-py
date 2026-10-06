@@ -111,9 +111,7 @@ class Queues:
             msg = f"{description} '{name}' is not in valid queue list"
             raise ValueError(msg)
 
-    def validate_queue(
-        self, name: str | None, description: str = "Queue"
-    ) -> str:
+    def validate_queue(self, name: str | None, description: str = "Queue") -> str:
         if name is None:
             return self.default
         if name.startswith("."):

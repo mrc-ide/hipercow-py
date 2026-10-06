@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 from hipercow import ui
 from hipercow.environment_engines import (
+    Conda,
     Empty,
     EnvironmentEngine,
     Pip,
@@ -32,7 +33,7 @@ def environment_new(name: str, engine: str, root: OptionalRoot = None) -> None:
             `empty` as that is a special empty environment.
 
         engine: The environment engine to use.  The options here are
-            `pip` and `empty`.  Soon we will support `conda` too.
+            `pip`, `conda` and `empty`.
 
         root: The root, or if not given search from the current directory.
 
@@ -48,8 +49,8 @@ def environment_new(name: str, engine: str, root: OptionalRoot = None) -> None:
         msg = f"Environment '{name}' already exists"
         raise Exception(msg)
 
-    if engine not in {"pip", "empty"}:
-        msg = "Only the 'pip' and 'empty' engines are supported"
+    if engine not in {"pip", "conda", "empty"}:
+        msg = "Only the 'pip', 'conda' and 'empty' engines are supported"
         raise Exception(msg)
 
     ui.alert_info(f"Creating environment '{name}' using '{engine}'")
@@ -156,9 +157,7 @@ def environment_exists(name: str, root: OptionalRoot = None) -> bool:
 
 # TODO: move this somewhere less user-facing
 def environment_engine(name: str, root: Root) -> EnvironmentEngine:
-    use_empty_environment = name == "empty" or (
-        name == "default" and not environment_exists(name, root)
-    )
+    use_empty_environment = name == "empty" or (name == "default" and not environment_exists(name, root))
     if use_empty_environment:
         cfg = EnvironmentConfiguration(engine="empty")
     else:
@@ -166,6 +165,8 @@ def environment_engine(name: str, root: Root) -> EnvironmentEngine:
             cfg = EnvironmentConfiguration.model_validate_json(f.read())
     if cfg.engine == "pip":
         return Pip(root, name)
+    elif cfg.engine == "conda":
+        return Conda(root, name)
     elif cfg.engine == "empty":
         return Empty(root, name)
     raise NotImplementedError()  # pragma no cover

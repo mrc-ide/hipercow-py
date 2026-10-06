@@ -71,14 +71,8 @@ def _read_task_times(task_id: str, root: Root):
         with path_times.open() as f:
             return TaskTimes.model_validate_json(f.read())
     created = root.path_task_data(task_id).stat().st_ctime
-    path_task_running = (
-        root.path_task(task_id) / STATUS_FILE_MAP[TaskStatus.RUNNING]
-    )
-    started = (
-        path_task_running.stat().st_ctime
-        if path_task_running.exists()
-        else None
-    )
+    path_task_running = root.path_task(task_id) / STATUS_FILE_MAP[TaskStatus.RUNNING]
+    started = path_task_running.stat().st_ctime if path_task_running.exists() else None
     return TaskTimes(created=created, started=started, finished=None)
 
 
@@ -121,9 +115,7 @@ def task_status(task_id: str, root: OptionalRoot = None) -> TaskStatus:
     return TaskStatus.CREATED
 
 
-def task_log(
-    task_id: str, *, outer: bool = False, root: OptionalRoot = None
-) -> str | None:
+def task_log(task_id: str, *, outer: bool = False, root: OptionalRoot = None) -> str | None:
     """Read the task log.
 
     Not all tasks have logs; tasks that have not yet started (status
@@ -160,9 +152,7 @@ def task_log(
     return dr.task_log(task_id, outer=outer, root=root)
 
 
-def set_task_status(
-    task_id: str, status: TaskStatus, value: str | None, root: Root
-):
+def set_task_status(task_id: str, status: TaskStatus, value: str | None, root: Root):
     path = root.path_task(task_id) / STATUS_FILE_MAP[status]
     if value is None:
         file_create(path)
@@ -212,9 +202,7 @@ def task_info(task_id: str, root: OptionalRoot = None) -> TaskInfo:
     return TaskInfo(status=status, data=data, times=times)
 
 
-def task_list(
-    *, root: OptionalRoot = None, with_status: TaskStatus | None = None
-) -> list[str]:
+def task_list(*, root: OptionalRoot = None, with_status: TaskStatus | None = None) -> list[str]:
     """List known tasks.
 
     Warning:
@@ -303,9 +291,7 @@ def task_wait(
     return status == TaskStatus.SUCCESS
 
 
-def task_recent_rebuild(
-    *, root: OptionalRoot = None, limit: int | None = None
-) -> None:
+def task_recent_rebuild(*, root: OptionalRoot = None, limit: int | None = None) -> None:
     """Rebuild the list of recent tasks.
 
     Args:
@@ -336,9 +322,7 @@ def task_recent_rebuild(
             f.write(f"{i}\n")
 
 
-def task_recent(
-    *, root: OptionalRoot = None, limit: int | None = None
-) -> list[str]:
+def task_recent(*, root: OptionalRoot = None, limit: int | None = None) -> list[str]:
     """Return a list of recently created tasks.
 
     Args:

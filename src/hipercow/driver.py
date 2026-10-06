@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from pydantic import BaseModel
 
 from hipercow import ui
+from hipercow.environment_engines import EnvironmentEngine
 from hipercow.resources import ClusterResources, TaskResources
 from hipercow.root import OptionalRoot, Root, open_root
 from hipercow.util import read_file_if_exists
@@ -34,9 +35,7 @@ class HipercowDriver(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
-    def submit(
-        self, task_id: str, resources: TaskResources | None, root: Root
-    ) -> None:
+    def submit(self, task_id: str, resources: TaskResources | None, root: Root) -> None:
         pass  # pragma: no cover
 
     @abstractmethod
@@ -47,17 +46,22 @@ class HipercowDriver(ABC):
     def resources(self) -> ClusterResources:
         pass  # pragma: no cover
 
-    def task_log(
-        self, task_id: str, *, outer: bool = False, root: Root
-    ) -> str | None:
+    def check_environment(self, engine: EnvironmentEngine) -> None:
+        """Check that an environment can be used with this driver.
+
+        Called before provisioning an environment or submitting a
+        task that uses it; raise an error if the environment's engine
+        is not supported.  The default accepts every engine.
+        """
+        pass
+
+    def task_log(self, task_id: str, *, outer: bool = False, root: Root) -> str | None:
         if outer:
             return None
         return read_file_if_exists(root.path_task_log(task_id))
 
 
-def show_configuration(
-    name: str | None = None, root: OptionalRoot = None
-) -> None:
+def show_configuration(name: str | None = None, root: OptionalRoot = None) -> None:
     """Show a driver configuration.
 
     Args:

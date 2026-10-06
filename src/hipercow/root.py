@@ -34,15 +34,10 @@ def init(path: str | Path) -> None:
 
     root = find_file_descend("hipercow", path)
     if root is not None:
-        ui.alert_warning(
-            f"hipercow already initialised at '{root}' (found from '{path}')"
-        )
+        ui.alert_warning(f"hipercow already initialised at '{root}' (found from '{path}')")
 
     if dest.exists() and not dest.is_dir():
-        msg = (
-            "Unexpected file 'hipercow/py' (rather than directory)"
-            f"found at {path}"
-        )
+        msg = f"Unexpected file 'hipercow/py' (rather than directory) found at {path}"
         raise Exception(msg)
 
     dest.mkdir(parents=True)
@@ -88,38 +83,26 @@ class Root:
         hostname = platform.node()
         return self.path_base() / "config" / hostname / (name or ".")
 
-    def path_environment(
-        self, name: str | None, *, relative: bool = False
-    ) -> Path:
+    def path_environment(self, name: str | None, *, relative: bool = False) -> Path:
         base = self.path_base(relative=relative)
         return base / "env" / (name or ".")
 
     def path_environment_config(self, name: str) -> Path:
         return self.path_environment(name) / "config"
 
-    def path_environment_contents(
-        self, name: str, *, relative: bool = False
-    ) -> Path:
+    def path_environment_contents(self, name: str, *, relative: bool = False) -> Path:
         return self.path_environment(name, relative=relative) / "contents"
 
-    def path_provision(
-        self, name: str, id: str, *, relative: bool = False
-    ) -> Path:
+    def path_provision(self, name: str, id: str, *, relative: bool = False) -> Path:
         return self.path_environment(name, relative=relative) / "provision" / id
 
-    def path_provision_data(
-        self, name: str, id: str, *, relative: bool = False
-    ) -> Path:
+    def path_provision_data(self, name: str, id: str, *, relative: bool = False) -> Path:
         return self.path_provision(name, id, relative=relative) / "data"
 
-    def path_provision_result(
-        self, name: str, id: str, *, relative: bool = False
-    ) -> Path:
+    def path_provision_result(self, name: str, id: str, *, relative: bool = False) -> Path:
         return self.path_provision(name, id, relative=relative) / "result"
 
-    def path_provision_log(
-        self, name: str, id: str, *, relative: bool = False
-    ) -> Path:
+    def path_provision_log(self, name: str, id: str, *, relative: bool = False) -> Path:
         return self.path_provision(name, id, relative=relative) / "log"
 
     def path_repl_history(self) -> Path:

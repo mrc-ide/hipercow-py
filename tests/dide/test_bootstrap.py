@@ -70,9 +70,7 @@ def test_can_submit_bootstrap_task(tmp_path):
     target = "hipercow"
     args = ""
     platform = "windows"
-    t = _bootstrap_submit(
-        client, mount, bootstrap_id, version, platform, target, args
-    )
+    t = _bootstrap_submit(client, mount, bootstrap_id, version, platform, target, args)
     resources = TaskResources(queue="AllNodes")
     assert t.client == client
     assert client.submit.call_count == 1
@@ -159,9 +157,7 @@ def test_can_launch_bootstrap(mocker):
     client = mock_client.return_value
     mount = mock_mount.return_value
 
-    assert mock_submit.mock_calls[0] == mock.call(
-        client, mount, mock.ANY, "3.10", "windows", "hipercow", ""
-    )
+    assert mock_submit.mock_calls[0] == mock.call(client, mount, mock.ANY, "3.10", "windows", "hipercow", "")
     assert mock_wait.call_count == 1
     assert len(mock_wait.mock_calls[0].args[0]) == 8
     assert mock_wait.mock_calls[0].args[0][3] == mock_submit.return_value

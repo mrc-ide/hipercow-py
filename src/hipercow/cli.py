@@ -227,9 +227,7 @@ def cli_task_status(task_id: str):
 
 
 @task.command("log")
-@click.option(
-    "--outer", is_flag=True, help="Print the outer logs, from the HPC system"
-)
+@click.option("--outer", is_flag=True, help="Print the outer logs, from the HPC system")
 @click.argument("task_id")
 def cli_task_log(task_id: str, *, outer=False):
     """Get a task log.
@@ -269,9 +267,7 @@ def cli_task_last():
 
 
 @task.command("recent")
-@click.option(
-    "--limit", type=int, default=10, help="The maximum number of tasks to list"
-)
+@click.option("--limit", type=int, default=10, help="The maximum number of tasks to list")
 @click.option("--rebuild", is_flag=True, help="Rebuild the recent task list")
 def cli_task_recent(limit: int, *, rebuild: bool):
     """List recent tasks."""
@@ -283,9 +279,7 @@ def cli_task_recent(limit: int, *, rebuild: bool):
 
 @task.command("create")
 @click.argument("cmd", nargs=-1)
-@click.option(
-    "--environment", type=str, help="The environment in which to run the task"
-)
+@click.option("--environment", type=str, help="The environment in which to run the task")
 @click.option("--queue", help="Queue to submit the task to")
 @click.option("--wait", is_flag=True, help="Wait for the task to complete")
 @click.option(
@@ -305,8 +299,7 @@ def cli_task_recent(limit: int, *, rebuild: bool):
 )
 @click.option(
     "--max_runtime",
-    help="Specify a maximum runtime "
-    "(seconds), after which your task will abort.",
+    help="Specify a maximum runtime (seconds), after which your task will abort.",
 )
 @click.option(
     "--memory_per_node",
@@ -368,9 +361,7 @@ def cli_task_create(
         memory_per_task=memory_per_task,
     )
 
-    task_id = task_create_shell(
-        _clean_cmd(cmd), environment=environment, resources=resources
-    )
+    task_id = task_create_shell(_clean_cmd(cmd), environment=environment, resources=resources)
     click.echo(task_id)
     if wait:
         task_wait(task_id)
@@ -391,9 +382,7 @@ def cli_task_eval(task_id: str, *, capture: bool):
     type=float,
     help="Time to wait between checking on task (in seconds)",
 )
-@click.option(
-    "--timeout", type=float, help="Time to wait for task before failing"
-)
+@click.option("--timeout", type=float, help="Time to wait for task before failing")
 @click.option(
     "--show-log/--no-show-log",
     default=True,
@@ -451,7 +440,7 @@ def cli_environment_delete(name: str):
 
 @environment.command("new")
 @click.option("--name", default="default", help="Name of the environment")
-@click.option("--engine", default="pip", help="Engine to use")
+@click.option("--engine", default="pip", help="Engine to use ('pip' or 'conda')")
 def cli_environment_new(name: str, engine: str):
     """Create a new environment.
 
@@ -468,12 +457,8 @@ def cli_environment_new(name: str, engine: str):
     environment_new(name, engine, r)
 
 
-@environment.command(
-    "provision", context_settings={"ignore_unknown_options": True}
-)
-@click.option(
-    "--name", default="default", help="Name of the environment to provision"
-)
+@environment.command("provision", context_settings={"ignore_unknown_options": True})
+@click.option("--name", default="default", help="Name of the environment to provision")
 @click.argument("cmd", nargs=-1, type=click.UNPROCESSED)
 def cli_environment_provision(name: str, cmd: tuple[str]):
     """Provision an environment.
@@ -583,9 +568,7 @@ def create():
 @create.command("bulk")
 @click.argument("cmd", nargs=-1)
 @click.option("--data", multiple=True, help="Data to use in the template")
-@click.option(
-    "--environment", type=str, help="The environment in which to run the task"
-)
+@click.option("--environment", type=str, help="The environment in which to run the task")
 @click.option("--queue", help="The queue to submit the task to")
 @click.option("--name", help="An optional name for the bundle")
 @click.option(

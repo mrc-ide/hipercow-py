@@ -21,9 +21,7 @@ class TaskResult:
     data: object
 
 
-def task_eval(
-    task_id: str, *, capture: bool, root: OptionalRoot = None
-) -> None:
+def task_eval(task_id: str, *, capture: bool, root: OptionalRoot = None) -> None:
     root = open_root(root)
     data = task_data_read(task_id, root)
     task_eval_data(data, capture=capture, root=root)
@@ -62,8 +60,6 @@ def task_eval_shell(data: TaskData, *, capture: bool, root: Root) -> TaskResult:
     env = data.envvars
     path = root.path / data.path
     filename = root.path_task_log(data.task_id) if capture else None
-    res = environment_engine(data.environment, root).run(
-        cmd, check=False, env=env, cwd=path, filename=filename
-    )
+    res = environment_engine(data.environment, root).run(cmd, check=False, env=env, cwd=path, filename=filename)
     success = res.returncode == 0
     return TaskResult(data.task_id, success, None)
