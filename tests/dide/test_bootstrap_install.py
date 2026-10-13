@@ -296,7 +296,7 @@ def test_remove_skips_installs_in_use(tmp_path, mocker, capsys):
 
 
 def test_created_parses_name():
-    assert bi._created("20260102030405-abcd") == datetime.datetime(2026, 1, 2, 3, 4, 5, tzinfo=UTC)
+    assert bi._created("20260102030405-abcd") == dt.datetime(2026, 1, 2, 3, 4, 5, tzinfo=UTC)
     with pytest.raises(ValueError, match="Invalid installation name"):
         bi._created("foo")
 
