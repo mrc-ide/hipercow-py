@@ -18,77 +18,77 @@ from hipercow.task_create import task_create_shell
 from hipercow.util import transient_envvars
 from tests.helpers import AnyInstanceOf
 
-
-def test_can_init_repository(tmp_path):
+def test_can_init_repository(tmp_path, monkeypatch):
     runner = CliRunner()
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        res = runner.invoke(cli.init, ".")
-        assert res.exit_code == 0
-        r = root.open_root()
-        assert r.path == Path.cwd()
-        res.stdout.startswith("Initialised hipercow at .")
+    monkeypatch.chdir(tmp_path)
+    res = runner.invoke(cli.init, ".")
+    assert res.exit_code == 0
+    r = root.open_root()
+    assert r.path == Path.cwd()
+    res.stdout.startswith("Initialised hipercow at .")
 
 
-def test_can_create_task(tmp_path):
+def test_can_create_task(tmp_path, monkeypatch):
     runner = CliRunner()
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        root.init(".")
-        r = root.open_root()
-        res = runner.invoke(cli.cli_driver_configure, ["example"])
-        assert res.exit_code == 0
-        res = runner.invoke(cli.cli_task_create, ["echo", "hello", "world"])
-        assert res.exit_code == 0
-        task_id = res.stdout.strip().splitlines()[-1].strip()
-        assert task.task_status(task_id, r) == task.TaskStatus.SUBMITTED
+    monkeypatch.chdir(tmp_path)
+    root.init(".")
+    r = root.open_root()
+    res = runner.invoke(cli.cli_driver_configure, ["example"])
+    assert res.exit_code == 0
+    res = runner.invoke(cli.cli_task_create, ["echo", "hello", "world"])
+    assert res.exit_code == 0
+    task_id = res.stdout.strip().splitlines()[-1].strip()
+    assert task.task_status(task_id, r) == task.TaskStatus.SUBMITTED
 
 
-def test_can_run_task(tmp_path):
+def test_can_run_task(tmp_path, monkeypatch):
     runner = CliRunner()
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        root.init(".")
-        r = root.open_root()
-        res = runner.invoke(cli.cli_driver_configure, ["example"])
-        assert res.exit_code == 0
-        res = runner.invoke(cli.cli_task_create, ["echo", "hello", "world"])
-        assert res.exit_code == 0
-        task_id = res.stdout.strip().splitlines()[-1].strip()
+    monkeypatch.chdir(tmp_path)
+    root.init(".")
+    r = root.open_root()
+    res = runner.invoke(cli.cli_driver_configure, ["example"])
+    assert res.exit_code == 0
+    res = runner.invoke(cli.cli_task_create, ["echo", "hello", "world"])
+    assert res.exit_code == 0
+    task_id = res.stdout.strip().splitlines()[-1].strip()
 
-        res = runner.invoke(cli.cli_task_status, task_id)
-        assert res.exit_code == 0
-        assert res.output.strip() == "submitted"
+    res = runner.invoke(cli.cli_task_status, task_id)
+    assert res.exit_code == 0
+    assert res.output.strip() == "submitted"
 
-        res = runner.invoke(cli.cli_task_eval, task_id)
-        assert res.exit_code == 0
-        # It would be good to test that we get the expected output
-        # here, and empirically we do.  However we don't seem to get
-        # it captured in the runner output, though it is swallowed by
-        # something.  I've checked with the capsys fixture and that
-        # does not seem to have it either.
-        assert task.task_status(task_id, r) == task.TaskStatus.SUCCESS
+    res = runner.invoke(cli.cli_task_eval, task_id)
+    assert res.exit_code == 0
+    # It would be good to test that we get the expected output
+    # here, and empirically we do.  However we don't seem to get
+    # it captured in the runner output, though it is swallowed by
+    # something.  I've checked with the capsys fixture and that
+    # does not seem to have it either.
+    assert task.task_status(task_id, r) == task.TaskStatus.SUCCESS
 
 
-def test_can_save_and_read_log(tmp_path):
+def test_can_save_and_read_log(tmp_path, monkeypatch):
     runner = CliRunner()
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        root.init(".")
-        res = runner.invoke(cli.cli_driver_configure, ["example"])
-        assert res.exit_code == 0
-        res = runner.invoke(cli.cli_task_create, ["echo", "hello", "world"])
-        task_id = res.stdout.strip().splitlines()[-1].strip()
+    monkeypatch.chdir(tmp_path)
+    
+    root.init(".")
+    res = runner.invoke(cli.cli_driver_configure, ["example"])
+    assert res.exit_code == 0
+    res = runner.invoke(cli.cli_task_create, ["echo", "hello", "world"])
+    task_id = res.stdout.strip().splitlines()[-1].strip()
 
-        res = runner.invoke(cli.cli_task_log, task_id)
-        assert res.exit_code == 0
-        assert res.output == ""
+    res = runner.invoke(cli.cli_task_log, task_id)
+    assert res.exit_code == 0
+    assert res.output == ""
 
-        res = runner.invoke(cli.cli_task_eval, [task_id, "--capture"])
-        assert res.exit_code == 0
+    res = runner.invoke(cli.cli_task_eval, [task_id, "--capture"])
+    assert res.exit_code == 0
 
-        res = runner.invoke(cli.cli_task_log, task_id)
-        assert res.exit_code == 0
-        assert res.output == "hello world\n\n"
+    res = runner.invoke(cli.cli_task_log, task_id)
+    assert res.exit_code == 0
+    assert res.output == "hello world\n\n"
 
-        res = runner.invoke(cli.cli_task_log, [task_id, "--outer"])
-        assert res.exit_code == 0
+    res = runner.invoke(cli.cli_task_log, [task_id, "--outer"])
+    assert res.exit_code == 0
 
 
 def test_can_process_with_status_args():
@@ -97,27 +97,28 @@ def test_can_process_with_status_args():
     assert cli._process_with_status(["success", "running"]) == TaskStatus.RUNNING | TaskStatus.SUCCESS
 
 
-def test_can_list_tasks(tmp_path):
+def test_can_list_tasks(tmp_path, monkeypatch):
     runner = CliRunner()
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        root.init(".")
-        res = runner.invoke(cli.cli_driver_configure, ["example"])
-        assert res.exit_code == 0
-        res = runner.invoke(cli.cli_task_create, ["echo", "hello", "world"])
-        assert res.exit_code == 0
-        task_id = res.stdout.strip().splitlines()[-1].strip()
+    
+    monkeypatch.chdir(tmp_path)
+    root.init(".")
+    res = runner.invoke(cli.cli_driver_configure, ["example"])
+    assert res.exit_code == 0
+    res = runner.invoke(cli.cli_task_create, ["echo", "hello", "world"])
+    assert res.exit_code == 0
+    task_id = res.stdout.strip().splitlines()[-1].strip()
 
-        res = runner.invoke(cli.cli_task_list, [])
-        assert res.exit_code == 0
-        assert res.stdout.strip().splitlines()[-1].strip() == task_id
+    res = runner.invoke(cli.cli_task_list, [])
+    assert res.exit_code == 0
+    assert res.stdout.strip().splitlines()[-1].strip() == task_id
 
-        res = runner.invoke(cli.cli_task_list, ["--with-status", "submitted"])
-        assert res.exit_code == 0
-        assert res.stdout.strip().splitlines()[-1].strip() == task_id
+    res = runner.invoke(cli.cli_task_list, ["--with-status", "submitted"])
+    assert res.exit_code == 0
+    assert res.stdout.strip().splitlines()[-1].strip() == task_id
 
-        res = runner.invoke(cli.cli_task_list, ["--with-status", "running"])
-        assert res.exit_code == 0
-        assert res.stdout.strip() == ""
+    res = runner.invoke(cli.cli_task_list, ["--with-status", "running"])
+    assert res.exit_code == 0
+    assert res.stdout.strip() == ""
 
 
 def test_can_call_cli_dide_authenticate(mocker):
@@ -156,283 +157,283 @@ def test_can_call_cli_dide_authenticate(mocker):
     assert cli.dide_auth.authenticate.call_count == 1
 
 
-def test_can_run_dide_check(tmp_path, mocker):
+def test_can_run_dide_check(tmp_path, mocker, monkeypatch):
     mock_check = mock.Mock()
     mocker.patch("hipercow.cli.dide_check", mock_check)
     runner = CliRunner()
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        res = runner.invoke(cli.cli_dide_check, [])
-        assert res.exit_code == 0
-        assert mock_check.call_count == 1
-        assert mock_check.mock_calls[0] == mock.call()
+    monkeypatch.chdir(tmp_path)
+    res = runner.invoke(cli.cli_dide_check, [])
+    assert res.exit_code == 0
+    assert mock_check.call_count == 1
+    assert mock_check.mock_calls[0] == mock.call()
 
 
-def test_can_configure_driver(tmp_path):
+def test_can_configure_driver(tmp_path, monkeypatch):
     runner = CliRunner()
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        res = runner.invoke(cli.init, ".")
-        res = runner.invoke(cli.cli_driver_configure, ["example"])
-        assert res.exit_code == 0
-        assert "Configured hipercow to use 'example'" in res.output
+    monkeypatch.chdir(tmp_path)
+    res = runner.invoke(cli.init, ".")
+    res = runner.invoke(cli.cli_driver_configure, ["example"])
+    assert res.exit_code == 0
+    assert "Configured hipercow to use 'example'" in res.output
 
-        res = runner.invoke(cli.cli_driver_list, [])
-        assert res.exit_code == 0
-        assert res.output == "example\n"
+    res = runner.invoke(cli.cli_driver_list, [])
+    assert res.exit_code == 0
+    assert res.output == "example\n"
 
-        res = runner.invoke(cli.cli_driver_show, [])
-        assert res.exit_code == 0
-        assert "Configuration for 'example'" in res.output
+    res = runner.invoke(cli.cli_driver_show, [])
+    assert res.exit_code == 0
+    assert "Configuration for 'example'" in res.output
 
-        res = runner.invoke(cli.cli_driver_unconfigure, ["example"])
-        assert res.exit_code == 0
-        assert "Removed configuration for 'example'" in res.output
+    res = runner.invoke(cli.cli_driver_unconfigure, ["example"])
+    assert res.exit_code == 0
+    assert "Removed configuration for 'example'" in res.output
 
-        res = runner.invoke(cli.cli_driver_list, [])
-        assert res.exit_code == 0
-        assert res.output == "(none)\n"
+    res = runner.invoke(cli.cli_driver_list, [])
+    assert res.exit_code == 0
+    assert res.output == "(none)\n"
 
 
-def test_can_list_environments(tmp_path):
+def test_can_list_environments(tmp_path, monkeypatch):
     runner = CliRunner()
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        runner.invoke(cli.init, ".")
-        runner.invoke(cli.cli_driver_configure, ["example"])
-        res = runner.invoke(cli.cli_environment_new, [])
-        assert res.exit_code == 0
-        assert "Creating environment 'default' using 'uv'" in res.output
-        res = runner.invoke(cli.cli_environment_list, [])
-        assert res.exit_code == 0
-        assert res.output == "default\nempty\n"
+    monkeypatch.chdir(tmp_path)
+    runner.invoke(cli.init, ".")
+    runner.invoke(cli.cli_driver_configure, ["example"])
+    res = runner.invoke(cli.cli_environment_new, [])
+    assert res.exit_code == 0
+    assert "Creating environment 'default' using 'uv'" in res.output
+    res = runner.invoke(cli.cli_environment_list, [])
+    assert res.exit_code == 0
+    assert res.output == "default\nempty\n"
 
 
-def test_can_create_task_in_environment(tmp_path):
+def test_can_create_task_in_environment(tmp_path, monkeypatch):
     runner = CliRunner()
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        root.init(".")
-        r = root.open_root()
-        res = runner.invoke(cli.cli_driver_configure, ["example"])
-        assert res.exit_code == 0
+    monkeypatch.chdir(tmp_path)
+    root.init(".")
+    r = root.open_root()
+    res = runner.invoke(cli.cli_driver_configure, ["example"])
+    assert res.exit_code == 0
 
-        runner.invoke(cli.init, ".")
-        res = runner.invoke(cli.cli_environment_new, ["--name", "other"])
-        assert res.exit_code == 0
+    runner.invoke(cli.init, ".")
+    res = runner.invoke(cli.cli_environment_new, ["--name", "other"])
+    assert res.exit_code == 0
 
-        res = runner.invoke(
-            cli.cli_task_create,
-            ["echo", "hello", "world", "--environment", "other"],
-        )
-        assert res.exit_code == 0
-        task_id = res.stdout.strip().splitlines()[-1].strip()
-        data = task_data_read(task_id, r)
-        assert data.environment == "other"
+    res = runner.invoke(
+        cli.cli_task_create,
+        ["echo", "hello", "world", "--environment", "other"],
+    )
+    assert res.exit_code == 0
+    task_id = res.stdout.strip().splitlines()[-1].strip()
+    data = task_data_read(task_id, r)
+    assert data.environment == "other"
 
 
-def test_can_provision_environment(tmp_path, mocker):
+def test_can_provision_environment(tmp_path, mocker, monkeypatch):
     runner = CliRunner()
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        runner.invoke(cli.init, ".")
-        runner.invoke(cli.cli_driver_configure, ["example"])
-        runner.invoke(cli.cli_environment_new, [])
+    monkeypatch.chdir(tmp_path)
+    runner.invoke(cli.init, ".")
+    runner.invoke(cli.cli_driver_configure, ["example"])
+    runner.invoke(cli.cli_environment_new, [])
 
-        mock_provision = mock.MagicMock()
-        mocker.patch("hipercow.cli.provision", mock_provision)
+    mock_provision = mock.MagicMock()
+    mocker.patch("hipercow.cli.provision", mock_provision)
 
-        res = runner.invoke(cli.cli_environment_provision, [])
-        assert res.exit_code == 0
-        assert mock_provision.call_count == 1
-        assert mock_provision.mock_calls[0] == mock.call("default", [], root=mock.ANY)
+    res = runner.invoke(cli.cli_environment_provision, [])
+    assert res.exit_code == 0
+    assert mock_provision.call_count == 1
+    assert mock_provision.mock_calls[0] == mock.call("default", [], root=mock.ANY)
 
-        res = runner.invoke(cli.cli_environment_provision, ["--name=foo", "pip", "install", "."])
-        assert res.exit_code == 0
-        assert mock_provision.call_count == 2
-        assert mock_provision.mock_calls[1] == mock.call("foo", ["pip", "install", "."], root=mock.ANY)
+    res = runner.invoke(cli.cli_environment_provision, ["--name=foo", "pip", "install", "."])
+    assert res.exit_code == 0
+    assert mock_provision.call_count == 2
+    assert mock_provision.mock_calls[1] == mock.call("foo", ["pip", "install", "."], root=mock.ANY)
 
 
-def test_can_provision_conda_environment(tmp_path, mocker):
+def test_can_provision_conda_environment(tmp_path, mocker, monkeypatch):
     runner = CliRunner()
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        runner.invoke(cli.init, ".")
-        runner.invoke(cli.cli_driver_configure, ["example"])
-        res = runner.invoke(cli.cli_environment_new, ["--engine", "conda"])
-        assert res.exit_code == 0
-        assert "Creating environment 'default' using 'conda'" in res.output
+    monkeypatch.chdir(tmp_path)
+    runner.invoke(cli.init, ".")
+    runner.invoke(cli.cli_driver_configure, ["example"])
+    res = runner.invoke(cli.cli_environment_new, ["--engine", "conda"])
+    assert res.exit_code == 0
+    assert "Creating environment 'default' using 'conda'" in res.output
 
-        mock_provision = mock.MagicMock()
-        mocker.patch("hipercow.cli.provision", mock_provision)
+    mock_provision = mock.MagicMock()
+    mocker.patch("hipercow.cli.provision", mock_provision)
 
-        cmd = ["conda", "install", "-c", "bioconda", "samtools"]
-        res = runner.invoke(cli.cli_environment_provision, cmd)
-        assert res.exit_code == 0
-        assert mock_provision.call_count == 1
-        assert mock_provision.mock_calls[0] == mock.call("default", cmd, root=mock.ANY)
+    cmd = ["conda", "install", "-c", "bioconda", "samtools"]
+    res = runner.invoke(cli.cli_environment_provision, cmd)
+    assert res.exit_code == 0
+    assert mock_provision.call_count == 1
+    assert mock_provision.mock_calls[0] == mock.call("default", cmd, root=mock.ANY)
 
 
-def test_can_choose_python_version_for_environment(tmp_path):
+def test_can_choose_python_version_for_environment(tmp_path, monkeypatch):
     runner = CliRunner()
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        runner.invoke(cli.init, ".")
-        res = runner.invoke(cli.cli_environment_new, ["--python", "3.13"])
-        assert res.exit_code == 0
-        assert "Creating environment 'default' using 'uv' with Python 3.13" in res.output
-        r = root.open_root()
-        with r.path_environment_config("default").open() as f:
-            cfg = EnvironmentConfiguration.model_validate_json(f.read())
-        assert cfg.engine == "uv"
-        assert cfg.python == "3.13"
+    monkeypatch.chdir(tmp_path)
+    runner.invoke(cli.init, ".")
+    res = runner.invoke(cli.cli_environment_new, ["--python", "3.13"])
+    assert res.exit_code == 0
+    assert "Creating environment 'default' using 'uv' with Python 3.13" in res.output
+    r = root.open_root()
+    with r.path_environment_config("default").open() as f:
+        cfg = EnvironmentConfiguration.model_validate_json(f.read())
+    assert cfg.engine == "uv"
+    assert cfg.python == "3.13"
 
-        res = runner.invoke(
-            cli.cli_environment_new,
-            ["--name", "other", "--engine", "pip", "--python", "3.13"],
-        )
-        assert res.exit_code == 1
-        assert "only supported by the 'uv' engine" in str(res.exception)
+    res = runner.invoke(
+        cli.cli_environment_new,
+        ["--name", "other", "--engine", "pip", "--python", "3.13"],
+    )
+    assert res.exit_code == 1
+    assert "only supported by the 'uv' engine" in str(res.exception)
 
 
-def test_can_delete_environment(tmp_path):
+def test_can_delete_environment(tmp_path, monkeypatch):
     runner = CliRunner()
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        runner.invoke(cli.init, ".")
-        runner.invoke(cli.cli_driver_configure, ["example"])
-        res = runner.invoke(cli.cli_environment_new, ["--name", "other"])
-        assert res.exit_code == 0
-        assert "Creating environment 'other' using 'uv'" in res.output
+    monkeypatch.chdir(tmp_path)
+    runner.invoke(cli.init, ".")
+    runner.invoke(cli.cli_driver_configure, ["example"])
+    res = runner.invoke(cli.cli_environment_new, ["--name", "other"])
+    assert res.exit_code == 0
+    assert "Creating environment 'other' using 'uv'" in res.output
 
-        res = runner.invoke(cli.cli_environment_list, [])
-        assert res.exit_code == 0
-        assert res.output == "empty\nother\n"
+    res = runner.invoke(cli.cli_environment_list, [])
+    assert res.exit_code == 0
+    assert res.output == "empty\nother\n"
 
-        res = runner.invoke(cli.cli_environment_delete, ["--name", "other"])
-        assert res.exit_code == 0
+    res = runner.invoke(cli.cli_environment_delete, ["--name", "other"])
+    assert res.exit_code == 0
 
-        res = runner.invoke(cli.cli_environment_list, [])
-        assert res.exit_code == 0
-        assert res.output == "empty\n"
+    res = runner.invoke(cli.cli_environment_list, [])
+    assert res.exit_code == 0
+    assert res.output == "empty\n"
 
 
-def test_can_wait_on_task(tmp_path, mocker):
+def test_can_wait_on_task(tmp_path, mocker, monkeypatch):
     runner = CliRunner()
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        runner.invoke(cli.init, ".")
-        runner.invoke(cli.cli_driver_configure, ["example"])
-        res = runner.invoke(cli.cli_task_create, ["echo", "hello", "world"])
-        assert res.exit_code == 0
-        task_id = res.stdout.strip().splitlines()[-1].strip()
+    monkeypatch.chdir(tmp_path)
+    runner.invoke(cli.init, ".")
+    runner.invoke(cli.cli_driver_configure, ["example"])
+    res = runner.invoke(cli.cli_task_create, ["echo", "hello", "world"])
+    assert res.exit_code == 0
+    task_id = res.stdout.strip().splitlines()[-1].strip()
 
-        mocker.patch("hipercow.cli.task_wait")
+    mocker.patch("hipercow.cli.task_wait")
 
-        res = runner.invoke(cli.cli_task_wait, [task_id])
-        assert res.exit_code == 0
-        assert cli.task_wait.call_count == 1
-        assert cli.task_wait.mock_calls[0] == mock.call(
-            task_id,
-            poll=1,
-            timeout=None,
-            show_log=True,
-            progress=True,
-        )
+    res = runner.invoke(cli.cli_task_wait, [task_id])
+    assert res.exit_code == 0
+    assert cli.task_wait.call_count == 1
+    assert cli.task_wait.mock_calls[0] == mock.call(
+        task_id,
+        poll=1,
+        timeout=None,
+        show_log=True,
+        progress=True,
+    )
 
-        res = runner.invoke(
-            cli.cli_task_wait,
-            [task_id, "--poll=0.1", "--no-show-log", "--timeout", "200"],
-        )
-        assert res.exit_code == 0
-        assert cli.task_wait.call_count == 2
-        assert cli.task_wait.mock_calls[1] == mock.call(
-            task_id,
-            poll=0.1,
-            timeout=200,
-            show_log=False,
-            progress=True,
-        )
+    res = runner.invoke(
+        cli.cli_task_wait,
+        [task_id, "--poll=0.1", "--no-show-log", "--timeout", "200"],
+    )
+    assert res.exit_code == 0
+    assert cli.task_wait.call_count == 2
+    assert cli.task_wait.mock_calls[1] == mock.call(
+        task_id,
+        poll=0.1,
+        timeout=200,
+        show_log=False,
+        progress=True,
+    )
 
 
-def test_can_build_environment(tmp_path, mocker):
+def test_can_build_environment(tmp_path, mocker, monkeypatch):
     runner = CliRunner()
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        runner.invoke(cli.init, ".")
+    monkeypatch.chdir(tmp_path)
+    runner.invoke(cli.init, ".")
 
-        mock_provision = mock.MagicMock()
-        mocker.patch("hipercow.cli.provision_run", mock_provision)
+    mock_provision = mock.MagicMock()
+    mocker.patch("hipercow.cli.provision_run", mock_provision)
 
-        res = runner.invoke(cli.cli_environment_provision_run, ["example", "abcdef"])
-        assert res.exit_code == 0
-        assert mock_provision.call_count == 1
-        assert mock_provision.mock_calls[0] == mock.call("example", "abcdef", mock.ANY)
+    res = runner.invoke(cli.cli_environment_provision_run, ["example", "abcdef"])
+    assert res.exit_code == 0
+    assert mock_provision.call_count == 1
+    assert mock_provision.mock_calls[0] == mock.call("example", "abcdef", mock.ANY)
 
 
-def test_can_create_on_task_and_wait(tmp_path, mocker):
+def test_can_create_on_task_and_wait(tmp_path, mocker, monkeypatch):
     runner = CliRunner()
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        runner.invoke(cli.init, ".")
-        runner.invoke(cli.cli_driver_configure, ["example"])
-        mocker.patch("hipercow.cli.task_wait")
-        res = runner.invoke(cli.cli_task_create, ["--wait", "echo", "hello", "world"])
-        assert res.exit_code == 0
-        task_id = res.stdout.strip().splitlines()[-1].strip()
-        assert cli.task_wait.call_count == 1
-        assert cli.task_wait.mock_calls[0] == mock.call(
-            task_id,
-        )
+    monkeypatch.chdir(tmp_path)
+    runner.invoke(cli.init, ".")
+    runner.invoke(cli.cli_driver_configure, ["example"])
+    mocker.patch("hipercow.cli.task_wait")
+    res = runner.invoke(cli.cli_task_create, ["--wait", "echo", "hello", "world"])
+    assert res.exit_code == 0
+    task_id = res.stdout.strip().splitlines()[-1].strip()
+    assert cli.task_wait.call_count == 1
+    assert cli.task_wait.mock_calls[0] == mock.call(
+        task_id,
+    )
 
 
-def test_can_get_last_task(tmp_path):
+def test_can_get_last_task(tmp_path, monkeypatch):
     runner = CliRunner()
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        root.init(".")
-        r = root.open_root()
+    monkeypatch.chdir(tmp_path)
+    root.init(".")
+    r = root.open_root()
 
-        # No tasks
-        res = runner.invoke(cli.cli_task_last, [])
-        assert res.exit_code == 0
-        assert res.stdout == ""
+    # No tasks
+    res = runner.invoke(cli.cli_task_last, [])
+    assert res.exit_code == 0
+    assert res.stdout == ""
 
-        res = runner.invoke(cli.cli_task_recent, [])
-        assert res.exit_code == 0
-        assert res.stdout == ""
+    res = runner.invoke(cli.cli_task_recent, [])
+    assert res.exit_code == 0
+    assert res.stdout == ""
 
-        ids = [task_create_shell(["true"], root=r) for _ in range(5)]
+    ids = [task_create_shell(["true"], root=r) for _ in range(5)]
 
-        res = runner.invoke(cli.cli_task_last, [])
-        assert res.exit_code == 0
-        assert res.stdout == f"{ids[-1]}\n"
+    res = runner.invoke(cli.cli_task_last, [])
+    assert res.exit_code == 0
+    assert res.stdout == f"{ids[-1]}\n"
 
-        res = runner.invoke(cli.cli_task_recent, [])
-        assert res.exit_code == 0
-        assert res.stdout == "".join(i + "\n" for i in ids)
+    res = runner.invoke(cli.cli_task_recent, [])
+    assert res.exit_code == 0
+    assert res.stdout == "".join(i + "\n" for i in ids)
 
-        res = runner.invoke(cli.cli_task_recent, ["--limit", 2])
-        assert res.exit_code == 0
-        assert res.stdout == "".join(i + "\n" for i in ids[-2:])
+    res = runner.invoke(cli.cli_task_recent, ["--limit", 2])
+    assert res.exit_code == 0
+    assert res.stdout == "".join(i + "\n" for i in ids[-2:])
 
 
-def test_can_rebuild_recent_list(tmp_path):
+def test_can_rebuild_recent_list(tmp_path, monkeypatch):
     runner = CliRunner()
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        root.init(".")
-        r = root.open_root()
+    monkeypatch.chdir(tmp_path)
+    root.init(".")
+    r = root.open_root()
 
-        ids = []
-        for i in range(5):
-            if i > 0:
-                time.sleep(0.01)
-            ids.append(task_create_shell(["echo", "hello world"], root=r))
+    ids = []
+    for i in range(5):
+        if i > 0:
+            time.sleep(0.01)
+        ids.append(task_create_shell(["echo", "hello world"], root=r))
 
-        res = runner.invoke(cli.cli_task_recent, [])
-        assert res.exit_code == 0
-        assert res.stdout == "".join(i + "\n" for i in ids)
+    res = runner.invoke(cli.cli_task_recent, [])
+    assert res.exit_code == 0
+    assert res.stdout == "".join(i + "\n" for i in ids)
 
-        with r.path_recent().open("w") as f:
-            for i in [*ids[:2], ids[2] + ids[3], ids[4]]:
-                f.write(f"{i}\n")
+    with r.path_recent().open("w") as f:
+        for i in [*ids[:2], ids[2] + ids[3], ids[4]]:
+            f.write(f"{i}\n")
 
-        res = runner.invoke(cli.cli_task_recent, [])
-        assert res.exit_code == 1
-        assert res.stdout == ""
-        assert str(res.exception) == "Recent data list is corrupt, please rebuild"
+    res = runner.invoke(cli.cli_task_recent, [])
+    assert res.exit_code == 1
+    assert res.stdout == ""
+    assert str(res.exception) == "Recent data list is corrupt, please rebuild"
 
-        res = runner.invoke(cli.cli_task_recent, ["--rebuild"])
-        assert res.exit_code == 0
-        assert res.stdout == "".join(i + "\n" for i in ids)
+    res = runner.invoke(cli.cli_task_recent, ["--rebuild"])
+    assert res.exit_code == 0
+    assert res.stdout == "".join(i + "\n" for i in ids)
 
 
 def test_can_call_cli_dide_bootstrap(mocker):
@@ -510,49 +511,49 @@ def test_cli_wrapper_passes_to_exception_handler_on_error(mocker):
     assert mock_handler.mock_calls[0] == mock.call(e)
 
 
-def test_can_set_python_version(tmp_path):
+def test_can_set_python_version(tmp_path, monkeypatch):
     runner = CliRunner()
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        res = runner.invoke(cli.init, ".")
+    monkeypatch.chdir(tmp_path)
+    res = runner.invoke(cli.init, ".")
 
-        r = root.open_root()
-        v_ok = ".".join(platform.python_version_tuple()[:2])
-        v_err = "3.11" if v_ok == "3.10" else "3.10"
+    r = root.open_root()
+    v_ok = ".".join(platform.python_version_tuple()[:2])
+    v_err = "3.11" if v_ok == "3.10" else "3.10"
 
-        res = runner.invoke(cli.cli_driver_configure, ["example", "--python-version", v_err])
-        assert res.exit_code == 1
-        assert "not the same as the local version" in str(res.exception)
-        assert list_drivers(r) == []
+    res = runner.invoke(cli.cli_driver_configure, ["example", "--python-version", v_err])
+    assert res.exit_code == 1
+    assert "not the same as the local version" in str(res.exception)
+    assert list_drivers(r) == []
 
-        res = runner.invoke(cli.cli_driver_configure, ["example", "--python-version", v_ok])
-        assert res.exit_code == 0
-        assert list_drivers(r) == ["example"]
+    res = runner.invoke(cli.cli_driver_configure, ["example", "--python-version", v_ok])
+    assert res.exit_code == 0
+    assert list_drivers(r) == ["example"]
 
 
-def test_can_launch_repl(tmp_path, mocker):
+def test_can_launch_repl(tmp_path, mocker, monkeypatch):
     runner = CliRunner()
     mock_repl = mock.MagicMock()
     mocker.patch("hipercow.cli.repl", mock_repl)
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        res = runner.invoke(cli.cli_repl, [])
-        assert res.exit_code == 0
-        assert mock_repl.call_count == 1
-        assert mock_repl.mock_calls[0] == mock.call(
-            AnyInstanceOf(click.Context),
-            prompt_kwargs={"message": "hipercow> ", "history": None},
-        )
+    monkeypatch.chdir(tmp_path)
+    res = runner.invoke(cli.cli_repl, [])
+    assert res.exit_code == 0
+    assert mock_repl.call_count == 1
+    assert mock_repl.mock_calls[0] == mock.call(
+        AnyInstanceOf(click.Context),
+        prompt_kwargs={"message": "hipercow> ", "history": None},
+    )
 
-        runner.invoke(cli.init, ".")
-        res = runner.invoke(cli.cli_repl, [])
-        assert res.exit_code == 0
-        assert mock_repl.call_count == 2
-        assert mock_repl.mock_calls[1] == mock.call(
-            AnyInstanceOf(click.Context),
-            prompt_kwargs={
-                "message": "hipercow> ",
-                "history": AnyInstanceOf(cli.FileHistory),
-            },
-        )
+    runner.invoke(cli.init, ".")
+    res = runner.invoke(cli.cli_repl, [])
+    assert res.exit_code == 0
+    assert mock_repl.call_count == 2
+    assert mock_repl.mock_calls[1] == mock.call(
+        AnyInstanceOf(click.Context),
+        prompt_kwargs={
+            "message": "hipercow> ",
+            "history": AnyInstanceOf(cli.FileHistory),
+        },
+    )
 
 
 def test_can_handle_exception_in_repl(mocker, capsys):
@@ -574,100 +575,100 @@ def test_can_handle_exception_in_repl(mocker, capsys):
     assert mock_repl.mock_calls[1] == mock.call(ctx, prompt_kwargs=args)
 
 
-def test_can_control_queue_used_in_task_creation(tmp_path):
+def test_can_control_queue_used_in_task_creation(tmp_path, monkeypatch):
     runner = CliRunner()
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        root.init(".")
-        r = root.open_root()
-        res = runner.invoke(cli.cli_driver_configure, ["example"])
+    monkeypatch.chdir(tmp_path)
+    root.init(".")
+    r = root.open_root()
+    res = runner.invoke(cli.cli_driver_configure, ["example"])
 
-        res = runner.invoke(
-            cli.cli_task_create,
-            ["echo", "hello", "world", "--queue", "default"],
-        )
-        assert res.exit_code == 0
-        task_id = res.stdout.splitlines()[1]
-        data = task_data_read(task_id, r)
-        assert data.resources == TaskResources(queue="default")
+    res = runner.invoke(
+        cli.cli_task_create,
+        ["echo", "hello", "world", "--queue", "default"],
+    )
+    assert res.exit_code == 0
+    task_id = res.stdout.splitlines()[1]
+    data = task_data_read(task_id, r)
+    assert data.resources == TaskResources(queue="default")
 
-        res = runner.invoke(
-            cli.cli_task_create,
-            ["echo", "hello", "world", "--queue", "other"],
-        )
-        assert res.exit_code == 1
-        assert "Queue 'other' is not in valid queue list" in str(res.exception)
+    res = runner.invoke(
+        cli.cli_task_create,
+        ["echo", "hello", "world", "--queue", "other"],
+    )
+    assert res.exit_code == 1
+    assert "Queue 'other' is not in valid queue list" in str(res.exception)
 
 
-def test_can_use_bulk_create(tmp_path):
+def test_can_use_bulk_create(tmp_path, monkeypatch):
     runner = CliRunner()
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        root.init(".")
-        r = root.open_root()
-        res = runner.invoke(
-            cli.cli_create_bulk,
-            [
-                "--name",
-                "mybundle",
-                "--data",
-                "a=1..2",
-                "--data",
-                "b=x,y",
-                "mycmd",
-                "@a",
-                "c/@{b}/d",
-            ],
-        )
-        assert res.exit_code == 0
-        assert re.search("Created bundle '.+' with 4 tasks", res.output)
-        bundle = bundle_load("mybundle", root=r)
-        assert len(bundle.task_ids) == 4
+    monkeypatch.chdir(tmp_path)
+    root.init(".")
+    r = root.open_root()
+    res = runner.invoke(
+        cli.cli_create_bulk,
+        [
+            "--name",
+            "mybundle",
+            "--data",
+            "a=1..2",
+            "--data",
+            "b=x,y",
+            "mycmd",
+            "@a",
+            "c/@{b}/d",
+        ],
+    )
+    assert res.exit_code == 0
+    assert re.search("Created bundle '.+' with 4 tasks", res.output)
+    bundle = bundle_load("mybundle", root=r)
+    assert len(bundle.task_ids) == 4
 
-        res = runner.invoke(cli.cli_bundle_list, [])
-        assert res.exit_code == 0
-        assert res.output.strip() == "mybundle"
+    res = runner.invoke(cli.cli_bundle_list, [])
+    assert res.exit_code == 0
+    assert res.output.strip() == "mybundle"
 
-        res = runner.invoke(cli.cli_bundle_delete, ["mybundle"])
-        assert res.exit_code == 0
+    res = runner.invoke(cli.cli_bundle_delete, ["mybundle"])
+    assert res.exit_code == 0
 
-        res = runner.invoke(cli.cli_bundle_list, [])
-        assert res.exit_code == 0
-        assert res.output.strip() == ""
+    res = runner.invoke(cli.cli_bundle_list, [])
+    assert res.exit_code == 0
+    assert res.output.strip() == ""
 
 
-def test_can_get_bundle_status(tmp_path):
+def test_can_get_bundle_status(tmp_path, monkeypatch):
     runner = CliRunner()
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        root.init(".")
-        r = root.open_root()
-        res = runner.invoke(
-            cli.cli_create_bulk,
-            [
-                "--name",
-                "mybundle",
-                "--data",
-                "a=1..5",
-                "echo",
-                "@a",
-            ],
-        )
-        assert res.exit_code == 0
-        assert re.search("Created bundle '.+' with 5 tasks", res.output)
-        bundle = bundle_load("mybundle", root=r)
+    monkeypatch.chdir(tmp_path)
+    root.init(".")
+    r = root.open_root()
+    res = runner.invoke(
+        cli.cli_create_bulk,
+        [
+            "--name",
+            "mybundle",
+            "--data",
+            "a=1..5",
+            "echo",
+            "@a",
+        ],
+    )
+    assert res.exit_code == 0
+    assert re.search("Created bundle '.+' with 5 tasks", res.output)
+    bundle = bundle_load("mybundle", root=r)
 
-        set_task_status(bundle.task_ids[3], TaskStatus.SUCCESS, None, r)
+    set_task_status(bundle.task_ids[3], TaskStatus.SUCCESS, None, r)
 
-        res = runner.invoke(cli.cli_bundle_status, ["mybundle"])
-        assert res.exit_code == 0
-        status = ["created", "created", "created", "success", "created"]
-        assert res.output == "".join(f"{id}: {status}\n" for id, status in zip(bundle.task_ids, status, strict=False))
+    res = runner.invoke(cli.cli_bundle_status, ["mybundle"])
+    assert res.exit_code == 0
+    status = ["created", "created", "created", "success", "created"]
+    assert res.output == "".join(f"{id}: {status}\n" for id, status in zip(bundle.task_ids, status, strict=False))
 
-        res = runner.invoke(cli.cli_bundle_status, ["mybundle", "--summary", "group"])
-        assert res.exit_code == 0
-        assert res.output == "created: 4\nsuccess: 1\n"
+    res = runner.invoke(cli.cli_bundle_status, ["mybundle", "--summary", "group"])
+    assert res.exit_code == 0
+    assert res.output == "created: 4\nsuccess: 1\n"
 
-        res = runner.invoke(cli.cli_bundle_status, ["mybundle", "--summary", "single"])
-        assert res.exit_code == 0
-        assert res.output == "created\n"
+    res = runner.invoke(cli.cli_bundle_status, ["mybundle", "--summary", "single"])
+    assert res.exit_code == 0
+    assert res.output == "created\n"
 
 
 def test_can_preview_commands():
@@ -716,25 +717,25 @@ def test_can_summarise_generated_commands():
     assert lines[7] == "  50: echo 10/5"
 
 
-def test_can_create_commands_from_csv(tmp_path):
+def test_can_create_commands_from_csv(tmp_path, monkeypatch):
     runner = CliRunner()
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        with open("data.csv", "w") as f:
-            f.write("a,b\n1,1\n1,2\n2,2")
-        res = runner.invoke(
-            cli.cli_create_bulk,
-            [
-                "--preview",
-                "--data=data.csv",
-                "echo",
-                "@{a}-@{b}",
-            ],
-        )
+    monkeypatch.chdir(tmp_path)
+    with open("data.csv", "w") as f:
+        f.write("a,b\n1,1\n1,2\n2,2")
+    res = runner.invoke(
+        cli.cli_create_bulk,
+        [
+            "--preview",
+            "--data=data.csv",
+            "echo",
+            "@{a}-@{b}",
+        ],
+    )
 
-        assert res.exit_code == 0
-        output = res.output.splitlines()
-        assert len(output) == 4
-        assert output[1:] == ["  1: echo 1-1", "  2: echo 1-2", "  3: echo 2-2"]
+    assert res.exit_code == 0
+    output = res.output.splitlines()
+    assert len(output) == 4
+    assert output[1:] == ["  1: echo 1-1", "  2: echo 1-2", "  3: echo 2-2"]
 
 
 def test_require_at_least_one_data_argument():
