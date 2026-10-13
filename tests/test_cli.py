@@ -69,7 +69,7 @@ def test_can_run_task(tmp_path, monkeypatch):
 def test_can_save_and_read_log(tmp_path, monkeypatch):
     runner = CliRunner()
     monkeypatch.chdir(tmp_path)
-    
+
     root.init(".")
     res = runner.invoke(cli.cli_driver_configure, ["example"])
     assert res.exit_code == 0
@@ -99,7 +99,7 @@ def test_can_process_with_status_args():
 
 def test_can_list_tasks(tmp_path, monkeypatch):
     runner = CliRunner()
-    
+
     monkeypatch.chdir(tmp_path)
     root.init(".")
     res = runner.invoke(cli.cli_driver_configure, ["example"])
