@@ -8,18 +8,26 @@ from hipercow.environment_engines import (
     Empty,
     EnvironmentEngine,
     Pip,
+    Uv,
 )
 from hipercow.root import OptionalRoot, Root, open_root
 
 
 class EnvironmentConfiguration(BaseModel):
     engine: str
+    python: str | None = None
 
 
 # Called 'new' and not 'create' to make it clear that this does not
 # actually create the environment, just the definition of that
 # environment.
-def environment_new(name: str, engine: str, root: OptionalRoot = None) -> None:
+def environment_new(
+    name: str,
+    engine: str,
+    root: OptionalRoot = None,
+    *,
+    python: str | None = None,
+) -> None:
     """Create a new environment.
 
     Creating an environment selects a name and declares the engine for
@@ -33,9 +41,13 @@ def environment_new(name: str, engine: str, root: OptionalRoot = None) -> None:
             `empty` as that is a special empty environment.
 
         engine: The environment engine to use.  The options here are
-            `pip`, `conda` and `empty`.
+            `uv`, `pip`, `conda` and `empty`.
 
         root: The root, or if not given search from the current directory.
+
+        python: The Python version to use (e.g., `3.12`), for the
+            `uv` engine only.  If not given, uv chooses a version
+            based on your project (see `hipercow.environment_engines.Uv`).
 
     Returns:
         Nothing, called for side effects.
@@ -49,17 +61,24 @@ def environment_new(name: str, engine: str, root: OptionalRoot = None) -> None:
         msg = f"Environment '{name}' already exists"
         raise Exception(msg)
 
-    if engine not in {"pip", "conda", "empty"}:
-        msg = "Only the 'pip', 'conda' and 'empty' engines are supported"
+    if engine not in {"uv", "pip", "conda", "empty"}:
+        msg = "Only the 'uv', 'pip', 'conda' and 'empty' engines are supported"
         raise Exception(msg)
 
-    ui.alert_info(f"Creating environment '{name}' using '{engine}'")
-    cfg = EnvironmentConfiguration(engine=engine)
+    if python is not None and engine != "uv":
+        msg = "Choosing a Python version is only supported by the 'uv' engine"
+        raise Exception(msg)
+
+    if python is None:
+        ui.alert_info(f"Creating environment '{name}' using '{engine}'")
+    else:
+        ui.alert_info(f"Creating environment '{name}' using '{engine}' with Python {python}")
+    cfg = EnvironmentConfiguration(engine=engine, python=python)
 
     path = root.path_environment_config(name)
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w") as f:
-        f.write(cfg.model_dump_json())
+        f.write(cfg.model_dump_json(exclude_none=True))
 
 
 def environment_list(root: OptionalRoot = None) -> list[str]:
@@ -163,7 +182,9 @@ def environment_engine(name: str, root: Root) -> EnvironmentEngine:
     else:
         with root.path_environment_config(name).open() as f:
             cfg = EnvironmentConfiguration.model_validate_json(f.read())
-    if cfg.engine == "pip":
+    if cfg.engine == "uv":
+        return Uv(root, name, python=cfg.python)
+    elif cfg.engine == "pip":
         return Pip(root, name)
     elif cfg.engine == "conda":
         return Conda(root, name)

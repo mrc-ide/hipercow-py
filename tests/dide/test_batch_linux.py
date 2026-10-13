@@ -36,7 +36,13 @@ def test_can_write_batch(tmp_path):
     assert (r.path / path_rel).exists()
     mm = "/mnt/cluster/Hipercow/bootstrap-py-linux/micromamba/micromamba"
     with (r.path / path_rel).open() as f:
-        assert f"export HIPERCOW_MICROMAMBA={mm}\n" in f.read()
+        contents = f.read()
+    assert f"export HIPERCOW_MICROMAMBA={mm}\n" in contents
+    v = config.python_version
+    bootstrap = f"/mnt/cluster/Hipercow/bootstrap-py-linux/python-{v}"
+    assert f"HIPERCOW_BOOTSTRAP=$(cat {bootstrap}/current)\n" in contents
+    hipercow = f"{bootstrap}/installs/${{HIPERCOW_BOOTSTRAP}}/bin/hipercow"
+    assert f"\n{hipercow} task eval --capture {tid}\n" in contents
 
 
 def test_can_create_provision_data(tmp_path):
@@ -65,4 +71,10 @@ def test_can_write_provision_batch(tmp_path):
     assert (r.path / path_rel).exists()
     mm = "/mnt/cluster/Hipercow/bootstrap-py-linux/micromamba/micromamba"
     with (r.path / path_rel).open() as f:
-        assert f"export HIPERCOW_MICROMAMBA={mm}\n" in f.read()
+        contents = f.read()
+    assert f"export HIPERCOW_MICROMAMBA={mm}\n" in contents
+    v = config.python_version
+    bootstrap = f"/mnt/cluster/Hipercow/bootstrap-py-linux/python-{v}"
+    assert f"HIPERCOW_BOOTSTRAP=$(cat {bootstrap}/current)\n" in contents
+    hipercow = f"{bootstrap}/installs/${{HIPERCOW_BOOTSTRAP}}/bin/hipercow"
+    assert f"\n{hipercow} environment provision-run myenv abcdef\n" in contents

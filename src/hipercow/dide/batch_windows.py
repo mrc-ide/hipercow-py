@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 import platform
 import re
 from pathlib import Path
@@ -14,6 +14,10 @@ from hipercow.dide.provision import ProvisionWaitWrapper
 from hipercow.dide.web import DideWebClient
 from hipercow.resources import TaskResources
 from hipercow.root import Root
+
+# The bootstrap (see 'hipercow dide bootstrap'), as seen from windows
+# nodes once the batch files below have mapped the hipercow share to I:
+BOOTSTRAP_ROOT_WINDOWS = r"I:\bootstrap-py-windows"
 
 TASK_RUN_BAT = Template(r"""@echo off
 REM automatically generated
@@ -35,10 +39,13 @@ ECHO working directory: %CD%
 set HIPERCOW_NO_DRIVERS=1
 set HIPERCOW_CORES=%CCP_NUMCPUS%
 set REDIS_URL=10.0.2.254
+set HIPERCOW_MICROMAMBA=${bootstrap_root}\micromamba\micromamba.bat
+set /p HIPERCOW_BOOTSTRAP=<${bootstrap_root}\python-${python_version}\current
+ECHO hipercow bootstrap: %HIPERCOW_BOOTSTRAP%
 
 ECHO this is a single task
 
-I:\bootstrap-py-windows\python-${python_version}\bin\hipercow task eval --capture ${task_id}
+${bootstrap_root}\python-${python_version}\installs\%HIPERCOW_BOOTSTRAP%\Scripts\hipercow task eval --capture ${task_id}
 
 @ECHO off
 set ErrorCode=%ERRORLEVEL%
@@ -90,9 +97,13 @@ ${hipercow_root_drive}
 cd ${hipercow_root_path}
 ECHO working directory: %CD%
 
+set HIPERCOW_MICROMAMBA=${bootstrap_root}\micromamba\micromamba.bat
+set /p HIPERCOW_BOOTSTRAP=<${bootstrap_root}\python-${python_version}\current
+ECHO hipercow bootstrap: %HIPERCOW_BOOTSTRAP%
+
 ECHO this is a provisioning task
 
-I:\bootstrap-py-windows\python-${python_version}\bin\hipercow environment provision-run ${environment_name} ${provision_id}
+${bootstrap_root}\python-${python_version}\installs\%HIPERCOW_BOOTSTRAP%\Scripts\hipercow environment provision-run ${environment_name} ${provision_id}
 
 @ECHO off
 %SystemDrive%
@@ -162,9 +173,10 @@ def _template_data_core_win(config: DideConfiguration) -> dict[str, str]:
 
     return {
         "hostname": platform.node(),
-        "date": str(datetime.datetime.now(tz=datetime.timezone.utc)),
+        "date": str(dt.datetime.now(tz=dt.timezone.utc)),
         "python_version": config.python_version,
         "hipercow_version": version,
+        "bootstrap_root": BOOTSTRAP_ROOT_WINDOWS,
         "hipercow_root_drive": root_drive,
         "hipercow_root_path": root_path,
         "network_shares_create": network_shares_create,

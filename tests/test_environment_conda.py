@@ -138,10 +138,10 @@ def test_conda_can_provision_with_pip(tmp_path, mocker, micromamba):
     env = Conda(r, "default")
     prefix = str(env.path())
 
-    env.provision(["pip", "install", "cowsay"])
+    env.provision(["pip", "install", "tqdm"])
     assert mock_run.call_count == 1
     assert mock_run.mock_calls[0] == mock.call(
-        [micromamba, "run", "--prefix", prefix, "pip", "install", "cowsay"],
+        [micromamba, "run", "--prefix", prefix, "pip", "install", "tqdm"],
         env=os.environ | env._envvars(),
         check=True,
     )
@@ -201,7 +201,7 @@ def test_conda_validates_provisioning_commands(tmp_path):
         ["conda", "uninstall", "samtools"],
         ["conda", "clean", "--all"],
         ["conda", "install", "-c", "bioconda", "samtools=1.21"],
-        ["pip", "install", "cowsay"],
+        ["pip", "install", "tqdm"],
     ]:
         assert env.check_args(cmd) == cmd
 

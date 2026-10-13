@@ -89,7 +89,7 @@ def test_cant_delete_unknown_environment(tmp_path):
 def test_require_known_environment_engine(tmp_path):
     root.init(tmp_path)
     r = root.open_root(tmp_path)
-    with pytest.raises(Exception, match="Only the 'pip', 'conda' and 'empty'"):
+    with pytest.raises(Exception, match="Only the 'uv', 'pip', 'conda' and 'empty'"):
         environment_new("default", "renv", r)
 
 
@@ -101,3 +101,36 @@ def test_create_conda_environment(tmp_path):
     with r.path_environment_config("default").open() as f:
         cfg = EnvironmentConfiguration.model_validate_json(f.read())
     assert cfg.engine == "conda"
+
+
+def test_create_uv_environment(tmp_path):
+    root.init(tmp_path)
+    r = root.open_root(tmp_path)
+    environment_new("default", "uv", r)
+    environment_new("other", "uv", r, python="3.13")
+    assert environment_list(r) == ["default", "empty", "other"]
+    with r.path_environment_config("default").open() as f:
+        cfg = EnvironmentConfiguration.model_validate_json(f.read())
+    assert cfg.engine == "uv"
+    assert cfg.python is None
+    with r.path_environment_config("other").open() as f:
+        cfg = EnvironmentConfiguration.model_validate_json(f.read())
+    assert cfg.engine == "uv"
+    assert cfg.python == "3.13"
+
+
+def test_python_version_only_written_when_given(tmp_path):
+    root.init(tmp_path)
+    r = root.open_root(tmp_path)
+    environment_new("default", "pip", r)
+    with r.path_environment_config("default").open() as f:
+        assert f.read() == '{"engine":"pip"}'
+
+
+def test_python_version_requires_uv_engine(tmp_path):
+    root.init(tmp_path)
+    r = root.open_root(tmp_path)
+    for engine in ["pip", "conda", "empty"]:
+        with pytest.raises(Exception, match="only supported by the 'uv'"):
+            environment_new("default", engine, r, python="3.12")
+    assert environment_list(r) == ["empty"]

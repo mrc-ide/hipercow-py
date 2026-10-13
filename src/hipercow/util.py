@@ -93,9 +93,14 @@ def subprocess_run(
         return subprocess.CompletedProcess(cmd, -1)
 
 
+# The versions of python that hipercow supports, and that 'hipercow
+# dide bootstrap' installs for
+PYTHON_VERSIONS = ["3.10", "3.11", "3.12", "3.13"]
+
+
 def check_python_version(version: str | None, valid: list[str] | None = None) -> str:
     if valid is None:
-        valid = ["3.10", "3.11", "3.12", "3.13"]
+        valid = PYTHON_VERSIONS
     if not version:
         v = ".".join(platform.python_version_tuple()[:2])
     else:
