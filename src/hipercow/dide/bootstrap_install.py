@@ -244,8 +244,8 @@ def _created(name: str) -> dt.datetime:
     return dt.datetime.strptime(m.group(1), "%Y%m%d%H%M%S").replace(tzinfo=dt.timezone.utc)
 
 
-def _now() -> datetime.datetime:
-    return datetime.datetime.now(tz=datetime.timezone.utc)
+def _now() -> dt.datetime:
+    return dt.datetime.now(tz=dt.timezone.utc)
 
 
 def _run(cmd: list[str], *, capture: bool = False) -> str:
