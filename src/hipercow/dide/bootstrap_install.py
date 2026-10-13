@@ -29,7 +29,7 @@ them.
 """
 
 import argparse
-import datetime
+import datetime as dt
 import json
 import os
 import platform
@@ -46,9 +46,9 @@ INSTALLS = "installs"
 METADATA = "hipercow-bootstrap.json"
 
 # Remove an installation once it has been superseded for this long
-PRUNE_AFTER = datetime.timedelta(days=30)
+PRUNE_AFTER = dt.timedelta(days=30)
 # Remove an installation that never completed after this long
-PRUNE_INCOMPLETE_AFTER = datetime.timedelta(days=1)
+PRUNE_INCOMPLETE_AFTER = dt.timedelta(days=1)
 
 RE_NAME = re.compile(r"^([0-9]{14})-[0-9a-f]+$")
 
@@ -203,7 +203,7 @@ def set_current(base: Path, name: str, *, attempts: int = 10) -> None:
         tmp.unlink(missing_ok=True)
 
 
-def prune(installs: Path, current: str, now: datetime.datetime) -> None:
+def prune(installs: Path, current: str, now: dt.datetime) -> None:
     for p in installs.glob("*.trash"):
         shutil.rmtree(p, ignore_errors=True)
     found = sorted(p.name for p in installs.iterdir() if p.is_dir() and RE_NAME.match(p.name))
@@ -236,12 +236,12 @@ def _remove(path: Path) -> None:
     print(f"Removed old installation '{path.name}'")
 
 
-def _created(name: str) -> datetime.datetime:
+def _created(name: str) -> dt.datetime:
     m = RE_NAME.match(name)
     if not m:
         msg = f"Invalid installation name '{name}'"
         raise ValueError(msg)
-    return datetime.datetime.strptime(m.group(1), "%Y%m%d%H%M%S").replace(tzinfo=datetime.timezone.utc)
+    return dt.datetime.strptime(m.group(1), "%Y%m%d%H%M%S").replace(tzinfo=dt.timezone.utc)
 
 
 def _now() -> datetime.datetime:

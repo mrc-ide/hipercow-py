@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 import platform
 from pathlib import Path
 from string import Template
@@ -140,7 +140,7 @@ def _template_data_core_linux(config: DideConfiguration) -> dict[str, str]:
     path_map = config.path_map
     return {
         "hostname": platform.node(),
-        "date": str(datetime.datetime.now(tz=datetime.timezone.utc)),
+        "date": str(dt.datetime.now(tz=dt.timezone.utc)),
         "python_version": config.python_version,
         "hipercow_version": version,
         "bootstrap_root": BOOTSTRAP_ROOT_LINUX,

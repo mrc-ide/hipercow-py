@@ -18,6 +18,7 @@ from hipercow.task_create import task_create_shell
 from hipercow.util import transient_envvars
 from tests.helpers import AnyInstanceOf
 
+
 def test_can_init_repository(tmp_path, monkeypatch):
     runner = CliRunner()
     monkeypatch.chdir(tmp_path)

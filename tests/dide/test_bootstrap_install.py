@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 import json
 import os
 import sys
@@ -12,7 +12,7 @@ from hipercow.dide import bootstrap_install as bi
 from hipercow.util import file_create
 
 PYTHON_VERSION = "{}.{}".format(*sys.version_info[:2])
-UTC = datetime.timezone.utc
+UTC = dt.timezone.utc
 
 
 def _args(root: Path, name: str, *extra: str) -> list[str]:
@@ -236,7 +236,7 @@ def test_set_current_gives_up_eventually(tmp_path, mocker):
 
 
 def test_prune_keeps_recently_superseded_installs(tmp_path):
-    now = datetime.datetime(2026, 3, 1, tzinfo=UTC)
+    now = dt.datetime(2026, 3, 1, tzinfo=UTC)
     names = [
         "20260101000000-aaaa",  # superseded 2026-01-15; removed
         "20260115000000-bbbb",  # superseded 2026-02-20; kept
@@ -249,7 +249,7 @@ def test_prune_keeps_recently_superseded_installs(tmp_path):
 
 
 def test_prune_never_removes_current(tmp_path):
-    now = datetime.datetime(2030, 1, 1, tzinfo=UTC)
+    now = dt.datetime(2030, 1, 1, tzinfo=UTC)
     names = ["20260101000000-aaaa", "20260115000000-bbbb"]
     for x in names:
         _fake_install(tmp_path / x)
@@ -261,7 +261,7 @@ def test_prune_never_removes_current(tmp_path):
 
 
 def test_prune_removes_stale_incomplete_installs(tmp_path):
-    now = datetime.datetime(2026, 3, 1, 12, tzinfo=UTC)
+    now = dt.datetime(2026, 3, 1, 12, tzinfo=UTC)
     _fake_install(tmp_path / "20260101000000-aaaa", complete=False)
     _fake_install(tmp_path / "20260301000000-bbbb", complete=False)
     _fake_install(tmp_path / "20260301060000-cccc")
@@ -273,7 +273,7 @@ def test_prune_removes_stale_incomplete_installs(tmp_path):
 
 
 def test_prune_ignores_unknown_files_and_clears_trash(tmp_path):
-    now = datetime.datetime(2030, 1, 1, tzinfo=UTC)
+    now = dt.datetime(2030, 1, 1, tzinfo=UTC)
     _fake_install(tmp_path / "20260101000000-aaaa.trash")
     _fake_install(tmp_path / "something-else")
     file_create(tmp_path / "20260101000000-bbbb")

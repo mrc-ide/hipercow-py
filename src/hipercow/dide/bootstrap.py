@@ -5,7 +5,7 @@ runs `bootstrap_install.py` (see there for the details) using a copy
 of uv kept on the share, so the nodes do not need python installed.
 """
 
-import datetime
+import datetime as dt
 import secrets
 import shutil
 from pathlib import Path
@@ -241,7 +241,7 @@ def _bootstrap_prepare(mount: Mount, bootstrap_id: str, platform: str, target: s
 
 
 def _bootstrap_install_name(bootstrap_id: str) -> str:
-    now = datetime.datetime.now(tz=datetime.timezone.utc)
+    now = dt.datetime.now(tz=dt.timezone.utc)
     return f"{now:%Y%m%d%H%M%S}-{bootstrap_id}"
 
 

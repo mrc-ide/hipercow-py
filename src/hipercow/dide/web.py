@@ -1,5 +1,5 @@
 import base64
-import datetime
+import datetime as dt
 import re
 from dataclasses import dataclass
 from subprocess import list2cmdline
@@ -320,8 +320,8 @@ def _parse_dide_status(status: str) -> TaskStatus:
     return remap[status]
 
 
-def _parse_dide_timestamp(time: str) -> datetime.datetime:
-    return datetime.datetime.strptime(time, "%Y%m%d%H%M%S").astimezone(datetime.timezone.utc)
+def _parse_dide_timestamp(time: str) -> dt.datetime:
+    return dt.datetime.strptime(time, "%Y%m%d%H%M%S").astimezone(dt.timezone.utc)
 
 
 def _call_quote_batch_path(path: str, prefix: str) -> str:

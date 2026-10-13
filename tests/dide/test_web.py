@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 import json
 
 import pytest
@@ -81,9 +81,9 @@ def test_can_get_status_for_user():
         TaskStatus.SUCCESS,
         "1 core",
         "rfitzjoh",
-        datetime.datetime(2025, 1, 29, 12, 4, 45, tzinfo=datetime.timezone.utc),
-        datetime.datetime(2025, 1, 29, 12, 4, 45, tzinfo=datetime.timezone.utc),
-        datetime.datetime(2025, 1, 29, 12, 4, 46, tzinfo=datetime.timezone.utc),
+        dt.datetime(2025, 1, 29, 12, 4, 45, tzinfo=dt.timezone.utc),
+        dt.datetime(2025, 1, 29, 12, 4, 45, tzinfo=dt.timezone.utc),
+        dt.datetime(2025, 1, 29, 12, 4, 46, tzinfo=dt.timezone.utc),
         "AllNodes",
     )
 

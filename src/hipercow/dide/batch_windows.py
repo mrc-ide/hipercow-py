@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 import platform
 import re
 from pathlib import Path
@@ -173,7 +173,7 @@ def _template_data_core_win(config: DideConfiguration) -> dict[str, str]:
 
     return {
         "hostname": platform.node(),
-        "date": str(datetime.datetime.now(tz=datetime.timezone.utc)),
+        "date": str(dt.datetime.now(tz=dt.timezone.utc)),
         "python_version": config.python_version,
         "hipercow_version": version,
         "bootstrap_root": BOOTSTRAP_ROOT_WINDOWS,
